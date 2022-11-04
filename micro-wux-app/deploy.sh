@@ -22,3 +22,4 @@ rm -f ../single-spa-app/src/index.js.bak
 cp ../single-spa-app/src/index.js ../single-spa-app/src/index.js.bak
 
 mv --force index.js ../single-spa-app/src/index.js
+
