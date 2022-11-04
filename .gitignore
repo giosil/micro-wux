@@ -1,0 +1,4 @@
+/single-spa-app/node_modules/
+/single-spa-app/package-lock.json
+/single-spa-root/node_modules/
+/single-spa-root/package-lock.json
