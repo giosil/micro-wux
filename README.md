@@ -2,11 +2,7 @@
 
 A compact version of [WUX](https://github.com/giosil/wux) Javascript library to build component based user interface without dependencies.
 
-micro-WUX was designed for the development of microfrontends.
-
-In this project framework single-spa is used for bringing together multiple JavaScript microfrontends in a frontend application.
-
-There are three subfolders:
+Here is also an example of using the library in JavaScript microfrontend development using the single-spa framework:
 
 - `micro-wux-app`   - typescript application with micro-wux library
 - `single-spa-app`  - single-spa application
@@ -22,7 +18,7 @@ There are three subfolders:
 
 - `cd micro-wux-app`
 - `.\build.cmd`  - compile micro-wux application
-- `.\deploy.cmd` - generate index.js copied in micro-wux-app/src folder
+- `.\deploy.cmd` - generate index.js in micro-wux-app/src folder
 
 ## Run 
 
@@ -69,7 +65,7 @@ namespace APP {
 </html>
 ```
 
-## Single-spa application
+## Single-spa application using single-spa-html
 
 ```javascript
 import singleSpaHtml from "single-spa-html";
