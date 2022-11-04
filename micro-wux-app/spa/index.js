@@ -6,7 +6,7 @@ const htmlLifecycles = singleSpaHtml({
 export const bootstrap = htmlLifecycles.bootstrap;
 export const mount = async (props) => {
 	await htmlLifecycles.mount(props);
-	WuxDOM.render(new APP.HelloWorld(), 'view-root');
+	WuxDOM.render(new APP.Main(), 'view-root');
 };
 export const unmount = async (props) => {
 	await htmlLifecycles.unmount(props);

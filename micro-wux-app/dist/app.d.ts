@@ -1,5 +1,5 @@
 declare namespace APP {
-    class HelloWorld extends WUX.WComponent {
+    class Main extends WUX.WComponent {
         protected render(): string;
     }
 }

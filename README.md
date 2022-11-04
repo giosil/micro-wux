@@ -39,14 +39,13 @@ There are three subfolders:
 ```typescript
 namespace APP {
 
-    export class HelloWorld extends WUX.WComponent {
-        protected render() {
-            return '<div>Hello World.</div>';
-        }
+  export class Main extends WUX.WComponent {
+    protected render() {
+      return '<div>Hello World.</div>';
     }
+  }
 
 }
-
 ```
 
 ```html
@@ -62,7 +61,7 @@ namespace APP {
 
     <script src="dist/app.min.js"></script>
     <script type="text/javascript">
-        WuxDOM.render(new APP.HelloWorld(), 'view-root');
+        WuxDOM.render(new APP.Main(), 'view-root');
     </script>
   </body>
 </html>

@@ -1,15 +1,15 @@
 var APP;
 (function (APP) {
-    var HelloWorld = (function (_super) {
-        __extends(HelloWorld, _super);
-        function HelloWorld() {
+    var Main = (function (_super) {
+        __extends(Main, _super);
+        function Main() {
             return _super !== null && _super.apply(this, arguments) || this;
         }
-        HelloWorld.prototype.render = function () {
+        Main.prototype.render = function () {
             return '<div>Hello World.</div>';
         };
-        return HelloWorld;
+        return Main;
     }(WUX.WComponent));
-    APP.HelloWorld = HelloWorld;
+    APP.Main = Main;
 })(APP || (APP = {}));
 //# sourceMappingURL=app.js.map

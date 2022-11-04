@@ -6,7 +6,7 @@ const htmlLifecycles = singleSpaHtml({
 export const bootstrap = htmlLifecycles.bootstrap;
 export const mount = async (props) => {
 	await htmlLifecycles.mount(props);
-	WuxDOM.render(new APP.HelloWorld(), 'view-root');
+	WuxDOM.render(new APP.Main(), 'view-root');
 };
 export const unmount = async (props) => {
 	await htmlLifecycles.unmount(props);
@@ -170,5 +170,5 @@ l(i)}},getData:function(t,n){t||(t="global")
 var i=e[t]
 return null==i?n:i},onDataChanged:function(t,e){t||(t="global"),n[t]||(n[t]=[]),n[t].push(e)}}}(WUX||(WUX={}))
 var APP
-!function(n){var r=function(n){function r(){return null!==n&&n.apply(this,arguments)||this}return __extends(r,n),r.prototype.render=function(){return"<div>Hello World.</div>"},r}(WUX.WComponent)
-n.HelloWorld=r}(APP||(APP={}))
+!function(n){var t=function(n){function t(){return null!==n&&n.apply(this,arguments)||this}return __extends(t,n),t.prototype.render=function(){return"<div>Hello World.</div>"},t}(WUX.WComponent)
+n.Main=t}(APP||(APP={}))

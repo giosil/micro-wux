@@ -23,4 +23,4 @@ IF EXIST ..\single-spa-app\src\index.js.bak (
 
 copy ..\single-spa-app\src\index.js ..\single-spa-app\src\index.js.bak
 
-copy /Y index.js ..\single-spa-app\src\index.js
+move /Y index.js ..\single-spa-app\src\index.js

@@ -1,6 +1,6 @@
 ﻿namespace APP {
 
-    export class HelloWorld extends WUX.WComponent {
+    export class Main extends WUX.WComponent {
         protected render() {
             return '<div>Hello World.</div>';
         }
