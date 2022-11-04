@@ -24,8 +24,11 @@ There are three subfolders:
 ## Run 
 
 - `cd single-spa-app`
+- `npm install`
 - `npm start` - to serve single-spa applications at http://localhost:8080/index.js
+
 - `cd single-spa-root`
+- `npm install`
 - `npm start` - to start single-spa root config at http://localhost:9000
 
 ## Example of micro-WUX application
