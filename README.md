@@ -17,8 +17,8 @@ Here is also an example of Javascript microfrontend using [single-spa](https://s
 ## Build and deploy micro-wux App as microfrontend single-spa
 
 - `cd micro-wux-app`
-- `.\build.cmd`  - compile micro-wux application
-- `.\deploy.cmd` - generate index.js in micro-wux-app/src folder
+- `.\build.cmd`  or `./build.sh`  - compile micro-wux application
+- `.\deploy.cmd` or `./deploy.sh` - generate index.js in micro-wux-app/src folder
 
 ## Run 
 
