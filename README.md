@@ -48,6 +48,8 @@ namespace APP {
 }
 ```
 
+## Run micro-WUX application standalone
+
 ```html
 <!doctype html>
 <html>
@@ -67,6 +69,26 @@ namespace APP {
 </html>
 ```
 
+## Single-spa application
+
+```javascript
+import singleSpaHtml from "single-spa-html";
+
+const htmlLifecycles = singleSpaHtml({
+  template: '<div id="view-root"></div>'
+});
+export const bootstrap = htmlLifecycles.bootstrap;
+export const mount = async (props) => {
+	await htmlLifecycles.mount(props);
+	WuxDOM.render(new APP.Main(), 'view-root');
+};
+export const unmount = async (props) => {
+	await htmlLifecycles.unmount(props);
+	WuxDOM.unmount('view-root');
+};
+/* micro-wux app */
+...
+```
 ## Contributors
 
 * [Giorgio Silvestris](https://github.com/giosil)
