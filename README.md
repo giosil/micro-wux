@@ -2,7 +2,7 @@
 
 A compact version of [WUX](https://github.com/giosil/wux) Javascript library to build component based user interface without dependencies.
 
-Here is also an example of using the library in JavaScript microfrontend development using the single-spa framework:
+Here is also an example of Javascript microfrontend using the [single-spa](https://single-spa.js.org/) framework and micro-wux library:
 
 - `micro-wux-app`   - typescript application with micro-wux library
 - `single-spa-app`  - single-spa application
