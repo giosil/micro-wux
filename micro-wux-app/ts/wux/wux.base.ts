@@ -520,6 +520,10 @@ namespace WUX {
                             let p = this.context.innerHTML;
                             if(!p) p = '';
                             this.context.innerHTML = p + r;
+                            let lc = this.context.lastChild;
+                            if(lc instanceof HTMLElement) {
+                                this.root = lc as HTMLElement;
+                            }
                             if (!this.root) this.root = this.id ? document.getElementById(this.id) : this.context;
                         }
                     }

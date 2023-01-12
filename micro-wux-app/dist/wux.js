@@ -592,6 +592,10 @@ var WUX;
                             if (!p)
                                 p = '';
                             this.context.innerHTML = p + r;
+                            var lc = this.context.lastChild;
+                            if (lc instanceof HTMLElement) {
+                                this.root = lc;
+                            }
                             if (!this.root)
                                 this.root = this.id ? document.getElementById(this.id) : this.context;
                         }
