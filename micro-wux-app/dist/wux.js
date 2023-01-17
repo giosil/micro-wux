@@ -1,18 +1,3 @@
-var __extends = (this && this.__extends) || (function () {
-    var extendStatics = function (d, b) {
-        extendStatics = Object.setPrototypeOf ||
-            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
-        return extendStatics(d, b);
-    };
-    return function (d, b) {
-        if (typeof b !== "function" && b !== null)
-            throw new TypeError("Class extends value " + String(b) + " is not a constructor or null");
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-})();
 var __assign = (this && this.__assign) || function () {
     __assign = Object.assign || function(t) {
         for (var s, i = 1, n = arguments.length; i < n; i++) {
@@ -33,6 +18,21 @@ var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
     }
     return to.concat(ar || Array.prototype.slice.call(from));
 };
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = function (d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    };
+    return function (d, b) {
+        if (typeof b !== "function" && b !== null)
+            throw new TypeError("Class extends value " + String(b) + " is not a constructor or null");
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
 var wuxRegistry = {};
 function wuxRegister(node, c) {
     if (!node)
@@ -853,29 +853,6 @@ var WUX;
         return WComponent;
     }());
     WUX.WComponent = WComponent;
-    var WText = (function (_super) {
-        __extends(WText, _super);
-        function WText(id, tag, text, classStyle, style, attributes) {
-            var _this = _super.call(this, id, 'WText', tag, classStyle, style, attributes) || this;
-            if (!tag)
-                tag = 'span';
-            _this.rootTag = tag;
-            _this.props = tag;
-            _this.state = text;
-            return _this;
-        }
-        WText.prototype.updateState = function (nextState) {
-            _super.prototype.updateState.call(this, nextState);
-            if (this.root)
-                this.root.innerText = this.state;
-        };
-        WText.prototype.componentDidMount = function () {
-            if (this.root)
-                this.root.innerText = this.state;
-        };
-        return WText;
-    }(WUX.WComponent));
-    WUX.WText = WText;
     function getId(e) {
         if (!e)
             return;
@@ -1449,6 +1426,8 @@ var WUX;
     var _dccb = {};
     WUX.global = {
         locale: 'it',
+        main_class: 'container-fluid',
+        con_class: 'container',
         init: function _init(callback) {
             if (WUX.debug)
                 console.log('[WUX] global.init...');
@@ -1487,5 +1466,217 @@ var WUX;
             _dccb[key].push(callback);
         }
     };
+})(WUX || (WUX = {}));
+var WUX;
+(function (WUX) {
+    var WHtml = (function (_super) {
+        __extends(WHtml, _super);
+        function WHtml(html) {
+            return _super.call(this, null, 'WHtml', html) || this;
+        }
+        WHtml.prototype.render = function () {
+            if (!this.props)
+                return "<span></span>";
+            if (this.props.charAt(0) != '<') {
+                this.props = "<span>" + this.props + "</span>";
+            }
+            return this.props;
+        };
+        return WHtml;
+    }(WUX.WComponent));
+    WUX.WHtml = WHtml;
+    var WContainer = (function (_super) {
+        __extends(WContainer, _super);
+        function WContainer(id, classStyle, style, attributes, inline, type) {
+            var _this = _super.call(this, id, 'WContainer', type, classStyle, WUX.style(style), attributes) || this;
+            _this.components = [];
+            _this.rootTag = inline ? 'span' : 'div';
+            if (type == 'aside')
+                _this.rootTag = 'aside';
+            return _this;
+        }
+        WContainer.prototype.end = function () {
+            if (this.parent instanceof WContainer)
+                return this.parent.end();
+            return this;
+        };
+        WContainer.prototype.grid = function () {
+            if (this.props == 'row' && this.parent instanceof WContainer)
+                return this.parent;
+            if (this.parent instanceof WContainer)
+                return this.parent.grid();
+            return this;
+        };
+        WContainer.prototype.row = function () {
+            if (this.props == 'row')
+                return this;
+            if (!this.parent) {
+                if (!this.components || !this.components.length)
+                    return this;
+                for (var i = this.components.length - 1; i >= 0; i--) {
+                    var c = this.components[i];
+                    if (c instanceof WContainer && c.getProps() == 'row')
+                        return c;
+                }
+                return this;
+            }
+            if (this.parent instanceof WContainer)
+                return this.parent.row();
+            return this;
+        };
+        WContainer.prototype.col = function () {
+            if (this.props == 'col')
+                return this;
+            if (this.parent instanceof WContainer)
+                return this.parent.col();
+            return this;
+        };
+        WContainer.prototype.add = function (component) {
+            if (!component)
+                return this;
+            if (component instanceof WUX.WComponent) {
+                if (!component.parent)
+                    component.parent = this;
+            }
+            var c;
+            if (typeof component == 'string' && component.length > 0) {
+                if (component.charAt(0) == '<' && component.charAt(component.length - 1) == '>') {
+                    c = new WHtml(component);
+                }
+            }
+            if (!c)
+                c = component;
+            this.components.push(c);
+            return this;
+        };
+        WContainer.prototype.remove = function (index) {
+            if (index < 0)
+                index = this.components.length + index;
+            if (index < 0 || index >= this.components.length)
+                return undefined;
+            this.components.splice(index, 1);
+            return this;
+        };
+        WContainer.prototype.removeAll = function () {
+            if (this.mounted) {
+                this.parent = null;
+                for (var _i = 0, _a = this.components; _i < _a.length; _i++) {
+                    var c = _a[_i];
+                    if (c instanceof WUX.WComponent)
+                        c.unmount();
+                }
+            }
+            this.components = [];
+            return this;
+        };
+        WContainer.prototype.addRow = function (classStyle, style, id, attributes) {
+            var classRow = classStyle == null ? 'row' : classStyle;
+            var row = new WContainer(id, classRow, style, attributes, false, 'row');
+            row.name = row.name + '_row';
+            return this.grid().addContainer(row);
+        };
+        WContainer.prototype.addCol = function (classStyle, style, id, attributes) {
+            if (!isNaN(parseInt(classStyle)))
+                classStyle = 'col-md-' + classStyle;
+            var classCol = classStyle == null ? 'col' : classStyle;
+            var col = new WContainer(id, classCol, style, attributes, false, 'col');
+            col.name = col.name + '_col';
+            return this.row().addContainer(col);
+        };
+        WContainer.prototype.addText = function (text, rowTag, classStyle, style, id, attributes) {
+            if (!text || !text.length)
+                return this;
+            var endRow = '';
+            if (rowTag) {
+                var i = rowTag.indexOf(' ');
+                endRow = i > 0 ? rowTag.substring(0, i) : rowTag;
+            }
+            var s = '';
+            for (var _i = 0, text_1 = text; _i < text_1.length; _i++) {
+                var r = text_1[_i];
+                if (r && r.length > 3) {
+                    var b = r.substring(0, 3);
+                    if (b == '<ul' || b == '<ol' || b == '<li' || b == '<di') {
+                        s += r;
+                        continue;
+                    }
+                }
+                if (rowTag && rowTag != 'br') {
+                    s += '<' + rowTag + '>' + r + '</' + endRow + '>';
+                }
+                else {
+                    s += r + '<br>';
+                }
+            }
+            if (classStyle || style || id || attributes) {
+                this.add(WUX.build('div', s, style, attributes, id, classStyle));
+            }
+            else {
+                this.add(s);
+            }
+            return this;
+        };
+        WContainer.prototype.addContainer = function (conid, classStyle, style, attributes, inline, props) {
+            if (conid instanceof WContainer) {
+                if (this._classStyle == null) {
+                    if (conid._classStyle && conid._classStyle.indexOf('row') == 0) {
+                        if (this.parent instanceof WContainer) {
+                            this._classStyle = WUX.global.con_class;
+                        }
+                        else {
+                            this._classStyle = WUX.global.main_class;
+                        }
+                    }
+                }
+                conid.parent = this;
+                this.components.push(conid);
+                return conid;
+            }
+            else if (typeof conid == 'string') {
+                var container = new WContainer(conid, classStyle, style, attributes, inline, props);
+                this.components.push(container);
+                return container;
+            }
+        };
+        WContainer.prototype.render = function () {
+            if (this.parent || this._classStyle || this._style) {
+                return this.build(this.rootTag);
+            }
+            return this.buildRoot(this.rootTag);
+        };
+        WContainer.prototype.componentDidMount = function () {
+            for (var _i = 0, _a = this.components; _i < _a.length; _i++) {
+                var element = _a[_i];
+                if (element instanceof WUX.WComponent) {
+                    element.mount(this.root);
+                }
+                else {
+                    this.root.append(element);
+                }
+            }
+        };
+        WContainer.prototype.componentWillUnmount = function () {
+            for (var _i = 0, _a = this.components; _i < _a.length; _i++) {
+                var c = _a[_i];
+                if (c instanceof WUX.WComponent)
+                    c.unmount();
+            }
+        };
+        WContainer.prototype.rebuild = function () {
+            this.root.innerHTML = '';
+            for (var _i = 0, _a = this.components; _i < _a.length; _i++) {
+                var element = _a[_i];
+                if (element instanceof WUX.WComponent) {
+                    element.mount(this.root);
+                }
+                else {
+                    this.root.append(element);
+                }
+            }
+            return this;
+        };
+        return WContainer;
+    }(WUX.WComponent));
+    WUX.WContainer = WContainer;
 })(WUX || (WUX = {}));
 //# sourceMappingURL=wux.js.map

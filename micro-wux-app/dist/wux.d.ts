@@ -21,6 +21,8 @@ declare namespace WUX {
     const version = "1.0.0";
     interface WGlobal {
         locale: string;
+        main_class: string;
+        con_class: string;
         init(callback: () => any): any;
         setData(key: string, data: any, dontTrigger?: boolean): void;
         getData(key: string, def?: any): any;
@@ -119,11 +121,6 @@ declare namespace WUX {
         ripId(sid: string): string;
         transferTo(dest: WComponent, force?: boolean, callback?: () => any): boolean;
     }
-    class WText extends WUX.WComponent<string, string> {
-        constructor(id?: string, tag?: string, text?: string, classStyle?: string, style?: string | WStyle, attributes?: string | object);
-        protected updateState(nextState: string): void;
-        protected componentDidMount(): void;
-    }
     function getId(e: any): string;
     function firstSub(e: any, r?: boolean): string;
     function lastSub(e: any): string;
@@ -213,4 +210,30 @@ declare namespace WUX {
 }
 declare namespace WUX {
     let global: WGlobal;
+}
+declare namespace WUX {
+    class WHtml extends WUX.WComponent<string, any> {
+        constructor(html: string);
+        protected render(): string;
+    }
+    class WContainer extends WComponent<string, any> {
+        components: Array<WElement>;
+        constructor(id?: string, classStyle?: string, style?: string | WStyle, attributes?: string | object, inline?: boolean, type?: string);
+        end(): WContainer;
+        grid(): WContainer;
+        row(): WContainer;
+        col(): WContainer;
+        add(component: WElement): this;
+        remove(index: number): this;
+        removeAll(): this;
+        addRow(classStyle?: string, style?: string | WStyle, id?: string, attributes?: string | object): WContainer;
+        addCol(classStyle?: string, style?: string | WStyle, id?: string, attributes?: string | object): WContainer;
+        addText(text: string[], rowTag?: string, classStyle?: string, style?: string | WStyle, id?: string, attributes?: string | object): this;
+        addContainer(container: WContainer, constraints?: string): WContainer;
+        addContainer(id?: string, classStyle?: string, style?: string, attributes?: string | object, inline?: boolean, props?: any): WContainer;
+        protected render(): any;
+        protected componentDidMount(): void;
+        componentWillUnmount(): void;
+        rebuild(): this;
+    }
 }
