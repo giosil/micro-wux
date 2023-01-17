@@ -18,7 +18,7 @@ IF NOT EXIST dist\app.min.js (
 type spa\index.js dist\wux.min.js dist\app.min.js > index.js
 
 IF EXIST ..\single-spa-app\src\index.js.bak (
-	delete ..\single-spa-app\src\index.js.bak
+	del ..\single-spa-app\src\index.js.bak
 )
 
 copy ..\single-spa-app\src\index.js ..\single-spa-app\src\index.js.bak
