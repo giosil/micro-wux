@@ -21,8 +21,6 @@ declare namespace WUX {
     const version = "1.0.0";
     interface WGlobal {
         locale: string;
-        main_class: string;
-        con_class: string;
         init(callback: () => any): any;
         setData(key: string, data: any, dontTrigger?: boolean): void;
         getData(key: string, def?: any): any;
@@ -217,23 +215,16 @@ declare namespace WUX {
         protected render(): string;
     }
     class WContainer extends WComponent<string, any> {
-        components: Array<WElement>;
+        comp: WComponent[];
+        corc: string[];
+        grid: string[][];
         constructor(id?: string, classStyle?: string, style?: string | WStyle, attributes?: string | object, inline?: boolean, type?: string);
-        end(): WContainer;
-        grid(): WContainer;
-        row(): WContainer;
-        col(): WContainer;
-        add(component: WElement): this;
-        remove(index: number): this;
-        removeAll(): this;
-        addRow(classStyle?: string, style?: string | WStyle, id?: string, attributes?: string | object): WContainer;
-        addCol(classStyle?: string, style?: string | WStyle, id?: string, attributes?: string | object): WContainer;
-        addText(text: string[], rowTag?: string, classStyle?: string, style?: string | WStyle, id?: string, attributes?: string | object): this;
-        addContainer(container: WContainer, constraints?: string): WContainer;
-        addContainer(id?: string, classStyle?: string, style?: string, attributes?: string | object, inline?: boolean, props?: any): WContainer;
+        addRow(classStyle?: string, style?: string | WStyle): WContainer;
+        addCol(classStyle?: string, style?: string | WStyle): WContainer;
+        add(component: WComponent): this;
         protected render(): any;
         protected componentDidMount(): void;
         componentWillUnmount(): void;
-        rebuild(): this;
+        protected cs(cs: string): string;
     }
 }

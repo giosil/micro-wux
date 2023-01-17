@@ -1426,8 +1426,6 @@ var WUX;
     var _dccb = {};
     WUX.global = {
         locale: 'it',
-        main_class: 'container-fluid',
-        con_class: 'container',
         init: function _init(callback) {
             if (WUX.debug)
                 console.log('[WUX] global.init...');
@@ -1488,192 +1486,92 @@ var WUX;
     var WContainer = (function (_super) {
         __extends(WContainer, _super);
         function WContainer(id, classStyle, style, attributes, inline, type) {
-            var _this = _super.call(this, id, 'WContainer', type, classStyle, WUX.style(style), attributes) || this;
-            _this.components = [];
+            var _this = _super.call(this, id ? id : '*', 'WContainer', type, classStyle, WUX.style(style), attributes) || this;
+            _this.comp = [];
+            _this.corc = [];
+            _this.grid = [];
             _this.rootTag = inline ? 'span' : 'div';
-            if (type == 'aside')
-                _this.rootTag = 'aside';
             return _this;
         }
-        WContainer.prototype.end = function () {
-            if (this.parent instanceof WContainer)
-                return this.parent.end();
+        WContainer.prototype.addRow = function (classStyle, style) {
+            if (!classStyle)
+                classStyle = 'row';
+            var g = [];
+            var s = WUX.style(style);
+            if (s)
+                classStyle += '^' + s;
+            g.push(classStyle);
+            this.grid.push(g);
             return this;
         };
-        WContainer.prototype.grid = function () {
-            if (this.props == 'row' && this.parent instanceof WContainer)
-                return this.parent;
-            if (this.parent instanceof WContainer)
-                return this.parent.grid();
-            return this;
-        };
-        WContainer.prototype.row = function () {
-            if (this.props == 'row')
-                return this;
-            if (!this.parent) {
-                if (!this.components || !this.components.length)
-                    return this;
-                for (var i = this.components.length - 1; i >= 0; i--) {
-                    var c = this.components[i];
-                    if (c instanceof WContainer && c.getProps() == 'row')
-                        return c;
-                }
-                return this;
-            }
-            if (this.parent instanceof WContainer)
-                return this.parent.row();
-            return this;
-        };
-        WContainer.prototype.col = function () {
-            if (this.props == 'col')
-                return this;
-            if (this.parent instanceof WContainer)
-                return this.parent.col();
+        WContainer.prototype.addCol = function (classStyle, style) {
+            if (!classStyle)
+                classStyle = 'col-12';
+            if (!isNaN(parseInt(classStyle)))
+                classStyle = 'col-' + classStyle;
+            if (!this.grid.length)
+                this.addRow();
+            var g = this.grid[this.grid.length - 1];
+            var s = WUX.style(style);
+            if (s)
+                classStyle += '^' + s;
+            g.push(classStyle);
             return this;
         };
         WContainer.prototype.add = function (component) {
+            if (!this.grid.length)
+                this.addRow().addCol();
             if (!component)
                 return this;
-            if (component instanceof WUX.WComponent) {
-                if (!component.parent)
-                    component.parent = this;
-            }
-            var c;
-            if (typeof component == 'string' && component.length > 0) {
-                if (component.charAt(0) == '<' && component.charAt(component.length - 1) == '>') {
-                    c = new WHtml(component);
-                }
-            }
-            if (!c)
-                c = component;
-            this.components.push(c);
+            var r = this.grid.length - 1;
+            var g = this.grid[r];
+            var c = g.length - 1;
+            this.comp.push(component);
+            this.corc.push(this.subId(r + '_' + c));
             return this;
-        };
-        WContainer.prototype.remove = function (index) {
-            if (index < 0)
-                index = this.components.length + index;
-            if (index < 0 || index >= this.components.length)
-                return undefined;
-            this.components.splice(index, 1);
-            return this;
-        };
-        WContainer.prototype.removeAll = function () {
-            if (this.mounted) {
-                this.parent = null;
-                for (var _i = 0, _a = this.components; _i < _a.length; _i++) {
-                    var c = _a[_i];
-                    if (c instanceof WUX.WComponent)
-                        c.unmount();
-                }
-            }
-            this.components = [];
-            return this;
-        };
-        WContainer.prototype.addRow = function (classStyle, style, id, attributes) {
-            var classRow = classStyle == null ? 'row' : classStyle;
-            var row = new WContainer(id, classRow, style, attributes, false, 'row');
-            row.name = row.name + '_row';
-            return this.grid().addContainer(row);
-        };
-        WContainer.prototype.addCol = function (classStyle, style, id, attributes) {
-            if (!isNaN(parseInt(classStyle)))
-                classStyle = 'col-md-' + classStyle;
-            var classCol = classStyle == null ? 'col' : classStyle;
-            var col = new WContainer(id, classCol, style, attributes, false, 'col');
-            col.name = col.name + '_col';
-            return this.row().addContainer(col);
-        };
-        WContainer.prototype.addText = function (text, rowTag, classStyle, style, id, attributes) {
-            if (!text || !text.length)
-                return this;
-            var endRow = '';
-            if (rowTag) {
-                var i = rowTag.indexOf(' ');
-                endRow = i > 0 ? rowTag.substring(0, i) : rowTag;
-            }
-            var s = '';
-            for (var _i = 0, text_1 = text; _i < text_1.length; _i++) {
-                var r = text_1[_i];
-                if (r && r.length > 3) {
-                    var b = r.substring(0, 3);
-                    if (b == '<ul' || b == '<ol' || b == '<li' || b == '<di') {
-                        s += r;
-                        continue;
-                    }
-                }
-                if (rowTag && rowTag != 'br') {
-                    s += '<' + rowTag + '>' + r + '</' + endRow + '>';
-                }
-                else {
-                    s += r + '<br>';
-                }
-            }
-            if (classStyle || style || id || attributes) {
-                this.add(WUX.build('div', s, style, attributes, id, classStyle));
-            }
-            else {
-                this.add(s);
-            }
-            return this;
-        };
-        WContainer.prototype.addContainer = function (conid, classStyle, style, attributes, inline, props) {
-            if (conid instanceof WContainer) {
-                if (this._classStyle == null) {
-                    if (conid._classStyle && conid._classStyle.indexOf('row') == 0) {
-                        if (this.parent instanceof WContainer) {
-                            this._classStyle = WUX.global.con_class;
-                        }
-                        else {
-                            this._classStyle = WUX.global.main_class;
-                        }
-                    }
-                }
-                conid.parent = this;
-                this.components.push(conid);
-                return conid;
-            }
-            else if (typeof conid == 'string') {
-                var container = new WContainer(conid, classStyle, style, attributes, inline, props);
-                this.components.push(container);
-                return container;
-            }
         };
         WContainer.prototype.render = function () {
-            if (this.parent || this._classStyle || this._style) {
-                return this.build(this.rootTag);
+            var inner = '';
+            var rm = this.grid.length;
+            if (rm) {
+                for (var r = 0; r < rm; r++) {
+                    var g = this.grid[r];
+                    var cm = g.length;
+                    if (!cm)
+                        continue;
+                    inner += '<div ' + this.cs(g[0]) + '>';
+                    for (var c = 1; c < cm; c++) {
+                        inner += '<div id="' + this.subId(r + '_' + c) + '" ' + this.cs(g[c]) + '></div>';
+                    }
+                    inner += "</div>";
+                }
             }
-            return this.buildRoot(this.rootTag);
+            return this.buildRoot(this.rootTag, inner);
         };
         WContainer.prototype.componentDidMount = function () {
-            for (var _i = 0, _a = this.components; _i < _a.length; _i++) {
-                var element = _a[_i];
-                if (element instanceof WUX.WComponent) {
-                    element.mount(this.root);
-                }
-                else {
-                    this.root.append(element);
-                }
+            for (var i = 0; i < this.comp.length; i++) {
+                var c = this.comp[i];
+                var e = document.getElementById(this.corc[i]);
+                if (!e)
+                    continue;
+                c.mount(e);
             }
         };
         WContainer.prototype.componentWillUnmount = function () {
-            for (var _i = 0, _a = this.components; _i < _a.length; _i++) {
+            for (var _i = 0, _a = this.comp; _i < _a.length; _i++) {
                 var c = _a[_i];
-                if (c instanceof WUX.WComponent)
-                    c.unmount();
+                c.unmount();
             }
         };
-        WContainer.prototype.rebuild = function () {
-            this.root.innerHTML = '';
-            for (var _i = 0, _a = this.components; _i < _a.length; _i++) {
-                var element = _a[_i];
-                if (element instanceof WUX.WComponent) {
-                    element.mount(this.root);
-                }
-                else {
-                    this.root.append(element);
-                }
-            }
-            return this;
+        WContainer.prototype.cs = function (cs) {
+            if (!cs)
+                return '';
+            var x = cs.indexOf('^');
+            if (x < 0)
+                return 'class="' + cs + '"';
+            var c = cs.substring(0, x);
+            var s = cs.substring(x + 1);
+            return 'class="' + c + '" style="' + s + '"';
         };
         return WContainer;
     }(WUX.WComponent));

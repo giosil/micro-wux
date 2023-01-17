@@ -143,9 +143,6 @@ namespace WUX {
 	export interface WGlobal {
 		/** Locale setting */
 		locale: string;
-		/** Default class or container of row / col. */
-		main_class: string;
-		con_class: string;
 		/** Global init function */
 		init(callback: () => any);
 		/** Shared data */

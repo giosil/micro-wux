@@ -8,9 +8,6 @@
 	export let global: WGlobal = {
 		locale: 'it',
 
-		main_class: 'container-fluid',
-		con_class: 'container',
-
 		init: function _init(callback: () => any) {
 			if (WUX.debug) console.log('[WUX] global.init...');
 			// Initialization code
