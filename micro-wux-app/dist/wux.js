@@ -1467,22 +1467,44 @@ var WUX;
 })(WUX || (WUX = {}));
 var WUX;
 (function (WUX) {
-    var WHtml = (function (_super) {
-        __extends(WHtml, _super);
-        function WHtml(html) {
-            return _super.call(this, null, 'WHtml', html) || this;
-        }
-        WHtml.prototype.render = function () {
-            if (!this.props)
-                return "<span></span>";
-            if (this.props.charAt(0) != '<') {
-                this.props = "<span>" + this.props + "</span>";
+    function _t(tagName, css, attributes, id, classStyle) {
+        var clsStyle;
+        var style;
+        if (typeof css == 'string') {
+            if (css.indexOf(':') > 0) {
+                style = css;
             }
-            return this.props;
-        };
-        return WHtml;
-    }(WUX.WComponent));
-    WUX.WHtml = WHtml;
+            else {
+                clsStyle = css;
+            }
+        }
+        else if (css) {
+            if (css.n)
+                clsStyle = css.n;
+            style = WUX.style(css);
+        }
+        if (classStyle) {
+            if (clsStyle) {
+                clsStyle += ' ' + classStyle;
+            }
+            else {
+                clsStyle = classStyle;
+            }
+        }
+        var r = '<' + tagName;
+        if (id)
+            r += ' id="' + id + '"';
+        if (clsStyle)
+            r += ' class="' + clsStyle + '"';
+        if (style)
+            r += ' style="' + style + '"';
+        var a = WUX.attributes(attributes);
+        if (a)
+            r += ' ' + a;
+        r += '>';
+        return r;
+    }
+    WUX._t = _t;
     var WContainer = (function (_super) {
         __extends(WContainer, _super);
         function WContainer(id, classStyle, style, attributes, inline, type) {
@@ -1576,5 +1598,188 @@ var WUX;
         return WContainer;
     }(WUX.WComponent));
     WUX.WContainer = WContainer;
+    var WTable = (function (_super) {
+        __extends(WTable, _super);
+        function WTable(id, header, keys, classStyle, style, attributes, props) {
+            var _this = _super.call(this, id ? id : '*', 'WTable', props, classStyle, style, attributes) || this;
+            _this.rootTag = 'table';
+            _this.header = header;
+            if (keys && keys.length) {
+                _this.keys = keys;
+            }
+            else {
+                _this.keys = [];
+                if (_this.header)
+                    for (var i = 0; i < _this.header.length; i++)
+                        _this.keys.push(i);
+            }
+            _this.widths = [];
+            return _this;
+        }
+        WTable.prototype.render = function () {
+            if (!this.shouldBuildRoot())
+                return undefined;
+            var tableClass = 'table';
+            if (this._classStyle)
+                tableClass = this._classStyle.indexOf('table ') >= 0 ? this._classStyle : tableClass + ' ' + this._classStyle;
+            var ts = this.style ? ' style="' + this.style + '"' : '';
+            var r = '';
+            if (this.div)
+                r += '<div id="' + this.id + '-c" class="' + this.div + '">';
+            r += '<table id="' + this.id + '" class="' + tableClass + '"' + ts + '>';
+            if (this.header && this.header.length) {
+                var ths = false;
+                if (typeof this.headStyle == 'string') {
+                    if (this.headStyle.indexOf('text-align') > 0)
+                        ths = true;
+                }
+                else if (this.headStyle && this.headStyle.a) {
+                    ths = true;
+                }
+                if (!this.hideHeader) {
+                    if (ths) {
+                        r += '<thead id="' + this.id + '-h"><tr>';
+                    }
+                    else {
+                        r += '<thead id="' + this.id + '-h"><tr' + WUX.buildCss(this.headStyle) + '>';
+                    }
+                    var j = -1;
+                    for (var _i = 0, _a = this.header; _i < _a.length; _i++) {
+                        var h = _a[_i];
+                        j++;
+                        var s = void 0;
+                        if (j == 0) {
+                            s = this.col0Style ? this.col0Style : this.colStyle;
+                        }
+                        else if (j == this.header.length - 1) {
+                            s = this.colLStyle ? this.colLStyle : this.colStyle;
+                        }
+                        else {
+                            s = ths ? this.headStyle : this.colStyle;
+                        }
+                        var w = this.widths && this.widths.length > j ? this.widths[j] : 0;
+                        var x = {};
+                        if (w)
+                            x.w = this.widthsPerc ? w + '%' : w;
+                        var t = this.getType(j);
+                        if (t == 'w')
+                            x.a = 'center';
+                        r += '<th' + WUX.buildCss(s, x) + '>' + h + '</th>';
+                    }
+                    r += '</tr></thead>';
+                }
+            }
+            r += '<tbody id="' + this.id + '-b"></tbody>';
+            r += '</table>';
+            if (this.div)
+                r += '</div>';
+            return r;
+        };
+        WTable.prototype.componentDidMount = function () {
+            this.buildBody();
+        };
+        WTable.prototype.componentDidUpdate = function (prevProps, prevState) {
+            this.buildBody();
+        };
+        WTable.prototype.getType = function (i) {
+            if (!this.types)
+                return '';
+            if (this.types.length <= i)
+                return '';
+            return this.types[i];
+        };
+        WTable.prototype.buildBody = function () {
+            var tbody = document.getElementById(this.id + "-b");
+            if (!tbody)
+                return;
+            if (!this.state || !this.state.length) {
+                tbody.innerHTML = '';
+                return;
+            }
+            if (!this.keys || !this.keys.length) {
+                tbody.innerHTML = '';
+                return;
+            }
+            var b = '';
+            var i = -1;
+            for (var _i = 0, _a = this.state; _i < _a.length; _i++) {
+                var row = _a[_i];
+                i++;
+                var r = '';
+                if (i == this.state.length - 1) {
+                    if (this.footerStyle) {
+                        r = _t('tr', this.footerStyle);
+                    }
+                    else {
+                        r = _t('tr', this.rowStyle);
+                    }
+                }
+                else {
+                    r = _t('tr', this.rowStyle);
+                }
+                b += r;
+                var j = -1;
+                for (var _b = 0, _c = this.keys; _b < _c.length; _b++) {
+                    var key = _c[_b];
+                    var v = row[key];
+                    var align = '';
+                    if (v == null)
+                        v = '';
+                    j++;
+                    var t = this.getType(j);
+                    switch (t) {
+                        case 'w':
+                            align = 'text-center';
+                            break;
+                        case 'c':
+                        case 'c5':
+                        case 'i':
+                        case 'n':
+                            align = 'text-right';
+                            break;
+                        case 'b':
+                            v = v ? '&check;' : '';
+                            break;
+                        default:
+                            if (v instanceof Date)
+                                v = v.toLocaleDateString();
+                            if (typeof v == 'boolean')
+                                v = v ? '&check;' : '';
+                            if (typeof v == 'number') {
+                                align = 'text-right';
+                            }
+                    }
+                    var s = void 0;
+                    if (j == 0) {
+                        s = this.col0Style ? this.col0Style : this.colStyle;
+                    }
+                    else if (j == this.header.length - 1) {
+                        s = this.colLStyle ? this.colLStyle : this.colStyle;
+                    }
+                    else {
+                        s = this.colStyle;
+                    }
+                    if (typeof s == 'string') {
+                        if (s.indexOf('text-align') > 0)
+                            align = '';
+                    }
+                    else if (s && s.a) {
+                        align = '';
+                    }
+                    var w = this.widths && this.widths.length > j ? this.widths[j] : 0;
+                    b += '<td' + WUX.buildCss(s, align, { w: w }) + '>' + v + '</td>';
+                }
+                if (this.header && this.header.length > this.keys.length) {
+                    for (var i_1 = 0; i_1 < this.header.length - this.keys.length; i_1++) {
+                        b += '<td' + WUX.buildCss(this.colStyle) + '></td>';
+                    }
+                }
+                b += '</tr>';
+                tbody.innerHTML = b;
+            }
+        };
+        return WTable;
+    }(WUX.WComponent));
+    WUX.WTable = WTable;
 })(WUX || (WUX = {}));
 //# sourceMappingURL=wux.js.map

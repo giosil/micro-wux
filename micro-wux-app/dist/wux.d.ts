@@ -210,10 +210,7 @@ declare namespace WUX {
     let global: WGlobal;
 }
 declare namespace WUX {
-    class WHtml extends WUX.WComponent<string, any> {
-        constructor(html: string);
-        protected render(): string;
-    }
+    function _t(tagName: string, css?: string | WStyle, attributes?: string | object, id?: string, classStyle?: string): string;
     class WContainer extends WComponent<string, any> {
         comp: WComponent[];
         corc: string[];
@@ -226,5 +223,26 @@ declare namespace WUX {
         protected componentDidMount(): void;
         componentWillUnmount(): void;
         protected cs(cs: string): string;
+    }
+    class WTable extends WComponent<any, any[]> {
+        header: string[];
+        keys: any[];
+        types: string[];
+        widths: number[];
+        widthsPerc: boolean;
+        hideHeader: boolean;
+        div: string;
+        colStyle: string | WStyle;
+        rowStyle: string | WStyle;
+        headStyle: string | WStyle;
+        footerStyle: string | WStyle;
+        col0Style: string | WStyle;
+        colLStyle: string | WStyle;
+        constructor(id: string, header: string[], keys?: any[], classStyle?: string, style?: string | WStyle, attributes?: string | object, props?: any);
+        protected render(): string;
+        protected componentDidMount(): void;
+        protected componentDidUpdate(prevProps: any, prevState: any): void;
+        protected getType(i: number): string;
+        protected buildBody(): void;
     }
 }

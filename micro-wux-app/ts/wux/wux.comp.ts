@@ -1,16 +1,36 @@
 namespace WUX {
 	
-	export class WHtml extends WUX.WComponent<string, any> {
-		constructor(html: string) {
-			super(null, 'WHtml', html);
-		}
-		protected render() {
-			if (!this.props) return "<span></span>";
-			if(this.props.charAt(0) != '<') {
-				this.props = "<span>" + this.props + "</span>";
+	export function _t(tagName: string, css?: string | WStyle, attributes?: string | object, id?: string, classStyle?: string): string {
+		let clsStyle: string;
+		let style: string;
+		if (typeof css == 'string') {
+			if (css.indexOf(':') > 0) {
+				style = css;
 			}
-			return this.props
+			else {
+				clsStyle = css;
+			}
 		}
+		else if (css) {
+			if (css.n) clsStyle = css.n;
+			style = WUX.style(css);
+		}
+		if (classStyle) {
+			if (clsStyle) {
+				clsStyle += ' ' + classStyle;
+			}
+			else {
+				clsStyle = classStyle;
+			}
+		}
+		let r = '<' + tagName;
+		if (id) r += ' id="' + id + '"';
+		if (clsStyle) r += ' class="' + clsStyle + '"';
+		if (style) r += ' style="' + style + '"';
+		let a = WUX.attributes(attributes);
+		if (a) r += ' ' + a;
+		r += '>';
+		return r;
 	}
 	
 	export class WContainer extends WComponent<string, any> {
@@ -102,4 +122,188 @@ namespace WUX {
 			return 'class="' + c + '" style="' + s + '"';
 		}
 	}
+	
+	export class WTable extends WComponent<any, any[]> {
+		header: string[];
+		keys: any[];
+		types: string[];
+		widths: number[];
+		widthsPerc: boolean;
+		hideHeader: boolean;
+		div: string; 
+		
+		colStyle: string | WStyle;
+		rowStyle: string | WStyle;
+		headStyle: string | WStyle;
+		footerStyle: string | WStyle;
+		/** First col style */
+		col0Style: string | WStyle;
+		/** Last col style */
+		colLStyle: string | WStyle;
+		
+		constructor(id: string, header: string[], keys?: any[], classStyle?: string, style?: string | WStyle, attributes?: string | object, props?: any) {
+			super(id ? id : '*', 'WTable', props, classStyle, style, attributes);
+			this.rootTag = 'table';
+			this.header = header;
+			if (keys && keys.length) {
+				this.keys = keys;
+			}
+			else {
+				this.keys = [];
+				if (this.header) for (let i = 0; i < this.header.length; i++) this.keys.push(i);
+			}
+			this.widths = [];
+		}
+		
+		protected render() {
+			if (!this.shouldBuildRoot()) return undefined;
+			let tableClass = 'table';
+			if (this._classStyle) tableClass = this._classStyle.indexOf('table ') >= 0 ? this._classStyle : tableClass + ' ' + this._classStyle;
+			let ts = this.style ? ' style="' + this.style + '"' : '';
+			let r = '';
+			if(this.div) r += '<div id="' + this.id + '-c" class="' + this.div + '">';
+			r += '<table id="' + this.id + '" class="' + tableClass + '"' + ts + '>';
+			if (this.header && this.header.length) {
+				let ths = false;
+				if (typeof this.headStyle == 'string') {
+					if (this.headStyle.indexOf('text-align') > 0) ths = true;
+				}
+				else if (this.headStyle && this.headStyle.a) {
+					ths = true;
+				}
+				if (!this.hideHeader) {
+					if (ths) {
+						r += '<thead id="' + this.id + '-h"><tr>';
+					}
+					else {
+						r += '<thead id="' + this.id + '-h"><tr' + WUX.buildCss(this.headStyle) + '>';
+					}
+					let j = -1;
+					for (let h of this.header) {
+						j++;
+						let s: string | WStyle;
+						if (j == 0) {
+							s = this.col0Style ? this.col0Style : this.colStyle;
+						}
+						else if (j == this.header.length - 1) {
+							s = this.colLStyle ? this.colLStyle : this.colStyle;
+						}
+						else {
+							s = ths ? this.headStyle : this.colStyle;
+						}
+						let w = this.widths && this.widths.length > j ? this.widths[j] : 0;
+						let x: WStyle = {};
+						if (w) x.w = this.widthsPerc ? w + '%' : w; 
+						let t = this.getType(j);
+						if(t == 'w') x.a = 'center';
+						r += '<th' + WUX.buildCss(s, x) + '>' + h + '</th>';
+					}
+					r += '</tr></thead>';
+				}
+			}
+			r += '<tbody id="' + this.id + '-b"></tbody>';
+			r += '</table>';
+			if(this.div) r += '</div>';
+			return r;
+		}
+		
+		protected componentDidMount(): void {
+			this.buildBody();
+		}
+		
+		protected componentDidUpdate(prevProps: any, prevState: any): void {
+			this.buildBody();
+		}
+		
+		protected getType(i: number): string {
+			if(!this.types) return '';
+			if(this.types.length <= i) return '';
+			return this.types[i];
+		}
+		
+		protected buildBody(): void {
+			let tbody = document.getElementById(this.id + "-b")
+			if(!tbody) return;
+			if (!this.state || !this.state.length) {
+				tbody.innerHTML = '';
+				return;
+			}
+			if (!this.keys || !this.keys.length) {
+				tbody.innerHTML = '';
+				return;
+			}
+			let b = '';
+			let i = -1;
+			for (let row of this.state) {
+				i++;
+				let r: string = '';
+				if (i == this.state.length - 1) {
+					if (this.footerStyle) {
+						r = _t('tr', this.footerStyle);
+					}
+					else {
+						r = _t('tr', this.rowStyle);
+					}
+				}
+				else {
+					r = _t('tr', this.rowStyle);
+				}
+				b += r;
+				let j = -1;
+				for (let key of this.keys) {
+					let v = row[key];
+					let align = '';
+					if (v == null) v = '';
+					j++;
+					let t = this.getType(j);
+					switch (t) {
+						case 'w':
+							align = 'text-center';
+							break;
+						case 'c':
+						case 'c5':
+						case 'i':
+						case 'n':
+							align = 'text-right';
+							break;
+						case 'b':
+							v = v ? '&check;' : '';
+							break;
+						default:
+							if (v instanceof Date) v = v.toLocaleDateString();
+							if (typeof v == 'boolean') v = v ? '&check;' : '';
+							if (typeof v == 'number') {
+								align = 'text-right';
+							}
+					}
+					let s: string | WStyle;
+					if (j == 0) {
+						s = this.col0Style ? this.col0Style : this.colStyle;
+					}
+					else if (j == this.header.length - 1) {
+						s = this.colLStyle ? this.colLStyle : this.colStyle;
+					}
+					else {
+						s = this.colStyle;
+					}
+					if (typeof s == 'string') {
+						if (s.indexOf('text-align') > 0) align = '';
+					}
+					else if (s && s.a) {
+						align = '';
+					}
+					let w = this.widths && this.widths.length > j ? this.widths[j] : 0;
+					b += '<td' + WUX.buildCss(s, align, { w: w }) + '>' + v + '</td>';
+				}
+				if (this.header && this.header.length > this.keys.length) {
+					for (let i = 0; i < this.header.length - this.keys.length; i++) {
+						b += '<td' + WUX.buildCss(this.colStyle) + '></td>';
+					}
+				}
+				b += '</tr>';
+				tbody.innerHTML = b;
+			}
+		}
+	}
+
 }
