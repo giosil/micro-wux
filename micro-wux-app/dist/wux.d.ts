@@ -204,13 +204,13 @@ declare namespace WUX {
     function removeClassOf(e: HTMLElement, name: string): void;
     function toggleClassOf(e: HTMLElement, name: string): void;
     function setCss(e: WComponent | HTMLElement, ...a: (string | WStyle)[]): WComponent | HTMLElement;
+    function buildIcon(icon: string, before?: string, after?: string, size?: number, cls?: string, title?: string): string;
     function build(tagName: string, inner?: string, css?: string | WStyle, attributes?: string | object, id?: string, classStyle?: string): string;
 }
 declare namespace WUX {
     let global: WGlobal;
 }
 declare namespace WUX {
-    function _t(tagName: string, css?: string | WStyle, attributes?: string | object, id?: string, classStyle?: string): string;
     class WContainer extends WComponent<string, any> {
         comp: WComponent[];
         corc: string[];
@@ -223,6 +223,20 @@ declare namespace WUX {
         protected componentDidMount(): void;
         componentWillUnmount(): void;
         protected cs(cs: string): string;
+    }
+    class WLink extends WComponent<string, string> {
+        protected _href: string;
+        protected _target: string;
+        constructor(id?: string, text?: string, icon?: string, classStyle?: string, style?: string | WStyle, attributes?: string | object, href?: string, target?: string);
+        get icon(): string;
+        set icon(s: string);
+        get href(): string;
+        set href(s: string);
+        get target(): string;
+        set target(s: string);
+        protected render(): string;
+        protected componentDidMount(): void;
+        protected componentWillUpdate(nextProps: any, nextState: any): void;
     }
     class WTable extends WComponent<any, any[]> {
         header: string[];

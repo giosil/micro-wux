@@ -1,38 +1,5 @@
 namespace WUX {
 	
-	export function _t(tagName: string, css?: string | WStyle, attributes?: string | object, id?: string, classStyle?: string): string {
-		let clsStyle: string;
-		let style: string;
-		if (typeof css == 'string') {
-			if (css.indexOf(':') > 0) {
-				style = css;
-			}
-			else {
-				clsStyle = css;
-			}
-		}
-		else if (css) {
-			if (css.n) clsStyle = css.n;
-			style = WUX.style(css);
-		}
-		if (classStyle) {
-			if (clsStyle) {
-				clsStyle += ' ' + classStyle;
-			}
-			else {
-				clsStyle = classStyle;
-			}
-		}
-		let r = '<' + tagName;
-		if (id) r += ' id="' + id + '"';
-		if (clsStyle) r += ' class="' + clsStyle + '"';
-		if (style) r += ' style="' + style + '"';
-		let a = WUX.attributes(attributes);
-		if (a) r += ' ' + a;
-		r += '>';
-		return r;
-	}
-	
 	export class WContainer extends WComponent<string, any> {
 		comp: WComponent[];
 		corc: string[];
@@ -120,6 +87,90 @@ namespace WUX {
 			let c = cs.substring(0, x);
 			let s = cs.substring(x + 1);
 			return 'class="' + c + '" style="' + s + '"';
+		}
+	}
+	
+	export class WLink extends WComponent<string, string> {
+		protected _href: string;
+		protected _target: string;
+
+		constructor(id?: string, text?: string, icon?: string, classStyle?: string, style?: string | WStyle, attributes?: string | object, href?: string, target?: string) {
+			// WComponent init
+			super(id ? id : '*', 'WLink', icon, classStyle, style, attributes);
+			this.updateState(text);
+			this.rootTag = 'a';
+			// WLink init
+			this._href = href;
+			this._target = target;
+		}
+
+		get icon(): string {
+			return this.props;
+		}
+		set icon(s: string) {
+			this.update(s, this.state, true, false, false);
+		}
+
+		get href(): string {
+			return this._href;
+		}
+		set href(s: string) {
+			this._href = s;
+			if (this.root) {
+				if (s) {
+					this.root.setAttribute('href', s);
+				}
+				else {
+					this.root.removeAttribute('href');
+				}
+			}
+		}
+
+		get target(): string {
+			return this._target;
+		}
+		set target(s: string) {
+			this._target = s;
+			if (this.root) {
+				if (s) {
+					this.root.setAttribute('target', s);
+				}
+				else {
+					this.root.removeAttribute('target');
+				}
+			}
+		}
+
+		protected render() {
+			let addAttributes = '';
+			if (this._href) addAttributes += 'href="' + this._href + '"';
+			if (this._target) {
+				if (addAttributes) addAttributes += ' ';
+				addAttributes += 'target="' + this._target + '"';
+			}
+			let html = '';
+			if (this.state) {
+				html += WUX.buildIcon(this.icon, '', ' ') + this.state;
+			}
+			else {
+				html += WUX.buildIcon(this.icon);
+			}
+			return this.build(this.rootTag, html, addAttributes);
+		}
+
+		protected componentDidMount(): void {
+			if (this._tooltip) this.root.setAttribute('title', this._tooltip);
+		}
+
+		protected componentWillUpdate(nextProps: any, nextState: any): void {
+			let html = '';
+			if (nextState) {
+				html += WUX.buildIcon(this.icon, '', ' ') + nextState;
+			}
+			else {
+				html += WUX.buildIcon(this.icon);
+			}
+			this.root.innerHTML = html;
 		}
 	}
 	
@@ -239,14 +290,14 @@ namespace WUX {
 				let r: string = '';
 				if (i == this.state.length - 1) {
 					if (this.footerStyle) {
-						r = _t('tr', this.footerStyle);
+						r = '<tr' + buildCss(this.footerStyle) + '>'
 					}
 					else {
-						r = _t('tr', this.rowStyle);
+						r = '<tr' + buildCss(this.rowStyle) + '>'
 					}
 				}
 				else {
-					r = _t('tr', this.rowStyle);
+					r = '<tr' + buildCss(this.rowStyle) + '>'
 				}
 				b += r;
 				let j = -1;

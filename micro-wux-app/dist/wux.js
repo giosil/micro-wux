@@ -517,8 +517,9 @@ var WUX;
             if (this.internal)
                 this.internal.unmount();
             this.internal = undefined;
-            if (this.root)
+            if (this.root) {
                 this.root.remove();
+            }
             this.root = undefined;
             if (this.id) {
                 var idx = WUX.registry.indexOf(this.id);
@@ -1374,6 +1375,24 @@ var WUX;
         return e;
     }
     WUX.setCss = setCss;
+    function buildIcon(icon, before, after, size, cls, title) {
+        if (!icon)
+            return '';
+        if (!before)
+            before = '';
+        if (!after)
+            after = '';
+        var t = title ? ' title="' + title + '"' : '';
+        cls = cls ? ' ' + cls : '';
+        if (icon.indexOf('.') > 0)
+            return before + '<img src="' + icon + '"' + t + '>' + after;
+        if (!size || size < 2)
+            return before + '<i class="fa ' + icon + cls + '"' + t + '></i>' + after;
+        if (size > 5)
+            size = 5;
+        return before + '<i class="fa ' + icon + ' fa-' + size + 'x' + cls + '"' + t + '></i>' + after;
+    }
+    WUX.buildIcon = buildIcon;
     function build(tagName, inner, css, attributes, id, classStyle) {
         if (!tagName)
             tagName = 'div';
@@ -1467,44 +1486,6 @@ var WUX;
 })(WUX || (WUX = {}));
 var WUX;
 (function (WUX) {
-    function _t(tagName, css, attributes, id, classStyle) {
-        var clsStyle;
-        var style;
-        if (typeof css == 'string') {
-            if (css.indexOf(':') > 0) {
-                style = css;
-            }
-            else {
-                clsStyle = css;
-            }
-        }
-        else if (css) {
-            if (css.n)
-                clsStyle = css.n;
-            style = WUX.style(css);
-        }
-        if (classStyle) {
-            if (clsStyle) {
-                clsStyle += ' ' + classStyle;
-            }
-            else {
-                clsStyle = classStyle;
-            }
-        }
-        var r = '<' + tagName;
-        if (id)
-            r += ' id="' + id + '"';
-        if (clsStyle)
-            r += ' class="' + clsStyle + '"';
-        if (style)
-            r += ' style="' + style + '"';
-        var a = WUX.attributes(attributes);
-        if (a)
-            r += ' ' + a;
-        r += '>';
-        return r;
-    }
-    WUX._t = _t;
     var WContainer = (function (_super) {
         __extends(WContainer, _super);
         function WContainer(id, classStyle, style, attributes, inline, type) {
@@ -1598,6 +1579,97 @@ var WUX;
         return WContainer;
     }(WUX.WComponent));
     WUX.WContainer = WContainer;
+    var WLink = (function (_super) {
+        __extends(WLink, _super);
+        function WLink(id, text, icon, classStyle, style, attributes, href, target) {
+            var _this = _super.call(this, id ? id : '*', 'WLink', icon, classStyle, style, attributes) || this;
+            _this.updateState(text);
+            _this.rootTag = 'a';
+            _this._href = href;
+            _this._target = target;
+            return _this;
+        }
+        Object.defineProperty(WLink.prototype, "icon", {
+            get: function () {
+                return this.props;
+            },
+            set: function (s) {
+                this.update(s, this.state, true, false, false);
+            },
+            enumerable: false,
+            configurable: true
+        });
+        Object.defineProperty(WLink.prototype, "href", {
+            get: function () {
+                return this._href;
+            },
+            set: function (s) {
+                this._href = s;
+                if (this.root) {
+                    if (s) {
+                        this.root.setAttribute('href', s);
+                    }
+                    else {
+                        this.root.removeAttribute('href');
+                    }
+                }
+            },
+            enumerable: false,
+            configurable: true
+        });
+        Object.defineProperty(WLink.prototype, "target", {
+            get: function () {
+                return this._target;
+            },
+            set: function (s) {
+                this._target = s;
+                if (this.root) {
+                    if (s) {
+                        this.root.setAttribute('target', s);
+                    }
+                    else {
+                        this.root.removeAttribute('target');
+                    }
+                }
+            },
+            enumerable: false,
+            configurable: true
+        });
+        WLink.prototype.render = function () {
+            var addAttributes = '';
+            if (this._href)
+                addAttributes += 'href="' + this._href + '"';
+            if (this._target) {
+                if (addAttributes)
+                    addAttributes += ' ';
+                addAttributes += 'target="' + this._target + '"';
+            }
+            var html = '';
+            if (this.state) {
+                html += WUX.buildIcon(this.icon, '', ' ') + this.state;
+            }
+            else {
+                html += WUX.buildIcon(this.icon);
+            }
+            return this.build(this.rootTag, html, addAttributes);
+        };
+        WLink.prototype.componentDidMount = function () {
+            if (this._tooltip)
+                this.root.setAttribute('title', this._tooltip);
+        };
+        WLink.prototype.componentWillUpdate = function (nextProps, nextState) {
+            var html = '';
+            if (nextState) {
+                html += WUX.buildIcon(this.icon, '', ' ') + nextState;
+            }
+            else {
+                html += WUX.buildIcon(this.icon);
+            }
+            this.root.innerHTML = html;
+        };
+        return WLink;
+    }(WUX.WComponent));
+    WUX.WLink = WLink;
     var WTable = (function (_super) {
         __extends(WTable, _super);
         function WTable(id, header, keys, classStyle, style, attributes, props) {
@@ -1708,14 +1780,14 @@ var WUX;
                 var r = '';
                 if (i == this.state.length - 1) {
                     if (this.footerStyle) {
-                        r = _t('tr', this.footerStyle);
+                        r = '<tr' + WUX.buildCss(this.footerStyle) + '>';
                     }
                     else {
-                        r = _t('tr', this.rowStyle);
+                        r = '<tr' + WUX.buildCss(this.rowStyle) + '>';
                     }
                 }
                 else {
-                    r = _t('tr', this.rowStyle);
+                    r = '<tr' + WUX.buildCss(this.rowStyle) + '>';
                 }
                 b += r;
                 var j = -1;

@@ -456,7 +456,9 @@ namespace WUX {
 			this.componentWillUnmount();
 			if (this.internal) this.internal.unmount();
 			this.internal = undefined;
-			if (this.root) this.root.remove();
+			if (this.root) {
+				this.root.remove();
+			}
 			this.root = undefined;
 			if (this.id) {
 				let idx = registry.indexOf(this.id);
@@ -1257,7 +1259,19 @@ namespace WUX {
 		}
 		return e;
 	}
-
+	
+	export function buildIcon(icon: string, before?: string, after?: string, size?: number, cls?: string, title?: string): string {
+		if (!icon) return '';
+		if (!before) before = '';
+		if (!after) after = '';
+		let t = title ? ' title="' + title + '"' : '';
+		cls = cls ? ' ' + cls : '';
+		if (icon.indexOf('.') > 0) return before + '<img src="' + icon + '"' + t + '>' + after;
+		if (!size || size < 2) return before + '<i class="fa ' + icon + cls + '"' + t + '></i>' + after;
+		if (size > 5) size = 5;
+		return before + '<i class="fa ' + icon + ' fa-' + size + 'x' + cls + '"' + t + '></i>' + after;
+	}
+	
 	export function build(tagName: string, inner?: string, css?: string | WStyle, attributes?: string | object, id?: string, classStyle?: string): string {
 		if (!tagName) tagName = 'div';
 		let clsStyle: string;
