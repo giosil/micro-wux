@@ -1,16 +1,18 @@
 namespace WUX {
 	
 	export class WContainer extends WComponent<string, any> {
+		cint: WComponent[];
 		comp: WComponent[];
-		corc: string[];
+		sr_c: string[];
 		grid: string[][];
-		
+
 		constructor(id?: string, classStyle?: string, style?: string | WStyle, attributes?: string | object, inline?: boolean, type?: string) {
 			// WComponent init
 			super(id ? id : '*', 'WContainer', type, classStyle, WUX.style(style), attributes);
 			// WContainer init
+			this.cint = [];
 			this.comp = [];
-			this.corc = [];
+			this.sr_c = [];
 			this.grid = [];
 			this.rootTag = inline ? 'span' : 'div';
 		}
@@ -36,15 +38,65 @@ namespace WUX {
 			return this;
 		}
 
-		add(component: WComponent): this {
-			if(!this.grid.length) this.addRow().addCol();
-			if (!component) return this;
+		add(component: WComponent, constraints?: string): this {
+			if(!component) return this;
+			if(!this.grid.length) {
+				this.cint.push(component);
+				return this;
+			}
+			if(constraints == 'push') {
+				this.cint.push(component);
+				return this;
+			}
+			if(constraints == 'unshift') {
+				this.cint.unshift(component);
+				return this;
+			}
 			let r = this.grid.length - 1;
+			if(constraints) {
+				let x = parseInt(constraints);
+				if(!isNaN(x)) {
+					if(x < 0) {
+						this.cint.push(component);
+						return this;
+					}
+					else {
+						r = x;
+					}
+				}
+			}
 			let g = this.grid[r];
 			let c = g.length - 1;
 			this.comp.push(component);
-			this.corc.push(this.subId(r + '_' + c));
+			this.sr_c.push(this.subId(r + '_' + c));
 			return this;
+		}
+
+		addGroup(w: WWrapper, ...ac: WComponent[]): this {
+			if (w) {
+				let cnt = this.addContainer(w);
+				if (!ac || !ac.length) return this;
+				for (let c of ac) {
+					if(c) cnt.add(c);
+				}
+				return this;
+			}
+			if (!ac || !ac.length) return this;
+			for (let c of ac) {
+				if(c) this.add(c);
+			}
+			return this;
+		}
+
+		addContainer(w: WWrapper, constraints?: string): WContainer {
+			let c = new WContainer();
+			if(w) {
+				c.classStyle = WUX.cls(w.classStyle, w.style)
+				c.style = WUX.style(w.style);
+				c.attributes = w.attributes;
+			}
+			this.add(c, constraints);
+			return c;
 		}
 
 		protected render(): any {
@@ -66,9 +118,13 @@ namespace WUX {
 		}
 
 		protected componentDidMount(): void {
+			for(let i = 0; i < this.cint.length; i++) {
+				let c = this.cint[i];
+				c.mount(this.root);
+			}
 			for(let i = 0; i < this.comp.length; i++) {
 				let c = this.comp[i];
-				let e = document.getElementById(this.corc[i]);
+				let e = document.getElementById(this.sr_c[i]);
 				if(!e) continue;
 				c.mount(e);
 			}
@@ -171,6 +227,438 @@ namespace WUX {
 				html += WUX.buildIcon(this.icon);
 			}
 			this.root.innerHTML = html;
+		}
+	}
+	
+	export class WLabel extends WComponent<string, string> {
+		forId: string;
+
+		constructor(id?: string, text?: string, icon?: string, classStyle?: string, style?: string | WStyle, attributes?: string | object) {
+			// WComponent init
+			super(id ? id : '*', 'WLabel', icon, classStyle, style, attributes);
+			this.rootTag = 'span';
+			this.updateState(text);
+		}
+
+		get icon(): string {
+			return this.props;
+		}
+		set icon(i: string) {
+			this.update(i, this.state, true, false, false);
+		}
+
+		protected updateState(nextState: string): void {
+			if (!nextState) nextState = '';
+			super.updateState(nextState);
+			if (this.root) this.root.innerHTML = WUX.buildIcon(this.props, '', ' ') + nextState;
+		}
+
+		for(e: WElement): this {
+			this.forId = WUX.getId(e);
+			return this;
+		}
+
+		protected render() {
+			let text = this.state ? this.state : '';
+			if (this.forId) return this.buildRoot('label', WUX.buildIcon(this.props, '', ' ') + text, 'for="' + this.forId + '"', this._classStyle);
+			return this.buildRoot(this.rootTag, WUX.buildIcon(this.props, '', ' ') + text, null, this._classStyle);
+		}
+
+		protected componentDidMount(): void {
+			if (this._tooltip) this.root.setAttribute('title', this._tooltip);
+		}
+	}
+	
+	export class WInput extends WComponent<string, string> {
+		size: number;
+		label: string;
+		/** 's'=string, 'n'=number, 'p'=percentage, 'c'=currency, 'c5'=currency, 'i'=integer, 'd'=date, 't'=date-time, 'h'=time, 'b'=boolean */
+		valueType: 's' | 'n' | 'p' | 'c' | 'c5' | 'i' | 'd' | 't' | 'h' | 'b';
+		placeHolder: string;
+
+		constructor(id?: string, type?: string, size?: number, classStyle?: string, style?: string | WStyle, attributes?: string | object) {
+			// WComponent init
+			super(id ? id : '*', 'WInput', type, classStyle, style, attributes);
+			this.rootTag = 'input';
+			// WInput init
+			this.size = size;
+			this.valueType = 's';
+		}
+
+		protected updateState(nextState: string) {
+			if (!nextState) nextState = '';
+			super.updateState(nextState);
+			if (this.root) this.root['value'] = nextState;
+		}
+		
+		getState(): string {
+			if(this.root) {
+				this.state = this.root['value'];
+			}
+			return this.state;
+		}
+
+		protected render() {
+			let l = '';
+			if (this.label) {
+				l = this.id ? '<label for="' + this.id + '">' : '<label>'
+				let br = this.label.lastIndexOf('<br');
+				if (br > 0) {
+					l += this.label.substring(0, br).replace('<', '&lt;').replace('>', '&gt;')
+					l += '</label><br>';
+				}
+				else {
+					l += this.label.replace('<', '&lt;').replace('>', '&gt;')
+					l += '</label> ';
+				}
+			}
+			if (this.props == 'static') {
+				return l + this.build('span', this.state);
+			}
+			else {
+				let addAttributes = 'name="' + this.id + '"';
+				addAttributes += this.props ? ' type="' + this.props + '"' : ' type="text"';
+				if (this.size) addAttributes += ' size="' + this.size + '"';
+				if (this.state) addAttributes += ' value="' + this.state + '"';
+				if (this.placeHolder) addAttributes += ' placeholder="' + this.placeHolder + '"';
+				return l + this.build(this.rootTag, '', addAttributes);
+			}
+		}
+	}
+	
+	export class WTextArea extends WComponent<number, string> {
+		constructor(id?: string, rows?: number, classStyle?: string, style?: string | WStyle, attributes?: string | object) {
+			// WComponent init
+			super(id ? id : '*', 'WTextArea', rows, classStyle, style, attributes);
+			this.rootTag = 'textarea';
+			if (!rows) this.props = 5;
+		}
+
+		protected updateState(nextState: string) {
+			if (!nextState) nextState = '';
+			super.updateState(nextState);
+			if (this.root) this.root['value'] = nextState;
+		}
+		
+		getState(): string {
+			if(this.root) {
+				this.state = this.root['value'];
+			}
+			return this.state;
+		}
+
+		protected render() {
+			if (!this.props) this.props = 1;
+			if (this._style) {
+				if (this._style.indexOf('width') < 0) {
+					this._style += ';width:100%';
+				}
+			}
+			else {
+				this._style = 'width:100%';
+			}
+			if (this._attributes) {
+				if (this._style.indexOf('rows=') < 0) {
+					this._attributes += ' rows="' + this.props + '"';
+				}
+			}
+			else {
+				this._attributes = 'rows="' + this.props + '"';
+			}
+			return WUX.build('textarea', '', this._style, this._attributes, this.id, this._classStyle);
+		}
+
+		protected componentDidMount(): void {
+			if (this._tooltip) this.root.setAttribute('title', this._tooltip);
+			if (this.state) this.root.setAttribute('value', this.state);
+		}
+	}
+	
+	export class WButton extends WComponent<string, string> {
+		public readonly type: string;
+
+		constructor(id?: string, text?: string, icon?: string, classStyle?: string, style?: string | WStyle, attributes?: string | object, type?: string) {
+			// WComponent init
+			super(id ? id : '*', 'WButton', icon, classStyle, style, attributes);
+			this.updateState(text);
+			this.rootTag = 'button';
+			// WButton init
+			this.type = type ? type : 'button';
+		}
+
+		get icon(): string {
+			return this.props;
+		}
+		set icon(i: string) {
+			this.update(i, this.state, true, false, false);
+		}
+
+		setText(text?: string, icon?: string) {
+			if (icon != null) this.props = icon;
+			this.setState(text);
+		}
+
+		protected render() {
+			let addAttributes = this.type ? 'type="' + this.type + '"' : '';
+			let html = '';
+			if (this.state) {
+				html += WUX.buildIcon(this.props, '', ' ') + this.state;
+			}
+			else {
+				html += WUX.buildIcon(this.props);
+			}
+			return this.build(this.rootTag, html, addAttributes);
+		}
+
+		protected componentDidMount(): void {
+			if (this._tooltip) this.root.setAttribute('title', this._tooltip);
+		}
+
+		protected componentWillUpdate(nextProps: any, nextState: any): void {
+			let html = '';
+			if (nextState) {
+				html += WUX.buildIcon(this.props, '', ' ') + nextState;
+			}
+			else {
+				html += WUX.buildIcon(this.props);
+			}
+			this.root.innerHTML = html;
+		}
+	}
+	
+	export class WCheck extends WComponent<boolean, any> {
+		wrapper: WUX.WContainer;
+		value: any;
+		protected _text: string;
+		protected _obs: MutationObserver;
+
+		constructor(id?: string, text?: string, value?: any, checked?: boolean, classStyle?: string, style?: string | WStyle, attributes?: string | object) {
+			// WComponent init
+			super(id ? id : '*', 'WCheck', checked, classStyle, style, attributes);
+			this.rootTag = 'input';
+			// WCheck init
+			this.value = value ? value : '1';
+			if (checked) this.updateState(value);
+			this._text = text;
+		}
+
+		get text(): string {
+			return this._text;
+		}
+		set text(s: string) {
+			this._text = s;
+		}
+
+		get checked(): boolean {
+			if(this.root) this.props = !!this.root['checked'];
+			this.state = this.props ? this.value : undefined;
+			return this.props;
+		}
+		set checked(b: boolean) {
+			this.setProps(b);
+		}
+
+		getState(): any {
+			if(this.root) this.props = !!this.root['checked'];
+			this.state = this.props ? this.value : undefined;
+			return this.state;
+		}
+
+		protected updateProps(nextProps: boolean) {
+			super.updateProps(nextProps);
+			this.state = this.props ? this.value : undefined;
+			if (this.root) {
+				if(this.props) {
+					this.root.setAttribute('checked', 'checked');
+				}
+				else {
+					this.root.removeAttribute('checked');
+				}
+			}
+		}
+
+		protected updateState(nextState: any) {
+			if (typeof nextState == 'boolean') {
+				nextState = nextState ? this.value : undefined;
+			}
+			super.updateState(nextState);
+			this.props = this.state != undefined;
+			if (this.root) {
+				if(this.props) {
+					this.root.setAttribute('checked', 'checked');
+				}
+				else {
+					this.root.removeAttribute('checked');
+				}
+			}
+		}
+
+		protected render() {
+			let addAttributes = 'name="' + this.id + '" type="checkbox"';
+			addAttributes += this.props ? ' checked="checked"' : '';
+			let inner = this._text ? '&nbsp;' + this._text : '';
+			return this.build(this.rootTag, inner, addAttributes);
+		}
+
+		protected componentDidMount(): void {
+			if (this._tooltip) this.root.setAttribute('title', this._tooltip);
+			this._obs = new MutationObserver(() => {
+				this.props = !!this.root['checked'];
+				this.trigger('propschange', this.props);
+				this.trigger('statechange', this.props ? this.value : undefined);
+			});
+		}
+	}
+	
+	export class WSelect extends WComponent implements WISelectable {
+		options: Array<string | WEntity>;
+		multiple: boolean;
+
+		constructor(id?: string, options?: Array<string | WEntity>, multiple?: boolean, classStyle?: string, style?: string | WStyle, attributes?: string | object) {
+			// WComponent init
+			super(id ? id : '*', 'WSelect', null, classStyle, style, attributes);
+			// WSelect init
+			this.rootTag = 'select';
+			this.options = options;
+			this.multiple = multiple;
+		}
+
+		getProps(): any {
+			if (!this.root) return this.props;
+			this.props = [];
+			let options = this.root["options"] as HTMLOptionElement[];
+			if(options && options.length) {
+				let s = WUtil.toNumber(this.root["selectedIndex"], -1);
+				if(s >= 0 && options.length > s) {
+					this.props.push(options[s].text);
+				}
+			}
+			return this.props;
+		}
+
+		select(i: number): this {
+			if (!this.root || !this.options) return this;
+			this.setState(this.options.length > i ? this.options[i] : null);
+			return this;
+		}
+
+		addOption(e: string | WEntity, sel?: boolean): this {
+			if (!e) return this;
+			if (!this.options) this.options = [];
+			this.options.push(e);
+			if (!this.mounted) return this;
+			let o = this.buildOptions();
+			this.root.innerHTML = o;
+			if (sel) this.updateState(e);
+			return this;
+		}
+
+		remOption(e: string | WEntity): this {
+			if (!e || !this.options) return this;
+			let x = -1;
+			for (let i = 0; i < this.options.length; i++) {
+				let s = this.options[i];
+				if (!s) continue;
+				if (typeof e == 'string') {
+					if (typeof s == 'string') {
+						if (s == e) {
+							x = i;
+							break;
+						}
+					}
+					else {
+						if (s.id == e) {
+							x = i;
+							break;
+						}
+					}
+				}
+				else {
+					if (typeof s == 'string') {
+						if (s == e.id) {
+							x = i;
+							break;
+						}
+					}
+					else {
+						if (s.id == e.id) {
+							x = i;
+							break;
+						}
+					}
+				}
+			}
+			if (x >= 0) {
+				this.options.splice(x, 1);
+				if (!this.mounted) return this;
+				let o = this.buildOptions();
+				this.root.innerHTML = o;
+			}
+			return this;
+		}
+
+		setOptions(options: Array<string | WEntity>, prevVal?: boolean): this {
+			this.options = options;
+			if (!this.mounted) return this;
+			let pv = this.root["value"]
+			let o = this.buildOptions();
+			this.root.innerHTML = o;
+			if (prevVal) {
+				this.root["value"] = pv;
+			}
+			else if (options && options.length) {
+				if (typeof options[0] == 'string') {
+					this.trigger('statechange', options[0]);
+				}
+				else {
+					this.trigger('statechange', WUtil.getString(options[0], 'id'));
+				}
+			}
+			return this;
+		}
+
+		protected updateState(nextState: any) {
+			super.updateState(nextState);
+			if (this.root) {
+				if (this.state == null) {
+					this.root["value"] = '';
+				}
+				else if (typeof this.state == 'string' || typeof this.state == 'number') {
+					this.root["value"] = '' + this.state;
+				}
+				else {
+					this.root["value"] = this.state.id;
+				}
+			}
+		}
+
+		protected render() {
+			let o = this.buildOptions();
+			let addAttributes = 'name="' + this.id + '"';
+			if (this.multiple) addAttributes += ' multiple="multiple"';
+			return this.buildRoot('select', o, addAttributes);
+		}
+
+		protected componentDidMount(): void {
+			if (this._tooltip) this.root.setAttribute('title', this._tooltip);
+			if (this.state) this.root["value"] = this.state;
+			this.root.addEventListener('change', () => {
+				this.trigger('statechange', this.root["value"]);
+			});
+		}
+
+		protected buildOptions(): string {
+			let r = '';
+			if (!this.options) this.options = [];
+			for (let opt of this.options) {
+				if (typeof opt == 'string') {
+					r += '<option>' + opt + '</option>';
+				}
+				else {
+					r += '<option value="' + opt.id + '">' + opt.text + '</option>';
+				}
+			}
+			return r;
 		}
 	}
 	
@@ -356,5 +844,314 @@ namespace WUX {
 			}
 		}
 	}
+	
+	export class WFormPanel extends WComponent<WField[][], any> {
+		protected title: string;
+		protected rows: WField[][];
+		protected roww: WWrapper[];
+		protected currRow: WField[];
+		protected main: WContainer;
+		protected checkboxStyle: string;
 
+		constructor(id?: string, title?: string, action?: string) {
+			// WComponent init
+			super(id ? id : '*', 'WFormPanel');
+			this.rootTag = 'form';
+			if (action) {
+				this._attributes = 'role="form" name="' + this.id + '" action="' + action + '"';
+			}
+			else {
+				this._attributes = 'role="form" name="' + this.id + '" action="javascript:void(0);"';
+			}
+			// WFormPanel init
+			this.title = title;
+			if(CSS.FORM) {
+				if(CSS.FORM.indexOf(':') > 0) {
+					this.style = CSS.FORM;
+				}
+				else {
+					this.classStyle = CSS.FORM;
+				}
+			}
+			this.init();
+		}
+
+		init(): this {
+			this.rows = [];
+			this.roww = [];
+			this.currRow = null;
+			this.addRow();
+			return this;
+		}
+
+		focus(): this {
+			if (!this.mounted) return this;
+			let f = this.first(true);
+			if (f) {
+				if (f.component) {
+					f.component.focus();
+				}
+				else if (f.element instanceof HTMLElement) {
+					f.element.focus();
+				}
+			}
+			return this;
+		}
+
+		first(enabled?: boolean): WField {
+			if (!this.rows) return null;
+			for (let row of this.rows) {
+				for (let f of row) {
+					if (enabled) {
+						if (f.enabled == null || f.enabled) {
+							if (f.readonly == null || !f.readonly) return f;
+						}
+					}
+					else {
+						return f;
+					}
+				}
+			}
+			return null;
+		}
+
+		focusOn(fieldId: string): this {
+			if (!this.mounted) return this;
+			let f = this.getField(fieldId);
+			if (!f) return this;
+			if (f.component) {
+				f.component.focus();
+			}
+			else if (f.element instanceof HTMLElement) {
+				f.element.focus();
+			}
+			return this;
+		}
+
+		getField(fid: string): WField {
+			if (!fid) return;
+			let sid = fid.indexOf(this.id + '-') == 0 ? fid : this.subId(fid);
+			for (let i = 0; i < this.rows.length; i++) {
+				let row = this.rows[i];
+				for (let j = 0; j < row.length; j++) {
+					let f = row[j];
+					if (f.id == sid) return f;
+				}
+			}
+			return;
+		}
+
+		addRow(classStyle?: string, style?: string | WStyle, id?: string, attributes?: string | object, type: string = 'row'): this {
+			if (this.currRow && !this.currRow.length) {
+				this.roww[this.roww.length - 1] = {
+					classStyle: classStyle,
+					style: style,
+					id: id,
+					attributes: WUX.attributes(attributes),
+					type: type
+				};
+				return this;
+			}
+			this.currRow = [];
+			this.rows.push(this.currRow);
+			this.roww.push({
+				classStyle: classStyle,
+				style: style,
+				id: id,
+				attributes: WUX.attributes(attributes),
+				type: type
+			});
+			return this;
+		}
+
+		addTextField(fieldId: string, label: string, readonly?: boolean): this {
+			let id = this.subId(fieldId);
+			let co = new WInput(id, 'text', 0, CSS.FORM_CTRL);
+			this.currRow.push({ 'id': id, 'label': label, 'component': co,'readonly': readonly });
+			return this;
+		}
+
+		addNoteField(fieldId: string, label: string, rows: number, readonly?: boolean): this {
+			if (!rows) rows = 3;
+			let id = this.subId(fieldId);
+			let co = new WTextArea(id, rows, CSS.FORM_CTRL);
+			this.currRow.push({ 'id': id, 'label': label, 'component': co,'readonly': readonly });
+			return this;
+		}
+
+		addDateField(fieldId: string, label: string, readonly?: boolean): this {
+			let id = this.subId(fieldId);
+			let co = new WInput(id, 'date', 0, CSS.FORM_CTRL);
+			this.currRow.push({ 'id': id, 'label': label, 'component': co,'readonly': readonly });
+			return this;
+		}
+
+		addOptionsField(fieldId: string, label: string, options?: (string | WEntity)[], attributes?: string | object, readonly?: boolean): this {
+			let id = this.subId(fieldId);
+			let co = new WSelect(id, options, false, CSS.FORM_CTRL, '', attributes);
+			this.currRow.push({ 'id': id, 'label': label, 'component': co,'readonly': readonly });
+			return this;
+		}
+
+		addBooleanField(fieldId: string, label: string): this {
+			let id = this.subId(fieldId);
+			let co = new WCheck(id, '');
+			co.classStyle = CSS.FORM_CTRL;
+			this.currRow.push({ 'id': id, 'label': label, 'component': co});
+			return this;
+		}
+
+		addBlankField(label?: string, classStyle?: string, style?: string | WStyle): this {
+			let co = new WContainer('', classStyle, style);
+			this.currRow.push({ 'id': '', 'label': label, 'component': co, 'classStyle': classStyle, 'style': style });
+			return this;
+		}
+
+		addInternalField(fieldId: string, value?: any): this {
+			if (value === undefined) value = null;
+			this.currRow.push({ 'id': this.subId(fieldId), 'value': value});
+			return this;
+		}
+
+		addComponent(fieldId: string, label: string, component: WComponent): this {
+			if (!component) return this;
+			if (fieldId) {
+				component.id = this.subId(fieldId);
+				this.currRow.push({ 'id': this.subId(fieldId), 'label': label, 'component': component });
+			}
+			else {
+				component.id = '';
+				this.currRow.push({ 'id': '', 'label': label, 'component': component });
+			}
+			return this;
+		}
+
+		protected componentDidMount(): void {
+			this.main = new WContainer(this.id + '-c');
+			for (let i = 0; i < this.rows.length; i++) {
+				let w = this.roww[i];
+				this.main.addRow(WUX.cls(w.type, w.classStyle, w.style), WUX.style(w.style));
+				
+				let row = this.rows[i];
+				
+				// Calcolo colonne effettive
+				let cols = 0;
+				for (let j = 0; j < row.length; j++) {
+					let f = row[j];
+					if(!f.component) continue;
+					cols += f.span && f.span > 0 ? f.span : 1;
+				}
+				let g = !!CSS.FORM_GROUP;
+				for (let j = 0; j < row.length; j++) {
+					let f = row[j];
+					if(!f.component) continue;
+					
+					let cs = Math.floor(12 / cols);
+					if (cs < 1) cs = 1;
+					if ((cs == 1 && cols < 11) && (j == 0 || j == cols - 1)) cs = 2;
+					if (f.span && f.span > 0) cs = cs * f.span;
+					this.main.addCol('' + cs);
+					
+					f.component.setState(f.value);
+					if(f.component instanceof WCheck) {
+						if (!this.checkboxStyle) {
+							let s = getComputedStyle(this.context).getPropertyValue('font-size');
+							let ch = Math.round(0.8 * parseInt(s));
+							if(isNaN(ch) || ch < 18) ch = 18;
+							this.checkboxStyle = 'height:' + ch + 'px;';
+						}
+						f.component.style = this.checkboxStyle;
+					}
+					
+					if(f.label && !f.labelComp) {
+						let l = new WLabel(f.id + '-l', f.label, '', f.classStyle);
+						f.labelComp = l.for(f.id);
+					}
+					
+					if(g) {
+						this.main.addGroup({classStyle: CSS.FORM_GROUP}, f.labelComp, f.component);
+					}
+					else {
+						this.main.add(f.labelComp);
+						this.main.add(f.component);
+					}
+				}
+			}
+			this.main.mount(this.root);
+		}
+
+		componentWillUnmount(): void {
+			if(!this.main) this.main.unmount();
+		}
+
+		clear(): this {
+			if (this.debug) console.log('WUX.WFormPanel.clear');
+			for (let i = 0; i < this.rows.length; i++) {
+				let row = this.rows[i];
+				for (let j = 0; j < row.length; j++) {
+					let f = row[j];
+					if(f.component) f.component.setState(null);
+					f.value = null;
+				}
+			}
+			return this;
+		}
+
+		setValue(fid: string, v: any, updState: boolean = true): this {
+			let f = this.getField(fid);
+			if(!f) return this;
+			if(f.component) f.component.setState(v);
+			f.value = v;
+			if (updState) {
+				if (!this.state) this.state = {};
+				this.state[fid] = v;
+			}
+			return this;
+		}
+
+		getValue(fid: string | WField): any {
+			let f = typeof fid == 'string' ? this.getField(fid) : fid;
+			if(!f) return null;
+			if(f.component) return f.component.getState();
+			return f.value;
+		}
+
+		getValues(): any {
+			let r = {};
+			for (let i = 0; i < this.rows.length; i++) {
+				let row = this.rows[i];
+				for (let j = 0; j < row.length; j++) {
+					let f = row[j];
+					r[this.ripId(f.id)] = f.component ? f.component.getState() : f.value;
+				}
+			}
+			return r;
+		}
+
+		getState() {
+			this.state = this.getValues();
+			return this.state;
+		}
+
+		protected updateState(nextState: any): void {
+			super.updateState(nextState);
+			if (!nextState || WUtil.isEmpty(nextState)) {
+				this.clear();
+			}
+			else {
+				this.updateView();
+			}
+		}
+
+		protected updateView() {
+			if (this.debug) console.log('WUX.WFormPanel.updateView()');
+			if (!this.state) {
+				this.clear();
+				return;
+			}
+			for (let id in this.state) {
+				this.setValue(id, this.state[id], false);
+			}
+		}
+	}
 }

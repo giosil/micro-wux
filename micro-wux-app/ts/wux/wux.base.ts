@@ -29,7 +29,7 @@ class WuxDOM {
 	static onUnmount(handler: (e: WUX.WEvent) => any) {
 		WuxDOM.onUnmountHandlers.push(handler);
 	}
-	private static lastCtx: HTMLElement;
+	private static lastCtx: Element;
 
 	static render(component: WUX.WElement, node?: WUX.WNode, before?: (n?: WUX.WNode) => any, after?: (n?: WUX.WNode) => any): void {
 		if (WUX.debug) console.log('WuxDOM.render ' + WUX.str(component) + ' on ' + WUX.str(node) + '...');
@@ -47,7 +47,7 @@ class WuxDOM {
 			}
 		})
 	}
-	static mount(e: WUX.WElement, node?: WUX.WNode): HTMLElement {
+	static mount(e: WUX.WElement, node?: WUX.WNode): Element {
 		if (!node) node = WuxDOM.lastCtx ? WuxDOM.lastCtx : document.getElementById('view-root');
 		if (WUX.debug) console.log('WuxDOM.mount ' + WUX.str(e) + ' on ' + WUX.str(node) + '...');
 		if (e == null) {
@@ -64,7 +64,7 @@ class WuxDOM {
 			e.mount(ctx);
 			wuxRegister(ctx, e);
 		}
-		else if (e instanceof HTMLElement) {
+		else if (e instanceof Element) {
 			ctx.append(e);
 		}
 		else {
@@ -75,7 +75,7 @@ class WuxDOM {
 		if (WUX.debug) console.log('WuxDOM.mount ' + WUX.str(e) + ' on ' + WUX.str(node) + ' completed.');
 		return ctx;
 	};
-	static unmount(node?: WUX.WNode): HTMLElement {
+	static unmount(node?: WUX.WNode): Element {
 		if (!node) node = WuxDOM.lastCtx ? WuxDOM.lastCtx : document.getElementById('view-root');
 		if (WUX.debug) console.log('WuxDOM.unmount ' + WUX.str(node) + '...');
 		let ctx = typeof node == 'string' ? (node.indexOf('#') == 0) ? document.getElementById(node.substring(1)) : document.getElementById(node) : node;
@@ -94,8 +94,8 @@ class WuxDOM {
 		}
 		return ctx;
 	}
-	static replace(o: WUX.WElement, e?: WUX.WElement): HTMLElement {
-		let node: HTMLElement;
+	static replace(o: WUX.WElement, e?: WUX.WElement): Element {
+		let node: Element;
 		if (!e) {
 			e = o;
 			o = undefined;
@@ -129,9 +129,9 @@ class WuxDOM {
 // WUX Base
 namespace WUX {
 
-	export type WElement = string | HTMLElement | WComponent;
+	export type WElement = string | Element | WComponent;
 
-	export type WNode = string | HTMLElement;
+	export type WNode = string | Element;
 
 	export let debug: boolean = false;
 
@@ -144,20 +144,76 @@ namespace WUX {
 		/** Locale setting */
 		locale: string;
 		/** Global init function */
-		init(callback: () => any);
+		init(callback: () => any): void;
 		/** Shared data */
 		setData(key: string, data: any, dontTrigger?: boolean): void;
 		getData(key: string, def?: any): any;
-		onDataChanged(key: string, callback: (data: any) => any);
+		onDataChanged(key: string, callback: (data: any) => any): void;
 	}
 
 	/** Event interface */
 	export interface WEvent {
 		component: WComponent;
-		element: HTMLElement
+		element: Element
 		target: any;
 		type: string;
 		data?: any;
+	}
+
+	/** WWrapper interface */
+	export interface WWrapper {
+		id?: string;
+		type?: string;
+		classStyle?: string;
+		style?: string | WStyle;
+		attributes?: string;
+		begin?: string;
+		wrapper?: WWrapper;
+		end?: string;
+		title?: string;
+		element?: Element;
+	}
+
+	/** WField interface */
+	export interface WField {
+		id: string;
+		label?: string;
+		classStyle?: string;
+		style?: string | WStyle;
+		attributes?: string;
+		span?: number;
+		value?: any;
+		element?: Element;
+		labelComp?: WComponent;
+		component?: WComponent;
+		required?: boolean;
+		readonly?: boolean;
+		enabled?: boolean;
+		visible?: boolean;
+	}
+
+	/** WEntity interface */
+	export interface WEntity {
+		id: any;
+		text?: string;
+		code?: string;
+		group?: any;
+		type?: any;
+		reference?: any;
+		enabled?: boolean;
+		marked?: boolean;
+		date?: Date;
+		notBefore?: Date;
+		expires?: Date;
+		icon?: string;
+		color?: string;
+		value?: number;
+	}
+	
+	/** WISelectable interface */
+	export interface WISelectable extends WComponent {
+		options: Array<string | WEntity>;
+		select(i: number): this;
 	}
 
 	/**
@@ -176,8 +232,8 @@ namespace WUX {
 		rootTag = 'div';
 
 		// Internal attributes
-		protected context: HTMLElement;
-		protected root: HTMLElement;
+		protected context: Element;
+		protected root: Element;
 		protected internal: WComponent;
 		protected props: P;
 		protected state: S;
@@ -197,12 +253,12 @@ namespace WUX {
 		// Event handlers
 		protected handlers: { [event: string]: ((e?: any) => any)[] } = {};
 
-		constructor(he?: HTMLElement);
+		constructor(he?: Element);
 		constructor(id?: string, name?: string, props?: P, classStyle?: string, style?: string | WStyle, attributes?: string | object);
-		constructor(id?: string | HTMLElement, name?: string, props?: P, classStyle?: string, style?: string | WStyle, attributes?: string | object) {
+		constructor(id?: string | Element, name?: string, props?: P, classStyle?: string, style?: string | WStyle, attributes?: string | object) {
 			this.cuid = Math.floor(Math.random() * 1000000000);
-			if (id instanceof HTMLElement) {
-				this.root = id as HTMLElement;
+			if (id instanceof Element) {
+				this.root = id as Element;
 				if (this.root) this.mounted = true;
 				if (this.debug) console.log('[' + str(this) + '] new wrapper root=' + str(this.root));
 			}
@@ -229,7 +285,7 @@ namespace WUX {
 		set visible(b: boolean) {
 			this._visible = b;
 			if (this.internal) this.internal.visible = b;
-			if (this.root) {
+			if (this.root instanceof HTMLElement) {
 				if (this._visible) this.root.style.display = "block"; else this.root.style.display = "none";
 			}
 		}
@@ -324,13 +380,13 @@ namespace WUX {
 
 		focus(): this {
 			if (this.internal) this.internal.focus();
-			if (this.root) this.root.focus();
+			if (this.root instanceof HTMLElement) this.root.focus();
 			return this;
 		}
 
 		blur(): this {
 			if (this.internal) this.internal.blur();
-			if (this.root) this.root.blur();
+			if (this.root instanceof HTMLElement) this.root.blur();
 			return this;
 		}
 
@@ -339,10 +395,10 @@ namespace WUX {
 			return this;
 		}
 
-		getContext(): HTMLElement {
+		getContext(): Element {
 			return this.context;
 		}
-		getRoot(): HTMLElement {
+		getRoot(): Element {
 			if (!this.root && this.internal) return this.internal.getRoot();
 			if (!this.root) {
 				if (this.id) {
@@ -470,7 +526,7 @@ namespace WUX {
 			return this;
 		}
 
-		mount(context?: HTMLElement): this {
+		mount(context?: Element): this {
 			if (this.debug) console.log('[' + str(this) + '] mount ctx=' + str(context) + ' root=' + str(this.root), this.state, this.props);
 			if (!this.id) {
 				if (this.root) {
@@ -514,17 +570,17 @@ namespace WUX {
 								}
 							}
 						}
-						else if (r instanceof HTMLElement) {
+						else if (r instanceof Element) {
 							this.context.append(r);
-							if (!this.root) this.root = r as HTMLElement;
+							if (!this.root) this.root = r as Element;
 						}
 						else {
 							let p = this.context.innerHTML;
 							if (!p) p = '';
 							this.context.innerHTML = p + r;
 							let lc = this.context.lastChild;
-							if (lc instanceof HTMLElement) {
-								this.root = lc as HTMLElement;
+							if (lc instanceof Element) {
+								this.root = lc as Element;
 							}
 							if (!this.root) this.root = this.id ? document.getElementById(this.id) : this.context;
 						}
@@ -539,7 +595,7 @@ namespace WUX {
 						this.internal.visible = false;
 					}
 					else {
-						this.root.style.display = 'none';
+						if(this.root instanceof HTMLElement) this.root.style.display = 'none';
 					}
 				}
 				if (!this._enabled) {
@@ -765,7 +821,7 @@ namespace WUX {
 
 	export function getId(e: any): string {
 		if (!e) return;
-		if (e instanceof HTMLElement) return (e as HTMLElement).id;
+		if (e instanceof Element) return (e as Element).id;
 		if (e instanceof WComponent) return (e as WComponent).id;
 		if (typeof e == 'string') {
 			if (e.indexOf('<') < 0) return e.indexOf('#') == 0 ? e.substring(1) : e;
@@ -899,8 +955,8 @@ namespace WUX {
 			if (!wcid) return wcdn;
 			return wcdn + '(' + wcid + ')';
 		}
-		if (a instanceof HTMLElement) {
-			return 'HTMLElement#' + a.id;
+		if (a instanceof Element) {
+			return 'Element#' + a.id;
 		}
 		if (typeof a == 'object') return JSON.stringify(a);
 		return a + '';
@@ -915,8 +971,8 @@ namespace WUX {
 			if (!root) return WUX.getTagName(root);
 			return '';
 		}
-		else if (c instanceof HTMLElement) {
-			return c.tagName;
+		else if (c instanceof Element) {
+			return c.tagName.toLowerCase();
 		}
 		else {
 			let s = '' + c;
@@ -1231,27 +1287,27 @@ namespace WUX {
 		return r.trim();
 	}
 
-	export function addClassOf(e: HTMLElement, name: string) {
+	export function addClassOf(e: Element, name: string) {
 		if (!e) return;
 		e.setAttribute('class', addClass(e.getAttribute('class'), name));
 	}
 
-	export function removeClassOf(e: HTMLElement, name: string) {
+	export function removeClassOf(e: Element, name: string) {
 		if (!e) return;
 		e.setAttribute('class', removeClass(e.getAttribute('class'), name));
 	}
 
-	export function toggleClassOf(e: HTMLElement, name: string) {
+	export function toggleClassOf(e: Element, name: string) {
 		if (!e) return;
 		e.setAttribute('class', toggleClass(e.getAttribute('class'), name));
 	}
 
-	export function setCss(e: WComponent | HTMLElement, ...a: (string | WStyle)[]): WComponent | HTMLElement {
+	export function setCss(e: WComponent | Element, ...a: (string | WStyle)[]): WComponent | Element {
 		if (!e || !a || !a.length) return e;
 		if (e instanceof WComponent) {
 			e.css(...a);
 		}
-		else if (e instanceof HTMLElement) {
+		else if (e instanceof Element) {
 			let s = css(...a);
 			let c = cls(...a);
 			if (c) addClassOf(e, c);
@@ -1308,5 +1364,567 @@ namespace WUX {
 		if (tagName == 'input') return bca[0] + r + bca[2];
 		r += '</' + tagName + '>';
 		return bca[0] + r + bca[2];
+	}
+	
+	/**
+	 * Utilities
+	 */
+	export class WUtil {
+		static toArray(a: any): any[] {
+			if (a instanceof WComponent) a = a.getState();
+			if (a == null) return [];
+			if (Array.isArray(a)) return a as any[];
+			let r = [];
+			r.push(a);
+			return r;
+		}
+
+		static toArrayNumber(a: any, nz?: boolean): number[] {
+			if (a instanceof WComponent) a = a.getState();
+			if (a == null) return [];
+			let r: number[] = [];
+			if (Array.isArray(a)) {
+				for (let e of a) {
+					let n = WUtil.toNumber(e);
+					if (nz && !n) continue;
+					r.push(n);
+				}
+			}
+			else {
+				let n = WUtil.toNumber(a);
+				if (nz && !n) return r;
+				r.push(n);
+			}
+			return r;
+		}
+
+		static toArrayString(a: any, ne?: boolean): string[] {
+			if (a instanceof WComponent) a = a.getState();
+			if (a == null) return [];
+			let r: string[] = [];
+			if (Array.isArray(a)) {
+				for (let e of a) {
+					let s = WUtil.toString(e);
+					if (ne && !s) continue;
+					r.push(s);
+				}
+			}
+			else {
+				let s = WUtil.toString(a);
+				if (ne && !s) return r;
+				r.push(WUtil.toString(a));
+			}
+			return r;
+		}
+
+		static splitNumbers(a: any, s: string): number[] {
+			if (!a) return [];
+			let sa = WUtil.toString(a);
+			let aos = sa.split(s);
+			let r: number[] = [];
+			for (let e of aos) {
+				r.push(WUtil.toNumber(e));
+			}
+			return r;
+		}
+
+		static toObject<T>(a: any, d?: T): T {
+			if (a instanceof WComponent) a = a.getState();
+			if (a == null) return d;
+			if (typeof a == 'object') return a as T;
+			return d;
+		}
+
+		static toString(a: any, d: string = ''): string {
+			if (a instanceof WComponent) a = a.getState();
+			if (a == null) return d;
+			if (typeof a == 'string') return a;
+			if (a instanceof Date) return WUX.formatDate(a);
+			if (typeof a == 'object' && a.id != undefined) return WUtil.toString(a.id, d);
+			if (Array.isArray(a) && a.length) return WUtil.toString(a[0], d);
+			return '' + a;
+		}
+
+		static toText(a: any, d: string = ''): string {
+			let r = WUtil.toString(a, d);
+			return r.replace('<', '&lt;').replace('>', '&gt;');
+		}
+
+		static toNumber(a: any, d: number = 0): number {
+			if (a instanceof WComponent) a = a.getState();
+			if (a == null) return d;
+			if (typeof a == 'number') return a;
+			if (a instanceof Date) return a.getFullYear() * 10000 + (a.getMonth() + 1) * 100 + a.getDate();
+			if (typeof a == 'object' && a.id != undefined) return WUtil.toNumber(a.id, d);
+			if (Array.isArray(a) && a.length) return WUtil.toNumber(a[0], d);
+			let s = ('' + a).trim();
+			if (s.indexOf('.') >= 0 && s.indexOf(',') >= 0) s = s.replace('.', '');
+			s = s.replace(',', '.');
+			let n = s.indexOf('.') >= d ? parseFloat(s) : parseInt(s);
+			return isNaN(n) ? d : n; 
+		}
+
+		static toInt(a: any, d: number = 0): number {
+			if (a instanceof WComponent) a = a.getState();
+			if (a == null) return d;
+			if (typeof a == 'number') return Math.floor(a);
+			if (a instanceof Date) return a.getFullYear() * 10000 + (a.getMonth() + 1) * 100 + a.getDate();
+			if (typeof a == 'object' && a.id != undefined) return WUtil.toInt(a.id, d);
+			if (Array.isArray(a) && a.length) return WUtil.toInt(a[0], d);
+			let s = ('' + a).replace(',', '.');
+			let n = parseInt(s);
+			return isNaN(n) ? d : n;
+		}
+
+		static toIntTime(a: any, d: number = 0): number {
+			if (a instanceof WComponent) a = a.getState();
+			if (a == null) return d;
+			if (typeof a == 'number') a;
+			if (a instanceof Date) return a.getHours() * 100 + a.getMinutes();
+			if (Array.isArray(a) && a.length) return WUtil.toIntTime(a[0], d);
+			let s = ('' + a).replace(':', '').replace('.', '').replace(',', '');
+			let n = parseInt(s);
+			return isNaN(n) ? d : n;
+		}
+
+		static isNumeric(a: any): a is string | number {
+			return !isNaN(a);
+		}
+
+		static checkEmail(e: any): string {
+			if(!e) return '';
+			let s = WUtil.toString(e);
+			if(!s) return '';
+			if(s.length < 5) return '';
+			let a = s.indexOf('@');
+			if(a <= 0) return '';
+			let d = s.lastIndexOf('.');
+			if(d < a) return '';
+			return s.trim().toLowerCase();
+		}
+
+		static starts(a: any, s: string): boolean {
+			if (!a || s == null) return false;
+			return WUtil.toString(a).indexOf(s) == 0;
+		}
+
+		static ends(a: any, s: string): boolean {
+			if (!a || s == null) return false;
+			let t = WUtil.toString(a);
+			let i = t.lastIndexOf(s);
+			if (i < 0) return false;
+			return i == t.length - s.length;
+		}
+
+		static isEmpty(a: any): boolean {
+			if (!a) return true;
+			if (Array.isArray(a) && !a.length) return true;
+			if (typeof a == 'object') {
+				let r = 0;
+				for (let k in a) if (a.hasOwnProperty(k)) return false;
+				return true;
+			}
+			return false;
+		}
+
+		static toBoolean(a: any, d: boolean = false): boolean {
+			if (a instanceof WComponent) a = a.getState();
+			if (a == null) return d;
+			if (typeof a == 'boolean') return a;
+			if (typeof a == 'string' && a.length) return '1YyTtSs'.indexOf(a.charAt(0)) >= 0;
+			return !!d;
+		}
+
+		static toDate(a: any, d?: Date): Date {
+			if (a instanceof WComponent) a = a.getState();
+			if (a == null) return d;
+			if (a instanceof Date) return a;
+			if (typeof a == 'number') {
+				if (a < 10000101) return d;
+				return new Date(a / 10000, ((a % 10000) / 100) - 1, (a % 10000) % 100);
+			}
+			if (typeof a == 'string') {
+				if (a.length < 8) return d;
+				// WDD, DD/MM/YYYY
+				let sd = a.indexOf(',');
+				if (sd >= 0) a = a.substring(sd + 1);
+				if (a.indexOf('-') > 3) return new Date(a.trim());
+				if (this.isNumeric(a)) {
+					let n = parseInt(a as string);
+					if (n < 10000101) return d;
+					return new Date(n / 10000, ((n % 10000) / 100) - 1, (n % 10000) % 100);
+				}
+				return new Date(a.trim().replace(/(\d{1,2}).(\d{1,2}).(\d{4})/, '$3-$2-$1'));
+			}
+			return d;
+		}
+
+		static getWeek(a?: any): number {
+			let d: Date;
+			if (a instanceof Date) {
+				// Clonare la data altrimenti verra' modificata
+				d = new Date(a.getTime());
+			}
+			else {
+				d = WUtil.toDate(a);
+			}
+			if (!d) d = new Date();
+			d.setHours(0, 0, 0, 0);
+			// Thursday in current week decides the year.
+			d.setDate(d.getDate() + 3 - (d.getDay() + 6) % 7);
+			// January 4 is always in week 1.
+			var w1 = new Date(d.getFullYear(), 0, 4);
+			// Adjust to Thursday in week 1 and count number of weeks from date to week1.
+			return 1 + Math.round(((d.getTime() - w1.getTime()) / 86400000 - 3 + (w1.getDay() + 6) % 7) / 7);
+		}
+
+		static getParam(name: string, url?: string): string {
+			if (!url) url = window.location.href;
+			name = name.replace(/[\[\]]/g, "\\$&");
+			var regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)'), results = regex.exec(url);
+			if (!results) return '';
+			if (!results[2]) return '';
+			return decodeURIComponent(results[2].replace(/\+/g, ' '));
+		}
+
+		static size(a: any): number {
+			if (!a) return 0;
+			if (Array.isArray(a)) return a.length;
+			if (typeof a == 'object') {
+				let r = 0;
+				for (let k in a) if (a.hasOwnProperty(k)) r++;
+				return r;
+			}
+			return 0;
+		}
+
+		static setValue(a: any, k: string, v: any): any {
+			if (typeof a == 'object') a[k] = v;
+			return a;
+		}
+
+		static getValue(a: any, k: string, d?: any): any {
+			if (!k) return d;
+			if (Array.isArray(a) && a.length) {
+				if (k == '-1') {
+					return WUtil.getLast(a, d);
+				}
+				else if (WUtil.isNumeric(k)) {
+					return WUtil.getItem(a, WUtil.toInt(k), d);
+				}
+				else {
+					return WUtil.getValue(a[0], k, d);
+				}
+			}
+			if (typeof a == 'object') {
+				let sep = k.indexOf('.');
+				if (a[k] == null && sep > 0) {
+					let sub = k.substring(0, sep);
+					if (a[sub] == null) return d;
+					return WUtil.getValue(a[sub], k.substring(sep + 1), d);
+				}
+				return a[k] == null ? d : a[k];
+			}
+			return d;
+		}
+
+		static getItem(a: any, i: number, d?: any): any {
+			if (i < 0) return d;
+			if (Array.isArray(a)) {
+				if (a.length > i) {
+					let r = a[i];
+					return r == null ? d : r;
+				}
+				return d;
+			}
+			return d;
+		}
+
+		static getFirst(a: any, d?: any): any {
+			if (Array.isArray(a)) {
+				if (a.length > 0) {
+					let r = a[0];
+					return r == null ? d : r;
+				}
+				return d;
+			}
+			return d;
+		}
+
+		static getLast(a: any, d?: any): any {
+			if (Array.isArray(a)) {
+				if (a.length > 0) {
+					let r = a[a.length - 1];
+					return r == null ? d : r;
+				}
+				return d;
+			}
+			return d;
+		}
+
+		static getNumber(a: any, k: string, d?: number): number {
+			return WUtil.toNumber(WUtil.getValue(a, k, d));
+		}
+
+		static getInt(a: any, k: string, d?: number): number {
+			return WUtil.toInt(WUtil.getValue(a, k, d));
+		}
+
+		static getString(a: any, k: string, d?: string, f?: string): string {
+			let v = WUtil.getValue(a, k);
+			if (v == null) return d;
+			if (!f) return WUtil.toString(v);
+			if (f == '?') {
+				if (typeof v == 'number') {
+					return WUX.formatNum(v);
+				}
+				else {
+					return WUtil.toString(v);
+				}
+			}
+			if (f == 'c') return WUX.formatCurr(v);
+			if (f == 'c5') return WUX.formatCurr5(v);
+			if (f == 'n') return WUX.formatNum(v);
+			if (f == 'n2') return WUX.formatNum2(v);
+			if (f == 'm') return WUX.formatMonth(v);
+			if (f == 'd') return WUX.formatDate(v);
+			if (f == 'dt') return WUX.formatDateTime(v);
+			if (f == 't') return WUX.formatTime(v);
+			return WUtil.toString(v);
+		}
+
+		static getText(a: any, k: string, d?: string): string {
+			return WUtil.toText(WUtil.getValue(a, k, d));
+		}
+
+		static getBoolean(a: any, k: string, d?: boolean): boolean {
+			return WUtil.toBoolean(WUtil.getValue(a, k, d));
+		}
+
+		static getDate(a: any, k: string, d?: Date): Date {
+			return WUtil.toDate(WUtil.getValue(a, k, d));
+		}
+
+		static getArray(a: any, k: string): any[] {
+			return WUtil.toArray(WUtil.getValue(a, k));
+		}
+
+		static getArrayNumber(a: any, k: string, nz?: boolean): number[] {
+			return WUtil.toArrayNumber(WUtil.getValue(a, k), nz);
+		}
+
+		static getArrayString(a: any, k: string, ne?: boolean): string[] {
+			return WUtil.toArrayString(WUtil.getValue(a, k), ne);
+		}
+
+		static getObject<T>(a: any, k: string, n?: boolean): T {
+			let r = WUtil.toObject<T>(WUtil.getValue(a, k));
+			if (!r && n) return {} as T;
+			return r;
+		}
+
+		static sort(a: any, t: boolean = true, k?: string): any[] {
+			if (!a) return [];
+			let array = WUtil.toArray(a);
+			if (!k) {
+				let r = array.sort();
+				return t ? r : r.reverse();
+			}
+			let r = array.sort(function (a, b) {
+				let x = WUtil.getValue(a, k); let y = WUtil.getValue(b, k);
+				return ((x < y) ? -1 : ((x > y) ? 1 : 0));
+			});
+			return t ? r : r.reverse();
+		}
+
+		static find(a: any, k: any, v: any): any {
+			if (!a || !k) return null;
+			let y = WUtil.toArray(a);
+			for (let i of y) {
+				let w = WUtil.getValue(i, k);
+				if (w instanceof Date && v instanceof Date) {
+					if (w.getTime() == v.getTime()) return i;
+				}
+				if (w == v) return i;
+			}
+			return null;
+		}
+
+		static indexOf(a: any, k: any, v: any): number {
+			if (!a || !k) return -1;
+			let y = WUtil.toArray(a);
+			for (let i = 0; i < y.length; i++) {
+				let w = WUtil.getValue(y[i], k);
+				if (w instanceof Date && v instanceof Date) {
+					if (w.getTime() == v.getTime()) return i;
+				}
+				if (w == v) return i;
+			}
+			return -1;
+		}
+
+		static isSameDate(a: Date, b: Date): boolean {
+			let na = this.toNumber(a);
+			let nb = this.toNumber(b);
+			if (na == nb) return true;
+			return false;
+		}
+
+		static indexOfDate(a: Date[], v: Date): number {
+			if (!a || !v) return -1;
+			let vi = WUtil.toNumber(v);
+			for (let i = 0; i < a.length; i++) {
+				if (!a[i]) continue;
+				let ai = WUtil.toNumber(a[i]);
+				if (ai == vi) return i;
+			}
+			return -1;
+		}
+
+		static round2(a: any): number {
+			if (a == null) return 0;
+			let n = WUtil.toNumber(a);
+			return (Math.round(n * 100) / 100);
+		}
+
+		static floor2(a: any): number {
+			if (a == null) return 0;
+			let n = WUtil.toNumber(a);
+			return (Math.floor(n * 100) / 100);
+		}
+
+		static ceil2(a: any): number {
+			if (a == null) return 0;
+			let n = WUtil.toNumber(a);
+			return (Math.ceil(n * 100) / 100);
+		}
+
+		static compare2(a: any, b: any): number {
+			if (!a && !b) return 0;
+			let n = Math.round(WUtil.toNumber(a) * 100);
+			let m = Math.round(WUtil.toNumber(b) * 100);
+			if (n == m) return 0;
+			return n > m ? 1 : -1;
+		}
+
+		static compare5(a: any, b: any): number {
+			if (!a && !b) return 0;
+			let n = Math.round(WUtil.toNumber(a) * 10000);
+			let m = Math.round(WUtil.toNumber(b) * 10000);
+			if (n == m) return 0;
+			return n > m ? 1 : -1;
+		}
+
+		static getCurrDate(d?: number, m?: number, y?: number, f?: boolean, l?: boolean): Date {
+			let r = new Date();
+			r.setHours(0, 0, 0, 0);
+			if (d) r.setDate(r.getDate() + d);
+			if (m) r.setMonth(r.getMonth() + m);
+			if (y) r.setFullYear(r.getFullYear() + y);
+			if (f) r.setDate(1);
+			if (l) {
+				r.setMonth(r.getMonth() + 1);
+				r.setDate(0);
+			}
+			return r;
+		}
+
+		static calcDate(r: Date, d?: number, m?: number, y?: number, f?: boolean, l?: boolean): Date {
+			r = r ? new Date(r.getTime()) : new Date();
+			r.setHours(0, 0, 0, 0);
+			if (d) r.setDate(r.getDate() + d);
+			if (m) r.setMonth(r.getMonth() + m);
+			if (y) r.setFullYear(r.getFullYear() + y);
+			if (f) r.setDate(1);
+			if (l) {
+				r.setMonth(r.getMonth() + 1);
+				r.setDate(0);
+			}
+			return r;
+		}
+
+		static timestamp(dt?: any): string {
+			let d = dt ? WUtil.toDate(dt) : new Date();
+			if (!d) d = new Date();
+			let sy = '' + d.getFullYear();
+			let nm = d.getMonth() + 1;
+			let sm = nm < 10 ? '0' + nm : '' + nm;
+			let nd = d.getDate();
+			let sd = nd < 10 ? '0' + nd : '' + nd;
+			let nh = d.getHours();
+			let sh = nh < 10 ? '0' + nh : '' + nh;
+			let np = d.getMinutes();
+			let sp = np < 10 ? '0' + np : '' + np;
+			let ns = d.getSeconds();
+			let ss = ns < 10 ? '0' + ns : '' + ns;
+			return sy + sm + sd + sh + sp + ss;
+		}
+
+		static nvl(...v: any[]): any {
+			if (!v || !v) return;
+			for (let e of v) {
+				if (!e) return e;
+			}
+			return v[0];
+		}
+
+		static eqValues(o1: object, o2: object, ...keys: any[]): boolean {
+			if (!o1 && !o2) return true;
+			if (!o1 || !o2) return false;
+			for (let k of keys) {
+				if (o1[k] != o2[k]) return false;
+			}
+			return true;
+		}
+
+		static col(tuples: any[], i: number, d?: any): any[] {
+			let r: any[] = [];
+			if (!tuples || !tuples.length) return r;
+			for (let e of tuples) {
+				r.push(WUtil.getItem(e, i, d));
+			}
+			return r;
+		}
+
+		static getSortedKeys(map: object): any[] {
+			if (!map) return [];
+			let r = [];
+			for (var key in map) {
+				if (map.hasOwnProperty(key)) r.push(key);
+			}
+			return r.sort();
+		}
+
+		static diffMinutes(ah: any, al: any): number {
+			let dh = WUtil.toDate(ah);
+			let dl = WUtil.toDate(al);
+			if (!dh) dh = new Date();
+			if (!dl) dl = new Date();
+			return (dh.getTime() - dl.getTime()) / 60000;
+		}
+
+		static diffHours(ah: any, al: any): number {
+			let dh = WUtil.toDate(ah);
+			let dl = WUtil.toDate(al);
+			if (!dh) dh = new Date();
+			if (!dl) dl = new Date();
+			return (dh.getTime() - dl.getTime()) / 3600000;
+		}
+
+		static diffDays(ah: any, al: any): number {
+			let dh = WUtil.toDate(ah);
+			let dl = WUtil.toDate(al);
+			if (!dh) dh = new Date();
+			if (!dl) dl = new Date();
+			let dt = dh.getTime() - dl.getTime();
+			let dv = dt / (3600000 * 24);
+			let rt = dt % (3600000 * 24);
+			let rh = rt / 60000;
+			let r = dv;
+			if (rh > 12) { // Passaggio dall'ora solare all'ora legale...
+				r++;
+			}
+			return r;
+		}
 	}
 }

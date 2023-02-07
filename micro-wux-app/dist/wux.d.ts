@@ -9,29 +9,77 @@ declare class WuxDOM {
     static onUnmount(handler: (e: WUX.WEvent) => any): void;
     private static lastCtx;
     static render(component: WUX.WElement, node?: WUX.WNode, before?: (n?: WUX.WNode) => any, after?: (n?: WUX.WNode) => any): void;
-    static mount(e: WUX.WElement, node?: WUX.WNode): HTMLElement;
-    static unmount(node?: WUX.WNode): HTMLElement;
-    static replace(o: WUX.WElement, e?: WUX.WElement): HTMLElement;
+    static mount(e: WUX.WElement, node?: WUX.WNode): Element;
+    static unmount(node?: WUX.WNode): Element;
+    static replace(o: WUX.WElement, e?: WUX.WElement): Element;
 }
 declare namespace WUX {
-    type WElement = string | HTMLElement | WComponent;
-    type WNode = string | HTMLElement;
+    type WElement = string | Element | WComponent;
+    type WNode = string | Element;
     let debug: boolean;
     let registry: string[];
     const version = "1.0.0";
     interface WGlobal {
         locale: string;
-        init(callback: () => any): any;
+        init(callback: () => any): void;
         setData(key: string, data: any, dontTrigger?: boolean): void;
         getData(key: string, def?: any): any;
-        onDataChanged(key: string, callback: (data: any) => any): any;
+        onDataChanged(key: string, callback: (data: any) => any): void;
     }
     interface WEvent {
         component: WComponent;
-        element: HTMLElement;
+        element: Element;
         target: any;
         type: string;
         data?: any;
+    }
+    interface WWrapper {
+        id?: string;
+        type?: string;
+        classStyle?: string;
+        style?: string | WStyle;
+        attributes?: string;
+        begin?: string;
+        wrapper?: WWrapper;
+        end?: string;
+        title?: string;
+        element?: Element;
+    }
+    interface WField {
+        id: string;
+        label?: string;
+        classStyle?: string;
+        style?: string | WStyle;
+        attributes?: string;
+        span?: number;
+        value?: any;
+        element?: Element;
+        labelComp?: WComponent;
+        component?: WComponent;
+        required?: boolean;
+        readonly?: boolean;
+        enabled?: boolean;
+        visible?: boolean;
+    }
+    interface WEntity {
+        id: any;
+        text?: string;
+        code?: string;
+        group?: any;
+        type?: any;
+        reference?: any;
+        enabled?: boolean;
+        marked?: boolean;
+        date?: Date;
+        notBefore?: Date;
+        expires?: Date;
+        icon?: string;
+        color?: string;
+        value?: number;
+    }
+    interface WISelectable extends WComponent {
+        options: Array<string | WEntity>;
+        select(i: number): this;
     }
     class WComponent<P = any, S = any> {
         id: string;
@@ -43,8 +91,8 @@ declare namespace WUX {
         data: any;
         cuid: number;
         rootTag: string;
-        protected context: HTMLElement;
-        protected root: HTMLElement;
+        protected context: Element;
+        protected root: Element;
         protected internal: WComponent;
         protected props: P;
         protected state: S;
@@ -61,7 +109,7 @@ declare namespace WUX {
         protected handlers: {
             [event: string]: ((e?: any) => any)[];
         };
-        constructor(he?: HTMLElement);
+        constructor(he?: Element);
         constructor(id?: string, name?: string, props?: P, classStyle?: string, style?: string | WStyle, attributes?: string | object);
         get visible(): boolean;
         set visible(b: boolean);
@@ -79,8 +127,8 @@ declare namespace WUX {
         focus(): this;
         blur(): this;
         forceUpdate(callback?: () => any): this;
-        getContext(): HTMLElement;
-        getRoot(): HTMLElement;
+        getContext(): Element;
+        getRoot(): Element;
         getState(): S;
         setState(nextState: S, force?: boolean, callback?: () => any): this;
         getProps(): P;
@@ -97,7 +145,7 @@ declare namespace WUX {
         trigger(eventType: 'click' | 'dblclick' | 'mouseenter' | 'mouseleave' | 'keypress' | 'keydown' | 'keyup' | 'blur' | 'submit' | 'change' | 'focus' | 'resize', ...extraParameters: any[]): this;
         trigger(eventType: string, ...extParams: any[]): this;
         unmount(): this;
-        mount(context?: HTMLElement): this;
+        mount(context?: Element): this;
         componentWillUnmount(): void;
         protected componentWillMount(): void;
         protected render(): any;
@@ -200,25 +248,101 @@ declare namespace WUX {
     function addClass(css: string, name: string): string;
     function removeClass(css: string, name: string): string;
     function toggleClass(css: string, name: string): string;
-    function addClassOf(e: HTMLElement, name: string): void;
-    function removeClassOf(e: HTMLElement, name: string): void;
-    function toggleClassOf(e: HTMLElement, name: string): void;
-    function setCss(e: WComponent | HTMLElement, ...a: (string | WStyle)[]): WComponent | HTMLElement;
+    function addClassOf(e: Element, name: string): void;
+    function removeClassOf(e: Element, name: string): void;
+    function toggleClassOf(e: Element, name: string): void;
+    function setCss(e: WComponent | Element, ...a: (string | WStyle)[]): WComponent | Element;
     function buildIcon(icon: string, before?: string, after?: string, size?: number, cls?: string, title?: string): string;
     function build(tagName: string, inner?: string, css?: string | WStyle, attributes?: string | object, id?: string, classStyle?: string): string;
+    class WUtil {
+        static toArray(a: any): any[];
+        static toArrayNumber(a: any, nz?: boolean): number[];
+        static toArrayString(a: any, ne?: boolean): string[];
+        static splitNumbers(a: any, s: string): number[];
+        static toObject<T>(a: any, d?: T): T;
+        static toString(a: any, d?: string): string;
+        static toText(a: any, d?: string): string;
+        static toNumber(a: any, d?: number): number;
+        static toInt(a: any, d?: number): number;
+        static toIntTime(a: any, d?: number): number;
+        static isNumeric(a: any): a is string | number;
+        static checkEmail(e: any): string;
+        static starts(a: any, s: string): boolean;
+        static ends(a: any, s: string): boolean;
+        static isEmpty(a: any): boolean;
+        static toBoolean(a: any, d?: boolean): boolean;
+        static toDate(a: any, d?: Date): Date;
+        static getWeek(a?: any): number;
+        static getParam(name: string, url?: string): string;
+        static size(a: any): number;
+        static setValue(a: any, k: string, v: any): any;
+        static getValue(a: any, k: string, d?: any): any;
+        static getItem(a: any, i: number, d?: any): any;
+        static getFirst(a: any, d?: any): any;
+        static getLast(a: any, d?: any): any;
+        static getNumber(a: any, k: string, d?: number): number;
+        static getInt(a: any, k: string, d?: number): number;
+        static getString(a: any, k: string, d?: string, f?: string): string;
+        static getText(a: any, k: string, d?: string): string;
+        static getBoolean(a: any, k: string, d?: boolean): boolean;
+        static getDate(a: any, k: string, d?: Date): Date;
+        static getArray(a: any, k: string): any[];
+        static getArrayNumber(a: any, k: string, nz?: boolean): number[];
+        static getArrayString(a: any, k: string, ne?: boolean): string[];
+        static getObject<T>(a: any, k: string, n?: boolean): T;
+        static sort(a: any, t?: boolean, k?: string): any[];
+        static find(a: any, k: any, v: any): any;
+        static indexOf(a: any, k: any, v: any): number;
+        static isSameDate(a: Date, b: Date): boolean;
+        static indexOfDate(a: Date[], v: Date): number;
+        static round2(a: any): number;
+        static floor2(a: any): number;
+        static ceil2(a: any): number;
+        static compare2(a: any, b: any): number;
+        static compare5(a: any, b: any): number;
+        static getCurrDate(d?: number, m?: number, y?: number, f?: boolean, l?: boolean): Date;
+        static calcDate(r: Date, d?: number, m?: number, y?: number, f?: boolean, l?: boolean): Date;
+        static timestamp(dt?: any): string;
+        static nvl(...v: any[]): any;
+        static eqValues(o1: object, o2: object, ...keys: any[]): boolean;
+        static col(tuples: any[], i: number, d?: any): any[];
+        static getSortedKeys(map: object): any[];
+        static diffMinutes(ah: any, al: any): number;
+        static diffHours(ah: any, al: any): number;
+        static diffDays(ah: any, al: any): number;
+    }
 }
 declare namespace WUX {
     let global: WGlobal;
+    class CSS {
+        static readonly FORM = "padding-top: 16px";
+        static readonly FORM_GROUP = "form-group";
+        static readonly FORM_CTRL = "form-control";
+    }
+    function formatDate(a: any, withDay?: boolean, e?: boolean): string;
+    function formatDateTime(a: any, withSec?: boolean, withDay?: boolean, e?: boolean): string;
+    function formatTime(a: any, withSec?: boolean): string;
+    function formatNum2(a: any, nz?: string, z?: string, neg?: string): string;
+    function formatNum(a: any, nz?: string, z?: string, neg?: string): string;
+    function formatCurr(a: any, nz?: string, z?: string, neg?: string): string;
+    function formatCurr5(a: any, nz?: string, z?: string, neg?: string): string;
+    function formatBoolean(a: any): string;
+    function format(a: any): string;
+    function formatDay(d: number, e?: boolean): string;
+    function formatMonth(m: number, e?: boolean, y?: any): string;
 }
 declare namespace WUX {
     class WContainer extends WComponent<string, any> {
+        cint: WComponent[];
         comp: WComponent[];
-        corc: string[];
+        sr_c: string[];
         grid: string[][];
         constructor(id?: string, classStyle?: string, style?: string | WStyle, attributes?: string | object, inline?: boolean, type?: string);
         addRow(classStyle?: string, style?: string | WStyle): WContainer;
         addCol(classStyle?: string, style?: string | WStyle): WContainer;
-        add(component: WComponent): this;
+        add(component: WComponent, constraints?: string): this;
+        addGroup(w: WWrapper, ...ac: WComponent[]): this;
+        addContainer(w: WWrapper, constraints?: string): WContainer;
         protected render(): any;
         protected componentDidMount(): void;
         componentWillUnmount(): void;
@@ -237,6 +361,73 @@ declare namespace WUX {
         protected render(): string;
         protected componentDidMount(): void;
         protected componentWillUpdate(nextProps: any, nextState: any): void;
+    }
+    class WLabel extends WComponent<string, string> {
+        forId: string;
+        constructor(id?: string, text?: string, icon?: string, classStyle?: string, style?: string | WStyle, attributes?: string | object);
+        get icon(): string;
+        set icon(i: string);
+        protected updateState(nextState: string): void;
+        for(e: WElement): this;
+        protected render(): string;
+        protected componentDidMount(): void;
+    }
+    class WInput extends WComponent<string, string> {
+        size: number;
+        label: string;
+        valueType: 's' | 'n' | 'p' | 'c' | 'c5' | 'i' | 'd' | 't' | 'h' | 'b';
+        placeHolder: string;
+        constructor(id?: string, type?: string, size?: number, classStyle?: string, style?: string | WStyle, attributes?: string | object);
+        protected updateState(nextState: string): void;
+        getState(): string;
+        protected render(): string;
+    }
+    class WTextArea extends WComponent<number, string> {
+        constructor(id?: string, rows?: number, classStyle?: string, style?: string | WStyle, attributes?: string | object);
+        protected updateState(nextState: string): void;
+        getState(): string;
+        protected render(): string;
+        protected componentDidMount(): void;
+    }
+    class WButton extends WComponent<string, string> {
+        readonly type: string;
+        constructor(id?: string, text?: string, icon?: string, classStyle?: string, style?: string | WStyle, attributes?: string | object, type?: string);
+        get icon(): string;
+        set icon(i: string);
+        setText(text?: string, icon?: string): void;
+        protected render(): string;
+        protected componentDidMount(): void;
+        protected componentWillUpdate(nextProps: any, nextState: any): void;
+    }
+    class WCheck extends WComponent<boolean, any> {
+        wrapper: WUX.WContainer;
+        value: any;
+        protected _text: string;
+        protected _obs: MutationObserver;
+        constructor(id?: string, text?: string, value?: any, checked?: boolean, classStyle?: string, style?: string | WStyle, attributes?: string | object);
+        get text(): string;
+        set text(s: string);
+        get checked(): boolean;
+        set checked(b: boolean);
+        getState(): any;
+        protected updateProps(nextProps: boolean): void;
+        protected updateState(nextState: any): void;
+        protected render(): string;
+        protected componentDidMount(): void;
+    }
+    class WSelect extends WComponent implements WISelectable {
+        options: Array<string | WEntity>;
+        multiple: boolean;
+        constructor(id?: string, options?: Array<string | WEntity>, multiple?: boolean, classStyle?: string, style?: string | WStyle, attributes?: string | object);
+        getProps(): any;
+        select(i: number): this;
+        addOption(e: string | WEntity, sel?: boolean): this;
+        remOption(e: string | WEntity): this;
+        setOptions(options: Array<string | WEntity>, prevVal?: boolean): this;
+        protected updateState(nextState: any): void;
+        protected render(): string;
+        protected componentDidMount(): void;
+        protected buildOptions(): string;
     }
     class WTable extends WComponent<any, any[]> {
         header: string[];
@@ -258,5 +449,37 @@ declare namespace WUX {
         protected componentDidUpdate(prevProps: any, prevState: any): void;
         protected getType(i: number): string;
         protected buildBody(): void;
+    }
+    class WFormPanel extends WComponent<WField[][], any> {
+        protected title: string;
+        protected rows: WField[][];
+        protected roww: WWrapper[];
+        protected currRow: WField[];
+        protected main: WContainer;
+        protected checkboxStyle: string;
+        constructor(id?: string, title?: string, action?: string);
+        init(): this;
+        focus(): this;
+        first(enabled?: boolean): WField;
+        focusOn(fieldId: string): this;
+        getField(fid: string): WField;
+        addRow(classStyle?: string, style?: string | WStyle, id?: string, attributes?: string | object, type?: string): this;
+        addTextField(fieldId: string, label: string, readonly?: boolean): this;
+        addNoteField(fieldId: string, label: string, rows: number, readonly?: boolean): this;
+        addDateField(fieldId: string, label: string, readonly?: boolean): this;
+        addOptionsField(fieldId: string, label: string, options?: (string | WEntity)[], attributes?: string | object, readonly?: boolean): this;
+        addBooleanField(fieldId: string, label: string): this;
+        addBlankField(label?: string, classStyle?: string, style?: string | WStyle): this;
+        addInternalField(fieldId: string, value?: any): this;
+        addComponent(fieldId: string, label: string, component: WComponent): this;
+        protected componentDidMount(): void;
+        componentWillUnmount(): void;
+        clear(): this;
+        setValue(fid: string, v: any, updState?: boolean): this;
+        getValue(fid: string | WField): any;
+        getValues(): any;
+        getState(): any;
+        protected updateState(nextState: any): void;
+        protected updateView(): void;
     }
 }
