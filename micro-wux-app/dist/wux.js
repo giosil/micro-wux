@@ -2677,7 +2677,6 @@ var WUX;
             var _this = _super.call(this, id ? id : '*', 'WInput', type, classStyle, style, attributes) || this;
             _this.rootTag = 'input';
             _this.size = size;
-            _this.valueType = 's';
             return _this;
         }
         WInput.prototype.updateState = function (nextState) {

@@ -375,7 +375,6 @@ declare namespace WUX {
     class WInput extends WComponent<string, string> {
         size: number;
         label: string;
-        valueType: 's' | 'n' | 'p' | 'c' | 'c5' | 'i' | 'd' | 't' | 'h' | 'b';
         placeHolder: string;
         constructor(id?: string, type?: string, size?: number, classStyle?: string, style?: string | WStyle, attributes?: string | object);
         protected updateState(nextState: string): void;

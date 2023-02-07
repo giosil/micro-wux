@@ -272,8 +272,6 @@ namespace WUX {
 	export class WInput extends WComponent<string, string> {
 		size: number;
 		label: string;
-		/** 's'=string, 'n'=number, 'p'=percentage, 'c'=currency, 'c5'=currency, 'i'=integer, 'd'=date, 't'=date-time, 'h'=time, 'b'=boolean */
-		valueType: 's' | 'n' | 'p' | 'c' | 'c5' | 'i' | 'd' | 't' | 'h' | 'b';
 		placeHolder: string;
 
 		constructor(id?: string, type?: string, size?: number, classStyle?: string, style?: string | WStyle, attributes?: string | object) {
@@ -282,7 +280,6 @@ namespace WUX {
 			this.rootTag = 'input';
 			// WInput init
 			this.size = size;
-			this.valueType = 's';
 		}
 
 		protected updateState(nextState: string) {
