@@ -38,7 +38,7 @@
 	}
 	
 	export class CSS {
-		static readonly FORM = 'padding-top: 16px';
+		static readonly FORM = 'padding-top:16px;';
 		static readonly FORM_GROUP = 'form-group';
 		static readonly FORM_CTRL = 'form-control';
 	}

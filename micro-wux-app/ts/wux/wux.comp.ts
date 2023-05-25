@@ -17,7 +17,7 @@ namespace WUX {
 			this.rootTag = inline ? 'span' : 'div';
 		}
 
-		addRow(classStyle?: string, style?: string | WStyle): WContainer {
+		addRow(classStyle?: string, style?: string | WStyle): this {
 			if(!classStyle) classStyle = 'row';
 			let g: string[] = [];
 			let s = WUX.style(style);
@@ -27,7 +27,7 @@ namespace WUX {
 			return this;
 		}
 
-		addCol(classStyle?: string, style?: string | WStyle): WContainer {
+		addCol(classStyle?: string, style?: string | WStyle): this {
 			if(!classStyle) classStyle = 'col-12';
 			if(!isNaN(parseInt(classStyle))) classStyle = 'col-' + classStyle;
 			if(!this.grid.length) this.addRow();
@@ -85,6 +85,39 @@ namespace WUX {
 			for (let c of ac) {
 				if(c) this.add(c);
 			}
+			return this;
+		}
+
+		addLine(style: string | WStyle, ...ac: WComponent[]): this {
+			let w = new WContainer();
+			w.addRow();
+			if(ac) {
+				let n = '1';
+				if(typeof style != 'string') {
+					n = style.n;
+					if(!n) n = '1';
+				}
+				for (let c of ac) {
+					if(c) w.addCol(n, style).add(c);
+				}
+			}
+			this.add(w);
+			return this;
+		}
+
+		addStack(style: string | WStyle, ...ac: WComponent[]): this {
+			let w = new WContainer();
+			if(ac) {
+				let n = '12';
+				if(typeof style != 'string') {
+					n = style.n;
+					if(!n) n = '12';
+				}
+				for (let c of ac) {
+					if(c) w.addRow().addCol(n, style).add(c);
+				}
+			}
+			this.add(w);
 			return this;
 		}
 

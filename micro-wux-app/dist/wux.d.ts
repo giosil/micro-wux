@@ -315,7 +315,7 @@ declare namespace WUX {
 declare namespace WUX {
     let global: WGlobal;
     class CSS {
-        static readonly FORM = "padding-top: 16px";
+        static readonly FORM = "padding-top:16px;";
         static readonly FORM_GROUP = "form-group";
         static readonly FORM_CTRL = "form-control";
     }
@@ -338,10 +338,12 @@ declare namespace WUX {
         sr_c: string[];
         grid: string[][];
         constructor(id?: string, classStyle?: string, style?: string | WStyle, attributes?: string | object, inline?: boolean, type?: string);
-        addRow(classStyle?: string, style?: string | WStyle): WContainer;
-        addCol(classStyle?: string, style?: string | WStyle): WContainer;
+        addRow(classStyle?: string, style?: string | WStyle): this;
+        addCol(classStyle?: string, style?: string | WStyle): this;
         add(component: WComponent, constraints?: string): this;
         addGroup(w: WWrapper, ...ac: WComponent[]): this;
+        addLine(style: string | WStyle, ...ac: WComponent[]): this;
+        addStack(style: string | WStyle, ...ac: WComponent[]): this;
         addContainer(w: WWrapper, constraints?: string): WContainer;
         protected render(): any;
         protected componentDidMount(): void;

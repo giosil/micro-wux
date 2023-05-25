@@ -2141,7 +2141,7 @@ var WUX;
     var CSS = (function () {
         function CSS() {
         }
-        CSS.FORM = 'padding-top: 16px';
+        CSS.FORM = 'padding-top:16px;';
         CSS.FORM_GROUP = 'form-group';
         CSS.FORM_CTRL = 'form-control';
         return CSS;
@@ -2477,6 +2477,51 @@ var WUX;
                 if (c)
                     this.add(c);
             }
+            return this;
+        };
+        WContainer.prototype.addLine = function (style) {
+            var ac = [];
+            for (var _i = 1; _i < arguments.length; _i++) {
+                ac[_i - 1] = arguments[_i];
+            }
+            var w = new WContainer();
+            w.addRow();
+            if (ac) {
+                var n = '1';
+                if (typeof style != 'string') {
+                    n = style.n;
+                    if (!n)
+                        n = '1';
+                }
+                for (var _a = 0, ac_3 = ac; _a < ac_3.length; _a++) {
+                    var c = ac_3[_a];
+                    if (c)
+                        w.addCol(n, style).add(c);
+                }
+            }
+            this.add(w);
+            return this;
+        };
+        WContainer.prototype.addStack = function (style) {
+            var ac = [];
+            for (var _i = 1; _i < arguments.length; _i++) {
+                ac[_i - 1] = arguments[_i];
+            }
+            var w = new WContainer();
+            if (ac) {
+                var n = '12';
+                if (typeof style != 'string') {
+                    n = style.n;
+                    if (!n)
+                        n = '12';
+                }
+                for (var _a = 0, ac_4 = ac; _a < ac_4.length; _a++) {
+                    var c = ac_4[_a];
+                    if (c)
+                        w.addRow().addCol(n, style).add(c);
+                }
+            }
+            this.add(w);
             return this;
         };
         WContainer.prototype.addContainer = function (w, constraints) {
