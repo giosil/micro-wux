@@ -107,7 +107,7 @@ namespace WUX {
 					let g = this.grid[r];
 					let cm = g.length;
 					if(!cm) continue;
-					inner += '<div ' + this.cs(g[0]) + '>';
+					inner += '<div ' + this.cs(g[0]) + ' id="' + this.subId(r + '_') + '">';
 					for(let c = 1; c < cm; c++) {
 						inner += '<div id="' + this.subId(r + '_' + c) + '" ' + this.cs(g[c]) + '></div>';
 					}
@@ -143,6 +143,34 @@ namespace WUX {
 			let c = cs.substring(0, x);
 			let s = cs.substring(x + 1);
 			return 'class="' + c + '" style="' + s + '"';
+		}
+
+		getElement(r: number, c: number = -1000): Element {
+			if(!this.grid || !this.grid.length) {
+				return null;
+			}
+			if(r < 0) {
+				r = this.grid.length + r;
+				if(r < 0) r = 0;
+			}
+			if(this.grid.length <= r) {
+				return null;
+			}
+			if(c == -1000) {
+				return document.getElementById(this.subId(r + '_'));
+			}
+			let g = this.grid[r];
+			if(!g || !g.length) {
+				return null;
+			}
+			if(c < 0) {
+				c = g.length - c;
+				if(c < 0) c = 0;
+			}
+			if(g.length <= c) {
+				return null;
+			}
+			return document.getElementById(this.subId(r + '_' + c));
 		}
 	}
 	
@@ -229,7 +257,7 @@ namespace WUX {
 			this.root.innerHTML = html;
 		}
 	}
-	
+
 	export class WLabel extends WComponent<string, string> {
 		forId: string;
 
@@ -268,7 +296,7 @@ namespace WUX {
 			if (this._tooltip) this.root.setAttribute('title', this._tooltip);
 		}
 	}
-	
+
 	export class WInput extends WComponent<string, string> {
 		size: number;
 		label: string;
@@ -287,7 +315,7 @@ namespace WUX {
 			super.updateState(nextState);
 			if (this.root) this.root['value'] = nextState;
 		}
-		
+
 		getState(): string {
 			if(this.root) {
 				this.state = this.root['value'];
@@ -322,7 +350,7 @@ namespace WUX {
 			}
 		}
 	}
-	
+
 	export class WTextArea extends WComponent<number, string> {
 		constructor(id?: string, rows?: number, classStyle?: string, style?: string | WStyle, attributes?: string | object) {
 			// WComponent init
@@ -336,7 +364,7 @@ namespace WUX {
 			super.updateState(nextState);
 			if (this.root) this.root['value'] = nextState;
 		}
-		
+
 		getState(): string {
 			if(this.root) {
 				this.state = this.root['value'];
@@ -413,11 +441,12 @@ namespace WUX {
 
 		protected componentWillUpdate(nextProps: any, nextState: any): void {
 			let html = '';
+			if(nextProps == null) nextProps = this.props;
 			if (nextState) {
-				html += WUX.buildIcon(this.props, '', ' ') + nextState;
+				html += WUX.buildIcon(nextProps, '', ' ') + nextState;
 			}
 			else {
-				html += WUX.buildIcon(this.props);
+				html += WUX.buildIcon(nextProps);
 			}
 			this.root.innerHTML = html;
 		}
@@ -667,7 +696,7 @@ namespace WUX {
 		widthsPerc: boolean;
 		hideHeader: boolean;
 		div: string; 
-		
+
 		colStyle: string | WStyle;
 		rowStyle: string | WStyle;
 		headStyle: string | WStyle;
@@ -676,7 +705,11 @@ namespace WUX {
 		col0Style: string | WStyle;
 		/** Last col style */
 		colLStyle: string | WStyle;
-		
+
+		sortable: number[];
+		soId: string[];
+		sortBy: number[];
+
 		constructor(id: string, header: string[], keys?: any[], classStyle?: string, style?: string | WStyle, attributes?: string | object, props?: any) {
 			super(id ? id : '*', 'WTable', props, classStyle, style, attributes);
 			this.rootTag = 'table';
@@ -690,9 +723,16 @@ namespace WUX {
 			}
 			this.widths = [];
 		}
-		
+
 		protected render() {
 			if (!this.shouldBuildRoot()) return undefined;
+			if (this.sortable && this.sortable.length) {
+				this.soId = [];
+				this.sortBy = [];
+				for(let i = 0; i < this.sortable.length; i++) {
+					this.sortBy.push(0);
+				}
+			}
 			let tableClass = 'table';
 			if (this._classStyle) tableClass = this._classStyle.indexOf('table ') >= 0 ? this._classStyle : tableClass + ' ' + this._classStyle;
 			let ts = this.style ? ' style="' + this.style + '"' : '';
@@ -732,7 +772,16 @@ namespace WUX {
 						if (w) x.w = this.widthsPerc ? w + '%' : w; 
 						let t = this.getType(j);
 						if(t == 'w') x.a = 'center';
-						r += '<th' + WUX.buildCss(s, x) + '>' + h + '</th>';
+						
+						let so = this.sortable && this.sortable.indexOf(j) >= 0;
+						if(so) {
+							let aid = this.subId('sort-' + j);
+							this.soId.push(aid);
+							r += '<th' + WUX.buildCss(s, x) + '><a style="cursor:pointer;text-decoration:none !important;" id="' + aid + '">' + h + ' &nbsp;<i class="fa fa-unsorted"></i></a></th>';
+						}
+						else {
+							r += '<th' + WUX.buildCss(s, x) + '>' + h + '</th>';
+						}
 					}
 					r += '</tr></thead>';
 				}
@@ -742,21 +791,51 @@ namespace WUX {
 			if(this.div) r += '</div>';
 			return r;
 		}
-		
+
 		protected componentDidMount(): void {
 			this.buildBody();
+			if(this.soId) {
+				for(let aid of this.soId) {
+					let a = document.getElementById(aid);
+					if(a) {
+						a.onclick = (e: PointerEvent) => {
+							let i = WUX.getId(e.currentTarget);
+							let c = WUtil.toNumber(WUX.lastSub(i), -1);
+							if(c >= 0 && this.keys.length > c) {
+								let h = this.header ? this.header[c] : '';
+								let v = this.sortBy[c];
+								if(!v) {
+									this.sortBy[c] = 1;
+									if(h) a.innerHTML = h + ' &nbsp;<i class="fa fa-sort-asc"></i>';
+								}
+								else if(v == 1) {
+									this.sortBy[c] = -1;
+									if(h) a.innerHTML = h + ' &nbsp;<i class="fa fa-sort-desc"></i>';
+								}
+								else if(v == -1) {
+									this.sortBy[c] = 0;
+									if(h) a.innerHTML = h + ' &nbsp;<i class="fa fa-unsorted"></i>';
+								}
+								if (this.handlers['_sort']) {
+									for (let h of this.handlers['_sort']) h(this.createEvent('_sort', this.sortBy));
+								}
+							}
+						};
+					}
+				}
+			}
 		}
-		
+
 		protected componentDidUpdate(prevProps: any, prevState: any): void {
 			this.buildBody();
 		}
-		
+
 		protected getType(i: number): string {
 			if(!this.types) return '';
 			if(this.types.length <= i) return '';
 			return this.types[i];
 		}
-		
+
 		protected buildBody(): void {
 			let tbody = document.getElementById(this.id + "-b")
 			if(!tbody) return;
@@ -840,8 +919,13 @@ namespace WUX {
 				tbody.innerHTML = b;
 			}
 		}
+
+		onSort(h: (e: WEvent) => any): void {
+			if (!this.handlers['_sort']) this.handlers['_sort'] = [];
+			this.handlers['_sort'].push(h);
+		}
 	}
-	
+
 	export class WFormPanel extends WComponent<WField[][], any> {
 		protected title: string;
 		protected rows: WField[][];

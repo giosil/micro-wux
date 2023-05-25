@@ -209,7 +209,7 @@ namespace WUX {
 		color?: string;
 		value?: number;
 	}
-	
+
 	/** WISelectable interface */
 	export interface WISelectable extends WComponent {
 		options: Array<string | WEntity>;
@@ -437,9 +437,10 @@ namespace WUX {
 			for (let event of arrayEvents) {
 				if (!this.handlers[event]) this.handlers[event] = [];
 				this.handlers[event].push(handler);
+				if (event.charAt(0) == '_' || event == 'mount' || event == 'unmount' || event == 'statechange' || event == 'propschange') continue;
+				if (this.root) this.root.addEventListener(event, handler);
 			}
 			if (this.internal) this.internal.on(events, handler);
-			if (this.root) this.root.addEventListener(events, handler);
 			return this;
 		}
 
@@ -1315,7 +1316,7 @@ namespace WUX {
 		}
 		return e;
 	}
-	
+
 	export function buildIcon(icon: string, before?: string, after?: string, size?: number, cls?: string, title?: string): string {
 		if (!icon) return '';
 		if (!before) before = '';
@@ -1327,7 +1328,7 @@ namespace WUX {
 		if (size > 5) size = 5;
 		return before + '<i class="fa ' + icon + ' fa-' + size + 'x' + cls + '"' + t + '></i>' + after;
 	}
-	
+
 	export function build(tagName: string, inner?: string, css?: string | WStyle, attributes?: string | object, id?: string, classStyle?: string): string {
 		if (!tagName) tagName = 'div';
 		let clsStyle: string;
@@ -1365,7 +1366,7 @@ namespace WUX {
 		r += '</' + tagName + '>';
 		return bca[0] + r + bca[2];
 	}
-	
+
 	/**
 	 * Utilities
 	 */
@@ -1520,7 +1521,6 @@ namespace WUX {
 			if (!a) return true;
 			if (Array.isArray(a) && !a.length) return true;
 			if (typeof a == 'object') {
-				let r = 0;
 				for (let k in a) if (a.hasOwnProperty(k)) return false;
 				return true;
 			}

@@ -431,11 +431,13 @@ var WUX;
                 if (!this.handlers[event_1])
                     this.handlers[event_1] = [];
                 this.handlers[event_1].push(handler);
+                if (event_1.charAt(0) == '_' || event_1 == 'mount' || event_1 == 'unmount' || event_1 == 'statechange' || event_1 == 'propschange')
+                    continue;
+                if (this.root)
+                    this.root.addEventListener(event_1, handler);
             }
             if (this.internal)
                 this.internal.on(events, handler);
-            if (this.root)
-                this.root.addEventListener(events, handler);
             return this;
         };
         WComponent.prototype.off = function (events) {
@@ -1635,7 +1637,6 @@ var WUX;
             if (Array.isArray(a) && !a.length)
                 return true;
             if (typeof a == 'object') {
-                var r = 0;
                 for (var k in a)
                     if (a.hasOwnProperty(k))
                         return false;
@@ -2497,7 +2498,7 @@ var WUX;
                     var cm = g.length;
                     if (!cm)
                         continue;
-                    inner += '<div ' + this.cs(g[0]) + '>';
+                    inner += '<div ' + this.cs(g[0]) + ' id="' + this.subId(r + '_') + '">';
                     for (var c = 1; c < cm; c++) {
                         inner += '<div id="' + this.subId(r + '_' + c) + '" ' + this.cs(g[c]) + '></div>';
                     }
@@ -2534,6 +2535,36 @@ var WUX;
             var c = cs.substring(0, x);
             var s = cs.substring(x + 1);
             return 'class="' + c + '" style="' + s + '"';
+        };
+        WContainer.prototype.getElement = function (r, c) {
+            if (c === void 0) { c = -1000; }
+            if (!this.grid || !this.grid.length) {
+                return null;
+            }
+            if (r < 0) {
+                r = this.grid.length + r;
+                if (r < 0)
+                    r = 0;
+            }
+            if (this.grid.length <= r) {
+                return null;
+            }
+            if (c == -1000) {
+                return document.getElementById(this.subId(r + '_'));
+            }
+            var g = this.grid[r];
+            if (!g || !g.length) {
+                return null;
+            }
+            if (c < 0) {
+                c = g.length - c;
+                if (c < 0)
+                    c = 0;
+            }
+            if (g.length <= c) {
+                return null;
+            }
+            return document.getElementById(this.subId(r + '_' + c));
         };
         return WContainer;
     }(WUX.WComponent));
@@ -2817,11 +2848,13 @@ var WUX;
         };
         WButton.prototype.componentWillUpdate = function (nextProps, nextState) {
             var html = '';
+            if (nextProps == null)
+                nextProps = this.props;
             if (nextState) {
-                html += WUX.buildIcon(this.props, '', ' ') + nextState;
+                html += WUX.buildIcon(nextProps, '', ' ') + nextState;
             }
             else {
-                html += WUX.buildIcon(this.props);
+                html += WUX.buildIcon(nextProps);
             }
             this.root.innerHTML = html;
         };
@@ -3092,6 +3125,13 @@ var WUX;
         WTable.prototype.render = function () {
             if (!this.shouldBuildRoot())
                 return undefined;
+            if (this.sortable && this.sortable.length) {
+                this.soId = [];
+                this.sortBy = [];
+                for (var i = 0; i < this.sortable.length; i++) {
+                    this.sortBy.push(0);
+                }
+            }
             var tableClass = 'table';
             if (this._classStyle)
                 tableClass = this._classStyle.indexOf('table ') >= 0 ? this._classStyle : tableClass + ' ' + this._classStyle;
@@ -3137,7 +3177,15 @@ var WUX;
                         var t = this.getType(j);
                         if (t == 'w')
                             x.a = 'center';
-                        r += '<th' + WUX.buildCss(s, x) + '>' + h + '</th>';
+                        var so = this.sortable && this.sortable.indexOf(j) >= 0;
+                        if (so) {
+                            var aid = this.subId('sort-' + j);
+                            this.soId.push(aid);
+                            r += '<th' + WUX.buildCss(s, x) + '><a style="cursor:pointer;text-decoration:none !important;" id="' + aid + '">' + h + ' &nbsp;<i class="fa fa-unsorted"></i></a></th>';
+                        }
+                        else {
+                            r += '<th' + WUX.buildCss(s, x) + '>' + h + '</th>';
+                        }
                     }
                     r += '</tr></thead>';
                 }
@@ -3149,7 +3197,48 @@ var WUX;
             return r;
         };
         WTable.prototype.componentDidMount = function () {
+            var _this = this;
             this.buildBody();
+            if (this.soId) {
+                var _loop_1 = function (aid) {
+                    var a = document.getElementById(aid);
+                    if (a) {
+                        a.onclick = function (e) {
+                            var i = WUX.getId(e.currentTarget);
+                            var c = WUX.WUtil.toNumber(WUX.lastSub(i), -1);
+                            if (c >= 0 && _this.keys.length > c) {
+                                var h = _this.header ? _this.header[c] : '';
+                                var v = _this.sortBy[c];
+                                if (!v) {
+                                    _this.sortBy[c] = 1;
+                                    if (h)
+                                        a.innerHTML = h + ' &nbsp;<i class="fa fa-sort-asc"></i>';
+                                }
+                                else if (v == 1) {
+                                    _this.sortBy[c] = -1;
+                                    if (h)
+                                        a.innerHTML = h + ' &nbsp;<i class="fa fa-sort-desc"></i>';
+                                }
+                                else if (v == -1) {
+                                    _this.sortBy[c] = 0;
+                                    if (h)
+                                        a.innerHTML = h + ' &nbsp;<i class="fa fa-unsorted"></i>';
+                                }
+                                if (_this.handlers['_sort']) {
+                                    for (var _i = 0, _a = _this.handlers['_sort']; _i < _a.length; _i++) {
+                                        var h_1 = _a[_i];
+                                        h_1(_this.createEvent('_sort', _this.sortBy));
+                                    }
+                                }
+                            }
+                        };
+                    }
+                };
+                for (var _i = 0, _a = this.soId; _i < _a.length; _i++) {
+                    var aid = _a[_i];
+                    _loop_1(aid);
+                }
+            }
         };
         WTable.prototype.componentDidUpdate = function (prevProps, prevState) {
             this.buildBody();
@@ -3250,6 +3339,11 @@ var WUX;
                 b += '</tr>';
                 tbody.innerHTML = b;
             }
+        };
+        WTable.prototype.onSort = function (h) {
+            if (!this.handlers['_sort'])
+                this.handlers['_sort'] = [];
+            this.handlers['_sort'].push(h);
         };
         return WTable;
     }(WUX.WComponent));

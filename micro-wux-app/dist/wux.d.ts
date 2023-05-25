@@ -347,6 +347,7 @@ declare namespace WUX {
         protected componentDidMount(): void;
         componentWillUnmount(): void;
         protected cs(cs: string): string;
+        getElement(r: number, c?: number): Element;
     }
     class WLink extends WComponent<string, string> {
         protected _href: string;
@@ -442,12 +443,16 @@ declare namespace WUX {
         footerStyle: string | WStyle;
         col0Style: string | WStyle;
         colLStyle: string | WStyle;
+        sortable: number[];
+        soId: string[];
+        sortBy: number[];
         constructor(id: string, header: string[], keys?: any[], classStyle?: string, style?: string | WStyle, attributes?: string | object, props?: any);
         protected render(): string;
         protected componentDidMount(): void;
         protected componentDidUpdate(prevProps: any, prevState: any): void;
         protected getType(i: number): string;
         protected buildBody(): void;
+        onSort(h: (e: WEvent) => any): void;
     }
     class WFormPanel extends WComponent<WField[][], any> {
         protected title: string;
