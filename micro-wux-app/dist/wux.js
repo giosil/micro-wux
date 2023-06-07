@@ -3702,18 +3702,21 @@ var WUX;
         function WCalendar(id, classStyle, style, attributes) {
             var _this = _super.call(this, id ? id : '*', 'WCalendar', 1, classStyle, style, attributes) || this;
             _this.am = [];
+            _this.mt = {};
             _this.ct = 'table';
             _this.cd = 'table-responsive';
             _this.ct = 'table';
             _this.sp = 'padding: 1rem;text-align:center;font-weight:bold;background-color:#eeeeee;';
-            _this.sm = 'padding: 1rem;text-align:center;font-weight:bold;background-color:#eeeeee;';
-            _this.sn = 'padding: 1rem;text-align:center;font-weight:bold;background-color:#eeeeee;';
+            _this.sm = _this.sp;
+            _this.sn = _this.sp;
             _this.sw = 'text-align:center;';
             _this.sd = 'text-align:center;';
             _this.so = 'text-align:center;background-color:#f5f5f5;cursor:pointer;';
             _this.ss = 'text-align:center;background-color:#ffdddd;';
             _this.sk = 'text-align:center;background-color:#ffffdd;';
             _this.se = 'background-color:#eeeeee;';
+            _this.st = ';font-weight:bold;';
+            _this.td = _this.str(new Date());
             return _this;
         }
         WCalendar.prototype.render = function () {
@@ -3771,7 +3774,7 @@ var WUX;
                 var o = p_1[_a];
                 var dt = WUX.WUtil.toDate(o);
                 if (!dt)
-                    return null;
+                    continue;
                 var k = this.str(dt);
                 this.am.push(k);
                 var e = document.getElementById(this.subId(k));
@@ -3797,6 +3800,17 @@ var WUX;
             }
             return this;
         };
+        WCalendar.prototype.title = function (d, t) {
+            var dt = WUX.WUtil.toDate(d);
+            if (!dt)
+                return this;
+            var k = this.str(dt);
+            this.mt[k] = t;
+            var e = document.getElementById(this.subId(k));
+            if (e)
+                e.setAttribute('title', t);
+            return this;
+        };
         WCalendar.prototype.unm = function (i, r) {
             if (r === void 0) { r = true; }
             if (i < 0)
@@ -3818,12 +3832,20 @@ var WUX;
             }
         };
         WCalendar.prototype.clear = function () {
-            if (!this.am || !this.am.length)
-                return this;
-            for (var i = 0; i < this.am.length; i++) {
-                this.unm(i, false);
+            if (this.am && this.am.length) {
+                for (var i = 0; i < this.am.length; i++) {
+                    this.unm(i, false);
+                }
+                this.am = [];
             }
-            this.am = [];
+            if (this.mt) {
+                for (var k in this.mt) {
+                    var e = document.getElementById(this.subId(k));
+                    if (e)
+                        e.setAttribute('title', null);
+                }
+                this.mt = {};
+            }
             return this;
         };
         WCalendar.prototype.prev = function () {
@@ -3868,15 +3890,18 @@ var WUX;
                     }
                     else {
                         var k = (y * 10000 + (m + 1) * 100 + d) + '';
+                        var t = k == this.td ? this.st : '';
+                        var a = this.mt[k];
+                        a = a ? ' title="' + a + '"' : '';
                         if (k == v) {
-                            b += '<td id="' + this.subId(k) + '" style="' + this.ss + '">' + d + '</td>';
+                            b += '<td id="' + this.subId(k) + '" style="' + this.ss + t + '"' + a + '>' + d + '</td>';
                         }
                         else {
                             if (this.am.indexOf(k) >= 0) {
-                                b += '<td id="' + this.subId(k) + '" style="' + this.sk + '">' + d + '</td>';
+                                b += '<td id="' + this.subId(k) + '" style="' + this.sk + t + '"' + a + '>' + d + '</td>';
                             }
                             else {
-                                b += '<td id="' + this.subId(k) + '" style="' + this.sd + '">' + d + '</td>';
+                                b += '<td id="' + this.subId(k) + '" style="' + this.sd + t + '"' + a + '>' + d + '</td>';
                             }
                         }
                         d++;
@@ -3911,17 +3936,19 @@ var WUX;
                     return;
                 if (s.length == 8) {
                     var n = parseInt(s);
+                    var t = s == _this.td ? _this.st : '';
                     var se = _this.ele(_this.state);
                     if (se) {
                         var p = _this.str(_this.state);
+                        var q = p == _this.td ? _this.st : '';
                         if (_this.am.indexOf(p) >= 0) {
-                            se.setAttribute('style', _this.sk);
+                            se.setAttribute('style', _this.sk + q);
                         }
                         else {
-                            se.setAttribute('style', _this.sd);
+                            se.setAttribute('style', _this.sd + q);
                         }
                     }
-                    e.target['style'] = _this.ss;
+                    e.target['style'] = _this.ss + t;
                     _this.setState(new Date(n / 10000, ((n % 10000) / 100) - 1, (n % 10000) % 100));
                 }
             });
@@ -3930,7 +3957,8 @@ var WUX;
                 if (!s)
                     return;
                 if (s.length == 8) {
-                    e.target['style'] = _this.so;
+                    var t = s == _this.td ? _this.st : '';
+                    e.target['style'] = _this.so + t;
                 }
             });
             this.root.addEventListener('mouseout', function (e) {
@@ -3938,16 +3966,17 @@ var WUX;
                 if (!s)
                     return;
                 if (s.length == 8) {
+                    var t = s == _this.td ? _this.st : '';
                     var i = _this.str(_this.state);
                     if (s == i) {
-                        e.target['style'] = _this.ss;
+                        e.target['style'] = _this.ss + t;
                     }
                     else {
                         if (_this.am.indexOf(s) >= 0) {
-                            e.target['style'] = _this.sk;
+                            e.target['style'] = _this.sk + t;
                         }
                         else {
-                            e.target['style'] = _this.sd;
+                            e.target['style'] = _this.sd + t;
                         }
                     }
                 }

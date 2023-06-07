@@ -507,12 +507,18 @@ declare namespace WUX {
         ss: string;
         sk: string;
         se: string;
+        st: string;
+        td: string;
         am: string[];
+        mt: {
+            [k: string]: string;
+        };
         constructor(id?: string, classStyle?: string, style?: string | WStyle, attributes?: string | object);
         protected render(): string;
         add(a: number): Date;
         mark(...p: any[]): this;
         unmark(...p: any[]): this;
+        title(d: any, t: string): this;
         unm(i: number, r?: boolean): void;
         clear(): this;
         prev(): Date;

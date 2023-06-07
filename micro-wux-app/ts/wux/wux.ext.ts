@@ -32,8 +32,14 @@ namespace WUX {
 		sk: string;
 		// Style empty
 		se: string;
+		// Style today
+		st: string;
+		// Today
+		td: string;
 		// Array of marker
 		am: string[] = [];
+		// Map date - title
+		mt: {[k: string]: string} = {};
 		
 		constructor(id?: string, classStyle?: string, style?: string | WStyle, attributes?: string | object) {
 			// WComponent init
@@ -47,9 +53,9 @@ namespace WUX {
 			// Style previous
 			this.sp = 'padding: 1rem;text-align:center;font-weight:bold;background-color:#eeeeee;';
 			// Style month
-			this.sm = 'padding: 1rem;text-align:center;font-weight:bold;background-color:#eeeeee;';
+			this.sm = this.sp;
 			// Style next
-			this.sn = 'padding: 1rem;text-align:center;font-weight:bold;background-color:#eeeeee;';
+			this.sn = this.sp;
 			// Style week day
 			this.sw = 'text-align:center;';
 			// Style day
@@ -62,6 +68,10 @@ namespace WUX {
 			this.sk = 'text-align:center;background-color:#ffffdd;';
 			// Style empty
 			this.se = 'background-color:#eeeeee;';
+			// Style today (Starts with ;)
+			this.st = ';font-weight:bold;';
+			// Today
+			this.td = this.str(new Date());
 		}
 		
 		protected render() {
@@ -115,7 +125,7 @@ namespace WUX {
 			if(!p || !p.length) return this;
 			for(let o of p) {
 				let dt = WUtil.toDate(o);
-				if(!dt) return null;
+				if(!dt) continue;
 				let k = this.str(dt);
 				this.am.push(k);
 				let e = document.getElementById(this.subId(k));
@@ -132,6 +142,16 @@ namespace WUX {
 				let k = this.str(dt);
 				this.unm(this.am.indexOf(k));
 			}
+			return this;
+		}
+		
+		title(d: any, t: string): this {
+			let dt = WUtil.toDate(d);
+			if(!dt) return this;
+			let k = this.str(dt);
+			this.mt[k] = t;
+			let e = document.getElementById(this.subId(k));
+			if(e) e.setAttribute('title', t);
 			return this;
 		}
 		
@@ -153,11 +173,19 @@ namespace WUX {
 		}
 		
 		clear(): this {
-			if(!this.am || !this.am.length) return this;
-			for(let i = 0; i < this.am.length; i++) {
-				this.unm(i, false);
+			if(this.am && this.am.length) {
+				for(let i = 0; i < this.am.length; i++) {
+					this.unm(i, false);
+				}
+				this.am = [];
 			}
-			this.am = [];
+			if(this.mt) {
+				for(let k in this.mt) {
+					let e = document.getElementById(this.subId(k));
+					if(e) e.setAttribute('title', null);
+				}
+				this.mt = {};
+			}
 			return this;
 		}
 		
@@ -209,15 +237,18 @@ namespace WUX {
 					}
 					else {
 						let k = (y * 10000 + (m + 1) * 100 + d) + '';
+						let t = k == this.td ? this.st : '';
+						let a = this.mt[k];
+						a = a ? ' title="' + a + '"' : '';
 						if(k == v) {
-							b += '<td id="' + this.subId(k) + '" style="' + this.ss + '">' + d + '</td>';
+							b += '<td id="' + this.subId(k) + '" style="' + this.ss + t + '"' + a + '>' + d + '</td>';
 						}
 						else {
 							if(this.am.indexOf(k) >= 0) {
-								b += '<td id="' + this.subId(k) + '" style="' + this.sk + '">' + d + '</td>';
+								b += '<td id="' + this.subId(k) + '" style="' + this.sk + t + '"' + a + '>' + d + '</td>';
 							}
 							else {
-								b += '<td id="' + this.subId(k) + '" style="' + this.sd + '">' + d + '</td>';
+								b += '<td id="' + this.subId(k) + '" style="' + this.sd + t + '"' + a + '>' + d + '</td>';
 							}
 						}
 						d++;
@@ -250,18 +281,20 @@ namespace WUX {
 				if(!s) return;
 				if(s.length == 8) {
 					let n = parseInt(s);
+					let t = s == this.td ? this.st : '';
 					// Date
 					let se = this.ele(this.state);
 					if(se) {
 						let p = this.str(this.state);
+						let q = p == this.td ? this.st : '';
 						if(this.am.indexOf(p) >= 0) {
-							se.setAttribute('style', this.sk);
+							se.setAttribute('style', this.sk + q);
 						}
 						else {
-							se.setAttribute('style', this.sd);
+							se.setAttribute('style', this.sd + q);
 						}
 					}
-					e.target['style'] = this.ss;
+					e.target['style'] = this.ss + t;
 					this.setState(new Date(n / 10000, ((n % 10000) / 100) - 1, (n % 10000) % 100));
 				}
 			});
@@ -269,27 +302,29 @@ namespace WUX {
 				let s = WUX.lastSub(e.target);
 				if(!s) return;
 				if(s.length == 8) {
+					let t = s == this.td ? this.st : '';
 					// Over date
-					e.target['style'] = this.so;
+					e.target['style'] = this.so + t;
 				}
 			});
 			this.root.addEventListener('mouseout', (e) => {
 				let s = WUX.lastSub(e.target);
 				if(!s) return;
 				if(s.length == 8) {
+					let t = s == this.td ? this.st : '';
 					let i = this.str(this.state);
 					if(s == i) {
 						// Selected date
-						e.target['style'] = this.ss;
+						e.target['style'] = this.ss + t;
 					}
 					else {
 						if(this.am.indexOf(s) >= 0) {
 							// Marked date
-							e.target['style'] = this.sk;
+							e.target['style'] = this.sk + t;
 						}
 						else {
 							// Normal date
-							e.target['style'] = this.sd;
+							e.target['style'] = this.sd + t;
 						}
 					}
 				}
