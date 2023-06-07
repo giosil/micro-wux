@@ -489,3 +489,37 @@ declare namespace WUX {
         protected updateView(): void;
     }
 }
+declare namespace WUX {
+    class WCalendar extends WComponent<number, Date> {
+        ep: HTMLElement;
+        em: HTMLElement;
+        en: HTMLElement;
+        et: HTMLElement;
+        eb: HTMLElement;
+        ct: string;
+        cd: string;
+        sp: string;
+        sm: string;
+        sn: string;
+        sw: string;
+        sd: string;
+        so: string;
+        ss: string;
+        sk: string;
+        se: string;
+        am: string[];
+        constructor(id?: string, classStyle?: string, style?: string | WStyle, attributes?: string | object);
+        protected render(): string;
+        add(a: number): Date;
+        mark(...p: any[]): this;
+        unmark(...p: any[]): this;
+        unm(i: number, r?: boolean): void;
+        clear(): this;
+        prev(): Date;
+        next(): Date;
+        ele(dt: Date): HTMLElement;
+        str(dt: Date): string;
+        protected body(): string;
+        protected componentDidMount(): void;
+    }
+}

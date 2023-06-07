@@ -3168,8 +3168,6 @@ var WUX;
             return _this;
         }
         WTable.prototype.render = function () {
-            if (!this.shouldBuildRoot())
-                return undefined;
             if (this.sortable && this.sortable.length) {
                 this.soId = [];
                 this.sortBy = [];
@@ -3696,5 +3694,267 @@ var WUX;
         return WFormPanel;
     }(WUX.WComponent));
     WUX.WFormPanel = WFormPanel;
+})(WUX || (WUX = {}));
+var WUX;
+(function (WUX) {
+    var WCalendar = (function (_super) {
+        __extends(WCalendar, _super);
+        function WCalendar(id, classStyle, style, attributes) {
+            var _this = _super.call(this, id ? id : '*', 'WCalendar', 1, classStyle, style, attributes) || this;
+            _this.am = [];
+            _this.ct = 'table';
+            _this.cd = 'table-responsive';
+            _this.ct = 'table';
+            _this.sp = 'padding: 1rem;text-align:center;font-weight:bold;background-color:#eeeeee;';
+            _this.sm = 'padding: 1rem;text-align:center;font-weight:bold;background-color:#eeeeee;';
+            _this.sn = 'padding: 1rem;text-align:center;font-weight:bold;background-color:#eeeeee;';
+            _this.sw = 'text-align:center;';
+            _this.sd = 'text-align:center;';
+            _this.so = 'text-align:center;background-color:#f5f5f5;cursor:pointer;';
+            _this.ss = 'text-align:center;background-color:#ffdddd;';
+            _this.sk = 'text-align:center;background-color:#ffffdd;';
+            _this.se = 'background-color:#eeeeee;';
+            return _this;
+        }
+        WCalendar.prototype.render = function () {
+            if (!this.state)
+                this.state = new Date();
+            var t = '<div class="' + this.cd + '"><table id="' + this.subId('t') + '" class="' + this.ct + '"><thead><tr>';
+            for (var x = 0; x < 7; x++) {
+                var k_1 = x == 6 ? 0 : x + 1;
+                t += '<th id="' + this.subId(k_1 + '') + '" style="' + this.sw + '">' + WUX.formatDay(k_1, false) + '</th>';
+            }
+            t += '</tr></thead><tbody id="' + this.subId('b') + '">';
+            t += this.body();
+            t += '</tbody></table></div>';
+            var m = this.state.getMonth();
+            var y = this.state.getFullYear();
+            var k = y * 100 + m + 1;
+            var p = '<a id="' + this.subId('p') + '" title="Mese precedente"><i class="fa fa-arrow-circle-left"></i></a>';
+            var n = '<a id="' + this.subId('n') + '" title="Mese successivo"><i class="fa fa-arrow-circle-right"></i></a>';
+            var i = '<div class="row"><div class="col-2" style="' + this.sp + '">' + p + '</div><div id="' + this.subId('m') + '" class="col-8" style="' + this.sm + '">' + WUX.formatMonth(k, true, true) + '</div><div class="col-2" style="' + this.sn + '">' + n + '</div></div>';
+            i += '<div class="row"><div class="col-12">' + t + '</div></div>';
+            return this.buildRoot(this.rootTag, i);
+        };
+        WCalendar.prototype.add = function (a) {
+            if (!this.state)
+                this.state = new Date();
+            var d = this.state.getDate();
+            var m = this.state.getMonth();
+            var y = this.state.getFullYear();
+            var r = m + a;
+            var n = new Date(y, r, d);
+            var nm = n.getMonth();
+            if (nm != r) {
+                n = new Date(y, r + 1, 0);
+                nm = n.getMonth();
+            }
+            var ny = n.getFullYear();
+            this.setState(n);
+            if (this.eb) {
+                this.eb.innerHTML = this.body();
+            }
+            if (this.em) {
+                var w = ny * 100 + nm + 1;
+                this.em.innerText = WUX.formatMonth(w, true, true);
+            }
+            return n;
+        };
+        WCalendar.prototype.mark = function () {
+            var p = [];
+            for (var _i = 0; _i < arguments.length; _i++) {
+                p[_i] = arguments[_i];
+            }
+            if (!p || !p.length)
+                return this;
+            for (var _a = 0, p_1 = p; _a < p_1.length; _a++) {
+                var o = p_1[_a];
+                var dt = WUX.WUtil.toDate(o);
+                if (!dt)
+                    return null;
+                var k = this.str(dt);
+                this.am.push(k);
+                var e = document.getElementById(this.subId(k));
+                if (e)
+                    e.setAttribute('style', this.sm);
+            }
+            return this;
+        };
+        WCalendar.prototype.unmark = function () {
+            var p = [];
+            for (var _i = 0; _i < arguments.length; _i++) {
+                p[_i] = arguments[_i];
+            }
+            if (!p || !p.length)
+                return this;
+            for (var _a = 0, p_2 = p; _a < p_2.length; _a++) {
+                var o = p_2[_a];
+                var dt = WUX.WUtil.toDate(o);
+                if (!dt)
+                    continue;
+                var k = this.str(dt);
+                this.unm(this.am.indexOf(k));
+            }
+            return this;
+        };
+        WCalendar.prototype.unm = function (i, r) {
+            if (r === void 0) { r = true; }
+            if (i < 0)
+                return;
+            var k = this.am[i];
+            if (!k)
+                return;
+            if (r)
+                this.am.splice(i, 1);
+            var e = document.getElementById(this.subId(k));
+            if (e) {
+                var s = this.str(this.state);
+                if (s == k) {
+                    e.setAttribute('style', this.ss);
+                }
+                else {
+                    e.setAttribute('style', this.sd);
+                }
+            }
+        };
+        WCalendar.prototype.clear = function () {
+            if (!this.am || !this.am.length)
+                return this;
+            for (var i = 0; i < this.am.length; i++) {
+                this.unm(i, false);
+            }
+            this.am = [];
+            return this;
+        };
+        WCalendar.prototype.prev = function () {
+            return this.add(-1);
+        };
+        WCalendar.prototype.next = function () {
+            return this.add(1);
+        };
+        WCalendar.prototype.ele = function (dt) {
+            if (!dt)
+                return null;
+            return document.getElementById(this.subId(this.str(dt)));
+        };
+        WCalendar.prototype.str = function (dt) {
+            if (!dt)
+                return null;
+            return (dt.getFullYear() * 10000 + (dt.getMonth() + 1) * 100 + dt.getDate()) + '';
+        };
+        WCalendar.prototype.body = function () {
+            if (!this.state)
+                this.state = new Date();
+            var b = '';
+            var s = this.state.getDate();
+            var m = this.state.getMonth();
+            var y = this.state.getFullYear();
+            var v = (y * 10000 + (m + 1) * 100 + s) + '';
+            var h = new Date(y, m, 1);
+            var w = h.getDay();
+            if (w == 0)
+                w = 7;
+            var j = new Date(y, m + 1, 0);
+            var l = j.getDate();
+            var d = 1;
+            for (var r = 1; r <= 6; r++) {
+                b += '<tr>';
+                for (var c = 1; c <= 7; c++) {
+                    if (r == 1 && c < w) {
+                        b += '<td style="' + this.se + '"></td>';
+                    }
+                    else if (d > l) {
+                        b += '<td style="' + this.se + '"></td>';
+                    }
+                    else {
+                        var k = (y * 10000 + (m + 1) * 100 + d) + '';
+                        if (k == v) {
+                            b += '<td id="' + this.subId(k) + '" style="' + this.ss + '">' + d + '</td>';
+                        }
+                        else {
+                            if (this.am.indexOf(k) >= 0) {
+                                b += '<td id="' + this.subId(k) + '" style="' + this.sk + '">' + d + '</td>';
+                            }
+                            else {
+                                b += '<td id="' + this.subId(k) + '" style="' + this.sd + '">' + d + '</td>';
+                            }
+                        }
+                        d++;
+                    }
+                }
+                b += '</tr>';
+                if (d > l)
+                    break;
+            }
+            return b;
+        };
+        WCalendar.prototype.componentDidMount = function () {
+            var _this = this;
+            this.ep = document.getElementById(this.subId('p'));
+            this.em = document.getElementById(this.subId('m'));
+            this.en = document.getElementById(this.subId('n'));
+            this.et = document.getElementById(this.subId('t'));
+            this.eb = document.getElementById(this.subId('b'));
+            if (this.ep) {
+                this.ep.addEventListener('click', function (e) {
+                    _this.prev();
+                });
+            }
+            if (this.en) {
+                this.en.addEventListener('click', function (e) {
+                    _this.next();
+                });
+            }
+            this.root.addEventListener('click', function (e) {
+                var s = WUX.lastSub(e.target);
+                if (!s)
+                    return;
+                if (s.length == 8) {
+                    var n = parseInt(s);
+                    var se = _this.ele(_this.state);
+                    if (se) {
+                        var p = _this.str(_this.state);
+                        if (_this.am.indexOf(p) >= 0) {
+                            se.setAttribute('style', _this.sk);
+                        }
+                        else {
+                            se.setAttribute('style', _this.sd);
+                        }
+                    }
+                    e.target['style'] = _this.ss;
+                    _this.setState(new Date(n / 10000, ((n % 10000) / 100) - 1, (n % 10000) % 100));
+                }
+            });
+            this.root.addEventListener('mouseover', function (e) {
+                var s = WUX.lastSub(e.target);
+                if (!s)
+                    return;
+                if (s.length == 8) {
+                    e.target['style'] = _this.so;
+                }
+            });
+            this.root.addEventListener('mouseout', function (e) {
+                var s = WUX.lastSub(e.target);
+                if (!s)
+                    return;
+                if (s.length == 8) {
+                    var i = _this.str(_this.state);
+                    if (s == i) {
+                        e.target['style'] = _this.ss;
+                    }
+                    else {
+                        if (_this.am.indexOf(s) >= 0) {
+                            e.target['style'] = _this.sk;
+                        }
+                        else {
+                            e.target['style'] = _this.sd;
+                        }
+                    }
+                }
+            });
+        };
+        return WCalendar;
+    }(WUX.WComponent));
+    WUX.WCalendar = WCalendar;
 })(WUX || (WUX = {}));
 //# sourceMappingURL=wux.js.map

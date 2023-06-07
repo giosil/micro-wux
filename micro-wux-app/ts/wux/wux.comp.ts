@@ -758,7 +758,6 @@ namespace WUX {
 		}
 
 		protected render() {
-			if (!this.shouldBuildRoot()) return undefined;
 			if (this.sortable && this.sortable.length) {
 				this.soId = [];
 				this.sortBy = [];

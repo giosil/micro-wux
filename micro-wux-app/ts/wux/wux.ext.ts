@@ -1,0 +1,299 @@
+namespace WUX {
+	export class WCalendar extends WComponent<number, Date> {
+		// Element previous
+		ep: HTMLElement;
+		// Element month
+		em: HTMLElement;
+		// Element next
+		en: HTMLElement;
+		// Element table
+		et: HTMLElement;
+		// Element table body
+		eb: HTMLElement;
+		// Class table
+		ct: string;
+		// Class div table
+		cd: string;
+		// Style previous
+		sp: string;
+		// Style month
+		sm: string;
+		// Style next
+		sn: string;
+		// Style week day
+		sw: string;
+		// Style day
+		sd: string;
+		// Style day over
+		so: string;
+		// Style day selected
+		ss: string;
+		// Style day marked
+		sk: string;
+		// Style empty
+		se: string;
+		// Array of marker
+		am: string[] = [];
+		
+		constructor(id?: string, classStyle?: string, style?: string | WStyle, attributes?: string | object) {
+			// WComponent init
+			super(id ? id : '*', 'WCalendar', 1, classStyle, style, attributes);
+			// Class table
+			this.ct = 'table';
+			// Class div table
+			this.cd = 'table-responsive';
+			// Class div table
+			this.ct = 'table';
+			// Style previous
+			this.sp = 'padding: 1rem;text-align:center;font-weight:bold;background-color:#eeeeee;';
+			// Style month
+			this.sm = 'padding: 1rem;text-align:center;font-weight:bold;background-color:#eeeeee;';
+			// Style next
+			this.sn = 'padding: 1rem;text-align:center;font-weight:bold;background-color:#eeeeee;';
+			// Style week day
+			this.sw = 'text-align:center;';
+			// Style day
+			this.sd = 'text-align:center;';
+			// Style day over
+			this.so = 'text-align:center;background-color:#f5f5f5;cursor:pointer;';
+			// Style day selected
+			this.ss = 'text-align:center;background-color:#ffdddd;';
+			// Style day marked
+			this.sk = 'text-align:center;background-color:#ffffdd;';
+			// Style empty
+			this.se = 'background-color:#eeeeee;';
+		}
+		
+		protected render() {
+			if(!this.state) this.state = new Date();
+			// Build table
+			let t = '<div class="' + this.cd + '"><table id="' + this.subId('t') + '" class="' + this.ct + '"><thead><tr>';
+			for(let x = 0; x < 7; x++) {
+				let k = x == 6 ? 0 : x + 1;
+				t += '<th id="' + this.subId(k + '') + '" style="' + this.sw + '">' + WUX.formatDay(k, false) + '</th>'; 
+			}
+			t += '</tr></thead><tbody id="' + this.subId('b') + '">';
+			t += this.body();
+			t += '</tbody></table></div>';
+			// Build component
+			let m = this.state.getMonth();
+			let y = this.state.getFullYear();
+			let k = y * 100 + m + 1;
+			let p = '<a id="' + this.subId('p') + '" title="Mese precedente"><i class="fa fa-arrow-circle-left"></i></a>';
+			let n = '<a id="' + this.subId('n') + '" title="Mese successivo"><i class="fa fa-arrow-circle-right"></i></a>';
+			let i = '<div class="row"><div class="col-2" style="' + this.sp + '">' + p + '</div><div id="' + this.subId('m') + '" class="col-8" style="' + this.sm + '">' + WUX.formatMonth(k, true, true) + '</div><div class="col-2" style="' + this.sn + '">' + n + '</div></div>';
+			i += '<div class="row"><div class="col-12">' + t + '</div></div>';
+			return this.buildRoot(this.rootTag, i);
+		}
+		
+		add(a: number): Date {
+			if(!this.state) this.state = new Date();
+			let d = this.state.getDate();
+			let m = this.state.getMonth();
+			let y = this.state.getFullYear();
+			let r = m + a;
+			let n = new Date(y, r, d);
+			let nm = n.getMonth();
+			if(nm != r) {
+				n = new Date(y, r + 1, 0);
+				nm = n.getMonth();
+			}
+			let ny = n.getFullYear();
+			// Invocare prima del metodo body
+			this.setState(n);
+			if(this.eb) {
+				this.eb.innerHTML = this.body();
+			}
+			if(this.em) {
+				let w = ny * 100 + nm + 1;
+				this.em.innerText = WUX.formatMonth(w, true, true);
+			}
+			return n;
+		}
+		
+		mark(...p: any[]): this {
+			if(!p || !p.length) return this;
+			for(let o of p) {
+				let dt = WUtil.toDate(o);
+				if(!dt) return null;
+				let k = this.str(dt);
+				this.am.push(k);
+				let e = document.getElementById(this.subId(k));
+				if(e) e.setAttribute('style', this.sm);
+			}
+			return this;
+		}
+		
+		unmark(...p: any[]): this {
+			if(!p || !p.length) return this;
+			for(let o of p) {
+				let dt = WUtil.toDate(o);
+				if(!dt) continue;
+				let k = this.str(dt);
+				this.unm(this.am.indexOf(k));
+			}
+			return this;
+		}
+		
+		unm(i: number, r: boolean = true): void {
+			if(i < 0) return;
+			let k = this.am[i];
+			if(!k) return;
+			if(r) this.am.splice(i, 1);
+			let e = document.getElementById(this.subId(k));
+			if(e) {
+				let s = this.str(this.state);
+				if(s == k) {
+					e.setAttribute('style', this.ss);
+				}
+				else {
+					e.setAttribute('style', this.sd);
+				}
+			}
+		}
+		
+		clear(): this {
+			if(!this.am || !this.am.length) return this;
+			for(let i = 0; i < this.am.length; i++) {
+				this.unm(i, false);
+			}
+			this.am = [];
+			return this;
+		}
+		
+		prev(): Date {
+			return this.add(-1);
+		}
+		
+		next(): Date {
+			return this.add(1);
+		}
+		
+		ele(dt: Date): HTMLElement {
+			if(!dt) return null;
+			return document.getElementById(this.subId(this.str(dt)));
+		}
+		
+		str(dt: Date): string {
+			if(!dt) return null;
+			return (dt.getFullYear() * 10000 + (dt.getMonth() + 1) * 100 + dt.getDate()) + '';
+		}
+		
+		protected body(): string {
+			if(!this.state) this.state = new Date();
+			let b = '';
+			let s = this.state.getDate();
+			let m = this.state.getMonth();
+			let y = this.state.getFullYear();
+			let v = (y * 10000 + (m + 1) * 100 + s) + '';
+			// First day of month
+			let h = new Date(y, m, 1);
+			let w = h.getDay();
+			if(w == 0) w = 7;
+			// Last day of month
+			let j = new Date(y, m + 1, 0);
+			let l = j.getDate();
+			let d = 1;
+			for(let r = 1; r <= 6; r++) {
+				b += '<tr>';
+				// rows
+				for(let c = 1; c <= 7; c++) {
+					// cols
+					if(r == 1 && c < w) {
+						// empty cell in first row
+						b += '<td style="' + this.se + '"></td>';
+					}
+					else if(d > l) {
+						// empty cell in last row
+						b += '<td style="' + this.se + '"></td>';
+					}
+					else {
+						let k = (y * 10000 + (m + 1) * 100 + d) + '';
+						if(k == v) {
+							b += '<td id="' + this.subId(k) + '" style="' + this.ss + '">' + d + '</td>';
+						}
+						else {
+							if(this.am.indexOf(k) >= 0) {
+								b += '<td id="' + this.subId(k) + '" style="' + this.sk + '">' + d + '</td>';
+							}
+							else {
+								b += '<td id="' + this.subId(k) + '" style="' + this.sd + '">' + d + '</td>';
+							}
+						}
+						d++;
+					}
+				}
+				b += '</tr>';
+				if(d > l) break;
+			}
+			return b;
+		}
+		
+		protected componentDidMount(): void {
+			this.ep = document.getElementById(this.subId('p'));
+			this.em = document.getElementById(this.subId('m'));
+			this.en = document.getElementById(this.subId('n'));
+			this.et = document.getElementById(this.subId('t'));
+			this.eb = document.getElementById(this.subId('b'));
+			if(this.ep) {
+				this.ep.addEventListener('click', (e) => {
+					this.prev();
+				});
+			}
+			if(this.en) {
+				this.en.addEventListener('click', (e) => {
+					this.next();
+				});
+			}
+			this.root.addEventListener('click', (e) => {
+				let s = WUX.lastSub(e.target);
+				if(!s) return;
+				if(s.length == 8) {
+					let n = parseInt(s);
+					// Date
+					let se = this.ele(this.state);
+					if(se) {
+						let p = this.str(this.state);
+						if(this.am.indexOf(p) >= 0) {
+							se.setAttribute('style', this.sk);
+						}
+						else {
+							se.setAttribute('style', this.sd);
+						}
+					}
+					e.target['style'] = this.ss;
+					this.setState(new Date(n / 10000, ((n % 10000) / 100) - 1, (n % 10000) % 100));
+				}
+			});
+			this.root.addEventListener('mouseover', (e) => {
+				let s = WUX.lastSub(e.target);
+				if(!s) return;
+				if(s.length == 8) {
+					// Over date
+					e.target['style'] = this.so;
+				}
+			});
+			this.root.addEventListener('mouseout', (e) => {
+				let s = WUX.lastSub(e.target);
+				if(!s) return;
+				if(s.length == 8) {
+					let i = this.str(this.state);
+					if(s == i) {
+						// Selected date
+						e.target['style'] = this.ss;
+					}
+					else {
+						if(this.am.indexOf(s) >= 0) {
+							// Marked date
+							e.target['style'] = this.sk;
+						}
+						else {
+							// Normal date
+							e.target['style'] = this.sd;
+						}
+					}
+				}
+			});
+		}
+	}
+}
