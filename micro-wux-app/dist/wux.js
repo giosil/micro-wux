@@ -3706,19 +3706,33 @@ var WUX;
             _this.ct = 'table';
             _this.cd = 'table-responsive';
             _this.ct = 'table';
-            _this.sp = 'padding: 1rem;text-align:center;font-weight:bold;background-color:#eeeeee;';
+            _this.sp = 'padding:1rem;text-align:center;font-weight:bold;background-color:#eeeeee;';
             _this.sm = _this.sp;
             _this.sn = _this.sp;
             _this.sw = 'text-align:center;';
             _this.sd = 'text-align:center;';
-            _this.so = 'text-align:center;background-color:#f5f5f5;cursor:pointer;';
+            _this.so = 'text-align:center;background-color:#f6f6f6;cursor:pointer;';
             _this.ss = 'text-align:center;background-color:#ffdddd;';
             _this.sk = 'text-align:center;background-color:#ffffdd;';
-            _this.se = 'background-color:#eeeeee;';
+            _this.se = 'background-color:#f0f0f0;';
             _this.st = 'font-weight:bold;';
             _this.td = _this.str(new Date());
             return _this;
         }
+        WCalendar.prototype.onDoubleClick = function (handler) {
+            if (!this.handlers['_doubleclick'])
+                this.handlers['_doubleclick'] = [];
+            this.handlers['_doubleclick'].push(handler);
+        };
+        WCalendar.prototype.updateState = function (nextState) {
+            this.state = nextState;
+            if (!this.state)
+                this.state = new Date();
+            var d = this.state.getDate();
+            var m = this.state.getMonth();
+            var y = this.state.getFullYear();
+            this.ls = (y * 10000 + (m + 1) * 100 + d) + '';
+        };
         WCalendar.prototype.render = function () {
             if (!this.state)
                 this.state = new Date();
@@ -3887,47 +3901,47 @@ var WUX;
             if (!this.state)
                 this.state = new Date();
             var b = '';
-            var s = this.state.getDate();
+            var d = this.state.getDate();
             var m = this.state.getMonth();
             var y = this.state.getFullYear();
-            var v = (y * 10000 + (m + 1) * 100 + s) + '';
+            this.ls = (y * 10000 + (m + 1) * 100 + d) + '';
             var h = new Date(y, m, 1);
             var w = h.getDay();
             if (w == 0)
                 w = 7;
             var j = new Date(y, m + 1, 0);
             var l = j.getDate();
-            var d = 1;
+            var z = 1;
             for (var r = 1; r <= 6; r++) {
                 b += '<tr>';
                 for (var c = 1; c <= 7; c++) {
                     if (r == 1 && c < w) {
                         b += '<td style="' + this.se + '"></td>';
                     }
-                    else if (d > l) {
+                    else if (z > l) {
                         b += '<td style="' + this.se + '"></td>';
                     }
                     else {
-                        var k = (y * 10000 + (m + 1) * 100 + d) + '';
+                        var k = (y * 10000 + (m + 1) * 100 + z) + '';
                         var t = k == this.td ? this.st : '';
                         var a = this.mt[k];
                         a = a ? ' title="' + a + '"' : '';
-                        if (k == v) {
-                            b += '<td id="' + this.subId(k) + '" style="' + this.ss + t + '"' + a + '>' + d + '</td>';
+                        if (k == this.ls) {
+                            b += '<td id="' + this.subId(k) + '" style="' + this.ss + t + '"' + a + '>' + z + '</td>';
                         }
                         else {
                             if (this.am.indexOf(k) >= 0) {
-                                b += '<td id="' + this.subId(k) + '" style="' + this.sk + t + '"' + a + '>' + d + '</td>';
+                                b += '<td id="' + this.subId(k) + '" style="' + this.sk + t + '"' + a + '>' + z + '</td>';
                             }
                             else {
-                                b += '<td id="' + this.subId(k) + '" style="' + this.sd + t + '"' + a + '>' + d + '</td>';
+                                b += '<td id="' + this.subId(k) + '" style="' + this.sd + t + '"' + a + '>' + z + '</td>';
                             }
                         }
-                        d++;
+                        z++;
                     }
                 }
                 b += '</tr>';
-                if (d > l)
+                if (z > l)
                     break;
             }
             return b;
@@ -3968,7 +3982,17 @@ var WUX;
                         }
                     }
                     e.target['style'] = _this.ss + t;
+                    if (_this.ls == s)
+                        return;
                     _this.setState(new Date(n / 10000, ((n % 10000) / 100) - 1, (n % 10000) % 100));
+                }
+            });
+            this.root.addEventListener('dblclick', function (e) {
+                var s = WUX.lastSub(e.target);
+                if (!s)
+                    return;
+                if (s.length == 8) {
+                    _this.trigger('_doubleclick', s);
                 }
             });
             this.root.addEventListener('mouseover', function (e) {

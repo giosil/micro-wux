@@ -40,6 +40,8 @@ namespace WUX {
 		am: string[] = [];
 		// Map date - title
 		mt: {[k: string]: string} = {};
+		// Last state (converted to string)
+		ls: string;
 		
 		constructor(id?: string, classStyle?: string, style?: string | WStyle, attributes?: string | object) {
 			// WComponent init
@@ -51,7 +53,7 @@ namespace WUX {
 			// Class div table
 			this.ct = 'table';
 			// Style previous
-			this.sp = 'padding: 1rem;text-align:center;font-weight:bold;background-color:#eeeeee;';
+			this.sp = 'padding:1rem;text-align:center;font-weight:bold;background-color:#eeeeee;';
 			// Style month
 			this.sm = this.sp;
 			// Style next
@@ -61,17 +63,31 @@ namespace WUX {
 			// Style day
 			this.sd = 'text-align:center;';
 			// Style day over
-			this.so = 'text-align:center;background-color:#f5f5f5;cursor:pointer;';
+			this.so = 'text-align:center;background-color:#f6f6f6;cursor:pointer;';
 			// Style day selected
 			this.ss = 'text-align:center;background-color:#ffdddd;';
 			// Style day marked
 			this.sk = 'text-align:center;background-color:#ffffdd;';
 			// Style empty
-			this.se = 'background-color:#eeeeee;';
+			this.se = 'background-color:#f0f0f0;';
 			// Style today
 			this.st = 'font-weight:bold;';
 			// Today
 			this.td = this.str(new Date());
+		}
+		
+		onDoubleClick(handler: (e: WEvent) => any): void {
+			if (!this.handlers['_doubleclick']) this.handlers['_doubleclick'] = [];
+			this.handlers['_doubleclick'].push(handler);
+		}
+		
+		protected updateState(nextState: Date): void {
+			this.state = nextState;
+			if(!this.state) this.state = new Date();
+			let d = this.state.getDate();
+			let m = this.state.getMonth();
+			let y = this.state.getFullYear();
+			this.ls = (y * 10000 + (m + 1) * 100 + d) + '';
 		}
 		
 		protected render() {
@@ -230,10 +246,11 @@ namespace WUX {
 		protected body(): string {
 			if(!this.state) this.state = new Date();
 			let b = '';
-			let s = this.state.getDate();
+			// Current state
+			let d = this.state.getDate();
 			let m = this.state.getMonth();
 			let y = this.state.getFullYear();
-			let v = (y * 10000 + (m + 1) * 100 + s) + '';
+			this.ls = (y * 10000 + (m + 1) * 100 + d) + '';
 			// First day of month
 			let h = new Date(y, m, 1);
 			let w = h.getDay();
@@ -241,7 +258,7 @@ namespace WUX {
 			// Last day of month
 			let j = new Date(y, m + 1, 0);
 			let l = j.getDate();
-			let d = 1;
+			let z = 1;
 			for(let r = 1; r <= 6; r++) {
 				b += '<tr>';
 				// rows
@@ -251,31 +268,31 @@ namespace WUX {
 						// empty cell in first row
 						b += '<td style="' + this.se + '"></td>';
 					}
-					else if(d > l) {
+					else if(z > l) {
 						// empty cell in last row
 						b += '<td style="' + this.se + '"></td>';
 					}
 					else {
-						let k = (y * 10000 + (m + 1) * 100 + d) + '';
+						let k = (y * 10000 + (m + 1) * 100 + z) + '';
 						let t = k == this.td ? this.st : '';
 						let a = this.mt[k];
 						a = a ? ' title="' + a + '"' : '';
-						if(k == v) {
-							b += '<td id="' + this.subId(k) + '" style="' + this.ss + t + '"' + a + '>' + d + '</td>';
+						if(k == this.ls) {
+							b += '<td id="' + this.subId(k) + '" style="' + this.ss + t + '"' + a + '>' + z + '</td>';
 						}
 						else {
 							if(this.am.indexOf(k) >= 0) {
-								b += '<td id="' + this.subId(k) + '" style="' + this.sk + t + '"' + a + '>' + d + '</td>';
+								b += '<td id="' + this.subId(k) + '" style="' + this.sk + t + '"' + a + '>' + z + '</td>';
 							}
 							else {
-								b += '<td id="' + this.subId(k) + '" style="' + this.sd + t + '"' + a + '>' + d + '</td>';
+								b += '<td id="' + this.subId(k) + '" style="' + this.sd + t + '"' + a + '>' + z + '</td>';
 							}
 						}
-						d++;
+						z++;
 					}
 				}
 				b += '</tr>';
-				if(d > l) break;
+				if(z > l) break;
 			}
 			return b;
 		}
@@ -315,7 +332,15 @@ namespace WUX {
 						}
 					}
 					e.target['style'] = this.ss + t;
+					if(this.ls == s) return;
 					this.setState(new Date(n / 10000, ((n % 10000) / 100) - 1, (n % 10000) % 100));
+				}
+			});
+			this.root.addEventListener('dblclick', (e) => {
+				let s = WUX.lastSub(e.target);
+				if(!s) return;
+				if(s.length == 8) {
+					this.trigger('_doubleclick', s);
 				}
 			});
 			this.root.addEventListener('mouseover', (e) => {

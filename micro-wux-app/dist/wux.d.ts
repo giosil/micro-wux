@@ -513,7 +513,10 @@ declare namespace WUX {
         mt: {
             [k: string]: string;
         };
+        ls: string;
         constructor(id?: string, classStyle?: string, style?: string | WStyle, attributes?: string | object);
+        onDoubleClick(handler: (e: WEvent) => any): void;
+        protected updateState(nextState: Date): void;
         protected render(): string;
         add(a: number): Date;
         mark(...p: any[]): this;
