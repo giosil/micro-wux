@@ -68,8 +68,8 @@ namespace WUX {
 			this.sk = 'text-align:center;background-color:#ffffdd;';
 			// Style empty
 			this.se = 'background-color:#eeeeee;';
-			// Style today (Starts with ;)
-			this.st = ';font-weight:bold;';
+			// Style today
+			this.st = 'font-weight:bold;';
 			// Today
 			this.td = this.str(new Date());
 		}
@@ -129,7 +129,7 @@ namespace WUX {
 				let k = this.str(dt);
 				this.am.push(k);
 				let e = document.getElementById(this.subId(k));
-				if(e) e.setAttribute('style', this.sm);
+				if(e) e.setAttribute('style', this.sk);
 			}
 			return this;
 		}
@@ -165,6 +165,9 @@ namespace WUX {
 				let s = this.str(this.state);
 				if(s == k) {
 					e.setAttribute('style', this.ss);
+				}
+				else if(this.am.indexOf(k) >= 0) {
+					e.setAttribute('style', this.sk);
 				}
 				else {
 					e.setAttribute('style', this.sd);
@@ -205,6 +208,23 @@ namespace WUX {
 		str(dt: Date): string {
 			if(!dt) return null;
 			return (dt.getFullYear() * 10000 + (dt.getMonth() + 1) * 100 + dt.getDate()) + '';
+		}
+		
+		from(): string {
+			if(!this.state) this.state = new Date();
+			let m = this.state.getMonth();
+			let y = this.state.getFullYear();
+			return (y * 10000 + (m + 1) * 100 + 1) + '';
+		}
+		
+		to(): string {
+			if(!this.state) this.state = new Date();
+			let m = this.state.getMonth();
+			let y = this.state.getFullYear();
+			// Last day
+			let n = new Date(y, m + 1, 0);
+			let d = n.getDate();
+			return (y * 10000 + (m + 1) * 100 + d) + '';
 		}
 		
 		protected body(): string {

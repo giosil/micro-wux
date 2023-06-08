@@ -525,6 +525,8 @@ declare namespace WUX {
         next(): Date;
         ele(dt: Date): HTMLElement;
         str(dt: Date): string;
+        from(): string;
+        to(): string;
         protected body(): string;
         protected componentDidMount(): void;
     }

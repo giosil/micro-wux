@@ -3715,7 +3715,7 @@ var WUX;
             _this.ss = 'text-align:center;background-color:#ffdddd;';
             _this.sk = 'text-align:center;background-color:#ffffdd;';
             _this.se = 'background-color:#eeeeee;';
-            _this.st = ';font-weight:bold;';
+            _this.st = 'font-weight:bold;';
             _this.td = _this.str(new Date());
             return _this;
         }
@@ -3779,7 +3779,7 @@ var WUX;
                 this.am.push(k);
                 var e = document.getElementById(this.subId(k));
                 if (e)
-                    e.setAttribute('style', this.sm);
+                    e.setAttribute('style', this.sk);
             }
             return this;
         };
@@ -3826,6 +3826,9 @@ var WUX;
                 if (s == k) {
                     e.setAttribute('style', this.ss);
                 }
+                else if (this.am.indexOf(k) >= 0) {
+                    e.setAttribute('style', this.sk);
+                }
                 else {
                     e.setAttribute('style', this.sd);
                 }
@@ -3863,6 +3866,22 @@ var WUX;
             if (!dt)
                 return null;
             return (dt.getFullYear() * 10000 + (dt.getMonth() + 1) * 100 + dt.getDate()) + '';
+        };
+        WCalendar.prototype.from = function () {
+            if (!this.state)
+                this.state = new Date();
+            var m = this.state.getMonth();
+            var y = this.state.getFullYear();
+            return (y * 10000 + (m + 1) * 100 + 1) + '';
+        };
+        WCalendar.prototype.to = function () {
+            if (!this.state)
+                this.state = new Date();
+            var m = this.state.getMonth();
+            var y = this.state.getFullYear();
+            var n = new Date(y, m + 1, 0);
+            var d = n.getDate();
+            return (y * 10000 + (m + 1) * 100 + d) + '';
         };
         WCalendar.prototype.body = function () {
             if (!this.state)
