@@ -3791,6 +3791,8 @@ var WUX;
                     continue;
                 var k = this.str(dt);
                 this.am.push(k);
+                if (k == this.ls)
+                    continue;
                 var e = document.getElementById(this.subId(k));
                 if (e)
                     e.setAttribute('style', this.sk);

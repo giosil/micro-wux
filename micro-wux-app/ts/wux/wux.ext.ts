@@ -144,6 +144,7 @@ namespace WUX {
 				if(!dt) continue;
 				let k = this.str(dt);
 				this.am.push(k);
+				if(k == this.ls) continue;
 				let e = document.getElementById(this.subId(k));
 				if(e) e.setAttribute('style', this.sk);
 			}
