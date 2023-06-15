@@ -3222,7 +3222,7 @@ var WUX;
                             x.a = 'center';
                         var so = this.sortable && this.sortable.indexOf(j) >= 0;
                         if (so) {
-                            var aid = this.subId('sort-' + j);
+                            var aid = this.subId('sort_' + j);
                             this.soId.push(aid);
                             r += '<th' + WUX.buildCss(s, x) + '><a style="cursor:pointer;text-decoration:none !important;" id="' + aid + '">' + h + ' &nbsp;<i class="fa fa-unsorted"></i></a></th>';
                         }
@@ -3247,8 +3247,11 @@ var WUX;
                     var a = document.getElementById(aid);
                     if (a) {
                         a.onclick = function (e) {
-                            var i = WUX.getId(e.currentTarget);
-                            var c = WUX.WUtil.toNumber(WUX.lastSub(i), -1);
+                            var i = WUX.lastSub(WUX.getId(e.currentTarget));
+                            var x = i.indexOf('_');
+                            if (x <= 0)
+                                return;
+                            var c = WUX.WUtil.toNumber(i.substring(x + 1), -1);
                             if (c >= 0 && _this.keys.length > c) {
                                 var h = _this.header ? _this.header[c] : '';
                                 var v = _this.sortBy[c];

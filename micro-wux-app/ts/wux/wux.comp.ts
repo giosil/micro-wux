@@ -807,7 +807,7 @@ namespace WUX {
 						
 						let so = this.sortable && this.sortable.indexOf(j) >= 0;
 						if(so) {
-							let aid = this.subId('sort-' + j);
+							let aid = this.subId('sort_' + j);
 							this.soId.push(aid);
 							r += '<th' + WUX.buildCss(s, x) + '><a style="cursor:pointer;text-decoration:none !important;" id="' + aid + '">' + h + ' &nbsp;<i class="fa fa-unsorted"></i></a></th>';
 						}
@@ -831,8 +831,10 @@ namespace WUX {
 					let a = document.getElementById(aid);
 					if(a) {
 						a.onclick = (e: PointerEvent) => {
-							let i = WUX.getId(e.currentTarget);
-							let c = WUtil.toNumber(WUX.lastSub(i), -1);
+							let i = WUX.lastSub(WUX.getId(e.currentTarget));
+							let x = i.indexOf('_');
+							if(x <= 0) return;
+							let c = WUtil.toNumber(i.substring(x + 1), -1);
 							if(c >= 0 && this.keys.length > c) {
 								let h = this.header ? this.header[c] : '';
 								let v = this.sortBy[c];
