@@ -576,9 +576,9 @@ namespace WUX {
 							if (!this.root) this.root = r as Element;
 						}
 						else {
-							let p = this.context.innerHTML;
-							if (!p) p = '';
-							this.context.innerHTML = p + r;
+							let t = document.createElement("template");
+							t.innerHTML = r;
+							this.context.append(t.content.firstElementChild);
 							let lc = this.context.lastChild;
 							if (lc instanceof Element) {
 								this.root = lc as Element;

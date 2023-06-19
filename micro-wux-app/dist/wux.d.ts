@@ -332,6 +332,12 @@ declare namespace WUX {
     function formatMonth(m: number, e?: boolean, y?: any): string;
 }
 declare namespace WUX {
+    class WHTML extends WComponent<string, any> {
+        isText: boolean;
+        constructor(props: string);
+        protected render(): string;
+        protected componentDidMount(): void;
+    }
     class WContainer extends WComponent<string, any> {
         cint: WComponent[];
         comp: WComponent[];
@@ -340,11 +346,14 @@ declare namespace WUX {
         constructor(id?: string, classStyle?: string, style?: string | WStyle, attributes?: string | object, inline?: boolean, type?: string);
         addRow(classStyle?: string, style?: string | WStyle): this;
         addCol(classStyle?: string, style?: string | WStyle): this;
-        add(component: WComponent, constraints?: string): this;
+        add(component: WComponent | string, constraints?: string): this;
         addGroup(w: WWrapper, ...ac: WComponent[]): this;
         addLine(style: string | WStyle, ...ac: WComponent[]): this;
         addStack(style: string | WStyle, ...ac: WComponent[]): this;
+        addContainer(c: WUX.WContainer, constraints?: string): WContainer;
         addContainer(w: WWrapper, constraints?: string): WContainer;
+        addContainer(i: string, classStyle?: string, style?: string, attributes?: string | object, inline?: boolean, type?: string): WContainer;
+        end(): WContainer;
         protected render(): any;
         protected componentDidMount(): void;
         componentWillUnmount(): void;

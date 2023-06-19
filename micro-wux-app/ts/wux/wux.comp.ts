@@ -1,5 +1,30 @@
 namespace WUX {
 	
+	export class WHTML extends WComponent<string, any> {
+		isText: boolean;
+		constructor(props: string) {
+			super(null, 'WHTML', props);
+		}
+		
+		protected render() {
+			if(!this.props || this.props.indexOf('<') < 0) {
+				this.isText = true;
+				return this.buildRoot(this.rootTag, this.props);
+			}
+			this.isText = false;
+			return this.props;
+		}
+		
+		protected componentDidMount(): void {
+			if(this.root && !this.isText) {
+				this.rootTag = this.root.tagName;
+				this.id = this.root.getAttribute('id');
+				this._classStyle = this.root.getAttribute('class');
+				this._style = this.root.getAttribute('style'); 
+			}
+		}
+	}
+	
 	export class WContainer extends WComponent<string, any> {
 		cint: WComponent[];
 		comp: WComponent[];
@@ -38,38 +63,45 @@ namespace WUX {
 			return this;
 		}
 
-		add(component: WComponent, constraints?: string): this {
+		add(component: WComponent | string, constraints?: string): this {
 			if(!component) return this;
-			if(!this.grid.length) {
-				this.cint.push(component);
+			if(typeof component == 'string') {
+				this.add(new WHTML(component), constraints);
 				return this;
 			}
-			if(constraints == 'push') {
-				this.cint.push(component);
-				return this;
-			}
-			if(constraints == 'unshift') {
-				this.cint.unshift(component);
-				return this;
-			}
-			let r = this.grid.length - 1;
-			if(constraints) {
-				let x = parseInt(constraints);
-				if(!isNaN(x)) {
-					if(x < 0) {
-						this.cint.push(component);
-						return this;
-					}
-					else {
-						r = x;
+			else {
+				if(!component.parent) component.parent = this;
+				if(!this.grid.length) {
+					this.cint.push(component);
+					return this;
+				}
+				if(constraints == 'push') {
+					this.cint.push(component);
+					return this;
+				}
+				if(constraints == 'unshift') {
+					this.cint.unshift(component);
+					return this;
+				}
+				let r = this.grid.length - 1;
+				if(constraints) {
+					let x = parseInt(constraints);
+					if(!isNaN(x)) {
+						if(x < 0) {
+							this.cint.push(component);
+							return this;
+						}
+						else {
+							r = x;
+						}
 					}
 				}
+				let g = this.grid[r];
+				let c = g.length - 1;
+				this.comp.push(component);
+				this.sr_c.push(this.subId(r + '_' + c));
+				return this;
 			}
-			let g = this.grid[r];
-			let c = g.length - 1;
-			this.comp.push(component);
-			this.sr_c.push(this.subId(r + '_' + c));
-			return this;
 		}
 
 		addGroup(w: WWrapper, ...ac: WComponent[]): this {
@@ -121,15 +153,34 @@ namespace WUX {
 			return this;
 		}
 
-		addContainer(w: WWrapper, constraints?: string): WContainer {
-			let c = new WContainer();
-			if(w) {
-				c.classStyle = WUX.cls(w.classStyle, w.style)
-				c.style = WUX.style(w.style);
-				c.attributes = w.attributes;
+		addContainer(c: WUX.WContainer, constraints?: string): WContainer;
+		addContainer(w: WWrapper, constraints?: string): WContainer;
+		addContainer(i: string, classStyle?: string, style?: string, attributes?: string | object, inline?: boolean, type?: string): WContainer;
+		addContainer(c_w_i: WUX.WContainer | WWrapper | string , con_cls?: string, style?: string, attributes?: string | object, inline?: boolean, type?: string): WContainer {
+			let c: WContainer;
+			if(typeof c_w_i == 'string') {
+				c = new WContainer(c_w_i, con_cls, style, attributes, inline, type);
+				this.add(c);
 			}
-			this.add(c, constraints);
+			else if(c_w_i instanceof WContainer) {
+				c_w_i.parent = this;
+				this.add(c_w_i, con_cls);
+			}
+			else {
+				c = new WContainer();
+				if(c_w_i) {
+					c.classStyle = WUX.cls(c_w_i.classStyle, c_w_i.style)
+					c.style = WUX.style(c_w_i.style);
+					c.attributes = c_w_i.attributes;
+				}
+				this.add(c, con_cls);
+			}
 			return c;
+		}
+
+		end(): WContainer {
+			if (this.parent instanceof WContainer) return this.parent.end();
+			return this;
 		}
 
 		protected render(): any {
