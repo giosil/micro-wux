@@ -68,9 +68,9 @@ class WuxDOM {
 			ctx.append(e);
 		}
 		else {
-			let p = ctx.innerHTML;
-			if (!p) p = '';
-			ctx.innerHTML = p + e;
+			let t = document.createElement("template");
+			t.innerHTML = e;
+			ctx.append(t.content.firstElementChild);
 		}
 		if (WUX.debug) console.log('WuxDOM.mount ' + WUX.str(e) + ' on ' + WUX.str(node) + ' completed.');
 		return ctx;

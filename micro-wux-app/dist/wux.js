@@ -110,10 +110,9 @@ var WuxDOM = (function () {
             ctx.append(e);
         }
         else {
-            var p = ctx.innerHTML;
-            if (!p)
-                p = '';
-            ctx.innerHTML = p + e;
+            var t = document.createElement("template");
+            t.innerHTML = e;
+            ctx.append(t.content.firstElementChild);
         }
         if (WUX.debug)
             console.log('WuxDOM.mount ' + WUX.str(e) + ' on ' + WUX.str(node) + ' completed.');
