@@ -1133,7 +1133,7 @@ namespace WUX {
 		addTextField(fieldId: string, label: string, readonly?: boolean): this {
 			let id = this.subId(fieldId);
 			let co = new WInput(id, 'text', 0, CSS.FORM_CTRL);
-			this.currRow.push({ 'id': id, 'label': label, 'component': co,'readonly': readonly });
+			this.currRow.push({ id: id, label: label, component: co, readonly: readonly, type: 'text' });
 			return this;
 		}
 
@@ -1141,21 +1141,35 @@ namespace WUX {
 			if (!rows) rows = 3;
 			let id = this.subId(fieldId);
 			let co = new WTextArea(id, rows, CSS.FORM_CTRL);
-			this.currRow.push({ 'id': id, 'label': label, 'component': co,'readonly': readonly });
+			this.currRow.push({ id: id, label: label, component: co, readonly: readonly, type: 'note' });
 			return this;
 		}
 
 		addDateField(fieldId: string, label: string, readonly?: boolean): this {
 			let id = this.subId(fieldId);
 			let co = new WInput(id, 'date', 0, CSS.FORM_CTRL);
-			this.currRow.push({ 'id': id, 'label': label, 'component': co,'readonly': readonly });
+			this.currRow.push({ id: id, label: label, component: co, readonly: readonly, type: 'date' });
+			return this;
+		}
+
+		addTimeField(fieldId: string, label: string, readonly?: boolean): this {
+			let id = this.subId(fieldId);
+			let co = new WInput(id, 'time', 0, CSS.FORM_CTRL);
+			this.currRow.push({ id: id, label: label, component: co, readonly: readonly, type: 'time' });
+			return this;
+		}
+
+		addEmailField(fieldId: string, label: string, readonly?: boolean): this {
+			let id = this.subId(fieldId);
+			let co = new WInput(id, 'email', 0, CSS.FORM_CTRL);
+			this.currRow.push({ id: id, label: label, component: co, readonly: readonly, type: 'email' });
 			return this;
 		}
 
 		addOptionsField(fieldId: string, label: string, options?: (string | WEntity)[], attributes?: string | object, readonly?: boolean): this {
 			let id = this.subId(fieldId);
 			let co = new WSelect(id, options, false, CSS.FORM_CTRL, '', attributes);
-			this.currRow.push({ 'id': id, 'label': label, 'component': co,'readonly': readonly });
+			this.currRow.push({ id: id, label: label, component: co, readonly: readonly, type: 'select' });
 			return this;
 		}
 
@@ -1163,19 +1177,19 @@ namespace WUX {
 			let id = this.subId(fieldId);
 			let co = new WCheck(id, '');
 			co.classStyle = CSS.FORM_CTRL;
-			this.currRow.push({ 'id': id, 'label': label, 'component': co});
+			this.currRow.push({ id: id, label: label, component: co, 'type': 'boolean'});
 			return this;
 		}
 
 		addBlankField(label?: string, classStyle?: string, style?: string | WStyle): this {
 			let co = new WContainer('', classStyle, style);
-			this.currRow.push({ 'id': '', 'label': label, 'component': co, 'classStyle': classStyle, 'style': style });
+			this.currRow.push({ id: '', label: label, component: co, classStyle: classStyle, style: style, type: 'blank' });
 			return this;
 		}
 
 		addInternalField(fieldId: string, value?: any): this {
 			if (value === undefined) value = null;
-			this.currRow.push({ 'id': this.subId(fieldId), 'value': value});
+			this.currRow.push({ id: this.subId(fieldId), value: value, type: 'internal'});
 			return this;
 		}
 
@@ -1183,11 +1197,11 @@ namespace WUX {
 			if (!component) return this;
 			if (fieldId) {
 				component.id = this.subId(fieldId);
-				this.currRow.push({ 'id': this.subId(fieldId), 'label': label, 'component': component });
+				this.currRow.push({ id: this.subId(fieldId), label: label, component: component, type: 'component' });
 			}
 			else {
 				component.id = '';
-				this.currRow.push({ 'id': '', 'label': label, 'component': component });
+				this.currRow.push({ id: '', label: label, component: component, type: 'component' });
 			}
 			return this;
 		}
@@ -1266,6 +1280,8 @@ namespace WUX {
 		setValue(fid: string, v: any, updState: boolean = true): this {
 			let f = this.getField(fid);
 			if(!f) return this;
+			if(f.type == 'date') v = isoDate(v);
+			if(f.type == 'time') v = formatTime(v, false);
 			if(f.component) f.component.setState(v);
 			f.value = v;
 			if (updState) {

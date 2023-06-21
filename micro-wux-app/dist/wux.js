@@ -2162,6 +2162,18 @@ var WUX;
         return sd + '/' + sm + '/' + d.getFullYear();
     }
     WUX.formatDate = formatDate;
+    function isoDate(a) {
+        if (!a)
+            return '';
+        var d = WUX.WUtil.toDate(a);
+        if (!d)
+            return '';
+        var m = d.getMonth() + 1;
+        var sm = m < 10 ? '0' + m : '' + m;
+        var sd = d.getDate() < 10 ? '0' + d.getDate() : '' + d.getDate();
+        return d.getFullYear() + '-' + sm + '-' + sd;
+    }
+    WUX.isoDate = isoDate;
     function formatDateTime(a, withSec, withDay, e) {
         if (withSec === void 0) { withSec = false; }
         if (withDay === void 0) { withDay = false; }
@@ -2195,6 +2207,8 @@ var WUX;
             return '';
         if (typeof a == 'number') {
             if (withSec) {
+                if (a < 10000)
+                    a = a * 100;
                 var hh = Math.floor(a / 10000);
                 var mm = Math.floor((a % 10000) / 100);
                 var is = (a % 10000) % 100;
@@ -2203,6 +2217,8 @@ var WUX;
                 return hh + ':' + sm + ':' + ss;
             }
             else {
+                if (a > 9999)
+                    a = Math.floor(a / 100);
                 var hh = Math.floor(a / 100);
                 var mm = a % 100;
                 var sm = mm < 10 ? '0' + mm : '' + mm;
@@ -2210,13 +2226,20 @@ var WUX;
             }
         }
         if (typeof a == 'string') {
-            if (a.indexOf(':') > 0)
-                return a;
-            if (a.length < 3)
-                return a + ':00';
-            if (a.length >= 5)
-                return a.substring(0, 2) + ':' + a.substring(2, 4) + ':' + a.substring(4);
-            return a.substring(0, 2) + ':' + a.substring(2);
+            var s = a.indexOf('T');
+            if (s < 0)
+                s = a.indexOf(' ');
+            if (s >= 0)
+                a = a.substring(s + 1);
+            s = a.indexOf('+');
+            if (s < 0)
+                s = a.indexOf('-');
+            if (s < 0)
+                s = a.indexOf('Z');
+            if (s >= 0)
+                a = a.substring(0, s);
+            var n = parseInt(a.replace(':', '').replace('.', ''));
+            return formatTime(n);
         }
         if (a instanceof Date) {
             var sh = a.getHours() < 10 ? '0' + a.getHours() : '' + a.getHours();
@@ -3558,7 +3581,7 @@ var WUX;
         WFormPanel.prototype.addTextField = function (fieldId, label, readonly) {
             var id = this.subId(fieldId);
             var co = new WInput(id, 'text', 0, WUX.CSS.FORM_CTRL);
-            this.currRow.push({ 'id': id, 'label': label, 'component': co, 'readonly': readonly });
+            this.currRow.push({ id: id, label: label, component: co, readonly: readonly, type: 'text' });
             return this;
         };
         WFormPanel.prototype.addNoteField = function (fieldId, label, rows, readonly) {
@@ -3566,37 +3589,49 @@ var WUX;
                 rows = 3;
             var id = this.subId(fieldId);
             var co = new WTextArea(id, rows, WUX.CSS.FORM_CTRL);
-            this.currRow.push({ 'id': id, 'label': label, 'component': co, 'readonly': readonly });
+            this.currRow.push({ id: id, label: label, component: co, readonly: readonly, type: 'note' });
             return this;
         };
         WFormPanel.prototype.addDateField = function (fieldId, label, readonly) {
             var id = this.subId(fieldId);
             var co = new WInput(id, 'date', 0, WUX.CSS.FORM_CTRL);
-            this.currRow.push({ 'id': id, 'label': label, 'component': co, 'readonly': readonly });
+            this.currRow.push({ id: id, label: label, component: co, readonly: readonly, type: 'date' });
+            return this;
+        };
+        WFormPanel.prototype.addTimeField = function (fieldId, label, readonly) {
+            var id = this.subId(fieldId);
+            var co = new WInput(id, 'time', 0, WUX.CSS.FORM_CTRL);
+            this.currRow.push({ id: id, label: label, component: co, readonly: readonly, type: 'time' });
+            return this;
+        };
+        WFormPanel.prototype.addEmailField = function (fieldId, label, readonly) {
+            var id = this.subId(fieldId);
+            var co = new WInput(id, 'email', 0, WUX.CSS.FORM_CTRL);
+            this.currRow.push({ id: id, label: label, component: co, readonly: readonly, type: 'email' });
             return this;
         };
         WFormPanel.prototype.addOptionsField = function (fieldId, label, options, attributes, readonly) {
             var id = this.subId(fieldId);
             var co = new WSelect(id, options, false, WUX.CSS.FORM_CTRL, '', attributes);
-            this.currRow.push({ 'id': id, 'label': label, 'component': co, 'readonly': readonly });
+            this.currRow.push({ id: id, label: label, component: co, readonly: readonly, type: 'select' });
             return this;
         };
         WFormPanel.prototype.addBooleanField = function (fieldId, label) {
             var id = this.subId(fieldId);
             var co = new WCheck(id, '');
             co.classStyle = WUX.CSS.FORM_CTRL;
-            this.currRow.push({ 'id': id, 'label': label, 'component': co });
+            this.currRow.push({ id: id, label: label, component: co, 'type': 'boolean' });
             return this;
         };
         WFormPanel.prototype.addBlankField = function (label, classStyle, style) {
             var co = new WContainer('', classStyle, style);
-            this.currRow.push({ 'id': '', 'label': label, 'component': co, 'classStyle': classStyle, 'style': style });
+            this.currRow.push({ id: '', label: label, component: co, classStyle: classStyle, style: style, type: 'blank' });
             return this;
         };
         WFormPanel.prototype.addInternalField = function (fieldId, value) {
             if (value === undefined)
                 value = null;
-            this.currRow.push({ 'id': this.subId(fieldId), 'value': value });
+            this.currRow.push({ id: this.subId(fieldId), value: value, type: 'internal' });
             return this;
         };
         WFormPanel.prototype.addComponent = function (fieldId, label, component) {
@@ -3604,11 +3639,11 @@ var WUX;
                 return this;
             if (fieldId) {
                 component.id = this.subId(fieldId);
-                this.currRow.push({ 'id': this.subId(fieldId), 'label': label, 'component': component });
+                this.currRow.push({ id: this.subId(fieldId), label: label, component: component, type: 'component' });
             }
             else {
                 component.id = '';
-                this.currRow.push({ 'id': '', 'label': label, 'component': component });
+                this.currRow.push({ id: '', label: label, component: component, type: 'component' });
             }
             return this;
         };
@@ -3687,6 +3722,10 @@ var WUX;
             var f = this.getField(fid);
             if (!f)
                 return this;
+            if (f.type == 'date')
+                v = WUX.isoDate(v);
+            if (f.type == 'time')
+                v = WUX.formatTime(v, false);
             if (f.component)
                 f.component.setState(v);
             f.value = v;
@@ -3761,8 +3800,8 @@ var WUX;
             _this.sw = 'text-align:center;';
             _this.sd = 'text-align:center;';
             _this.so = 'text-align:center;background-color:#f6f6f6;cursor:pointer;';
-            _this.ss = 'text-align:center;background-color:#ffdddd;';
-            _this.sk = 'text-align:center;background-color:#ffffdd;';
+            _this.ss = 'text-align:center;background-color:#d9e2f3;';
+            _this.sk = 'text-align:center;background-color:#ffe66d;';
             _this.se = 'background-color:#f0f0f0;';
             _this.st = 'font-weight:bold;';
             _this.td = _this.str(new Date());
@@ -3890,9 +3929,6 @@ var WUX;
                 var s = this.str(this.state);
                 if (s == k) {
                     e.setAttribute('style', this.ss);
-                }
-                else if (this.am.indexOf(k) >= 0) {
-                    e.setAttribute('style', this.sk);
                 }
                 else {
                     e.setAttribute('style', this.sd);

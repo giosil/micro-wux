@@ -53,6 +53,7 @@ declare namespace WUX {
         attributes?: string;
         span?: number;
         value?: any;
+        type?: string;
         element?: Element;
         labelComp?: WComponent;
         component?: WComponent;
@@ -320,6 +321,7 @@ declare namespace WUX {
         static readonly FORM_CTRL = "form-control";
     }
     function formatDate(a: any, withDay?: boolean, e?: boolean): string;
+    function isoDate(a: any): string;
     function formatDateTime(a: any, withSec?: boolean, withDay?: boolean, e?: boolean): string;
     function formatTime(a: any, withSec?: boolean): string;
     function formatNum2(a: any, nz?: string, z?: string, neg?: string): string;
@@ -482,6 +484,8 @@ declare namespace WUX {
         addTextField(fieldId: string, label: string, readonly?: boolean): this;
         addNoteField(fieldId: string, label: string, rows: number, readonly?: boolean): this;
         addDateField(fieldId: string, label: string, readonly?: boolean): this;
+        addTimeField(fieldId: string, label: string, readonly?: boolean): this;
+        addEmailField(fieldId: string, label: string, readonly?: boolean): this;
         addOptionsField(fieldId: string, label: string, options?: (string | WEntity)[], attributes?: string | object, readonly?: boolean): this;
         addBooleanField(fieldId: string, label: string): this;
         addBlankField(label?: string, classStyle?: string, style?: string | WStyle): this;

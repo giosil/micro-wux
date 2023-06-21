@@ -65,9 +65,9 @@ namespace WUX {
 			// Style day over
 			this.so = 'text-align:center;background-color:#f6f6f6;cursor:pointer;';
 			// Style day selected
-			this.ss = 'text-align:center;background-color:#ffdddd;';
+			this.ss = 'text-align:center;background-color:#d9e2f3;';
 			// Style day marked
-			this.sk = 'text-align:center;background-color:#ffffdd;';
+			this.sk = 'text-align:center;background-color:#ffe66d;';
 			// Style empty
 			this.se = 'background-color:#f0f0f0;';
 			// Style today
@@ -182,9 +182,6 @@ namespace WUX {
 				let s = this.str(this.state);
 				if(s == k) {
 					e.setAttribute('style', this.ss);
-				}
-				else if(this.am.indexOf(k) >= 0) {
-					e.setAttribute('style', this.sk);
 				}
 				else {
 					e.setAttribute('style', this.sd);

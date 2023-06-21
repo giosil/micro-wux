@@ -183,6 +183,7 @@ namespace WUX {
 		attributes?: string;
 		span?: number;
 		value?: any;
+		type?: string;
 		element?: Element;
 		labelComp?: WComponent;
 		component?: WComponent;

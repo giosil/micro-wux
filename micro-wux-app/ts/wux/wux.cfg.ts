@@ -58,6 +58,16 @@
 		return sd + '/' + sm + '/' + d.getFullYear();
 	}
 
+	export function isoDate(a: any): string {
+		if (!a) return '';
+		let d = WUtil.toDate(a);
+		if (!d) return '';
+		let m = d.getMonth() + 1;
+		let sm = m < 10 ? '0' + m : '' + m;
+		let sd = d.getDate() < 10 ? '0' + d.getDate() : '' + d.getDate();
+		return d.getFullYear() + '-' + sm + '-' + sd;
+	}
+
 	export function formatDateTime(a: any, withSec: boolean = false, withDay: boolean = false, e: boolean = false): string {
 		if (!a) return '';
 		let d = WUtil.toDate(a);
@@ -84,6 +94,7 @@
 		if (a == null) return '';
 		if (typeof a == 'number') {
 			if (withSec) {
+				if(a < 10000) a = a * 100;
 				let hh = Math.floor(a / 10000);
 				let mm = Math.floor((a % 10000) / 100);
 				let is = (a % 10000) % 100;
@@ -92,6 +103,7 @@
 				return hh + ':' + sm + ':' + ss;
 			}
 			else {
+				if(a > 9999) a = Math.floor(a / 100);
 				let hh = Math.floor(a / 100);
 				let mm = a % 100;
 				let sm = mm < 10 ? '0' + mm : '' + mm;
@@ -99,10 +111,15 @@
 			}
 		}
 		if (typeof a == 'string') {
-			if (a.indexOf(':') > 0) return a;
-			if (a.length < 3) return a + ':00';
-			if (a.length >= 5) return a.substring(0, 2) + ':' + a.substring(2, 4) + ':' + a.substring(4);
-			return a.substring(0, 2) + ':' + a.substring(2);
+			let s = a.indexOf('T');
+			if(s < 0) s = a.indexOf(' ');
+			if(s >= 0) a = a.substring(s + 1);
+			s = a.indexOf('+');
+			if(s < 0) s = a.indexOf('-');
+			if(s < 0) s = a.indexOf('Z');
+			if(s >= 0) a = a.substring(0, s);
+			let n = parseInt(a.replace(':', '').replace('.', ''));
+			return formatTime(n);
 		}
 		if (a instanceof Date) {
 			let sh = a.getHours() < 10 ? '0' + a.getHours() : '' + a.getHours();
