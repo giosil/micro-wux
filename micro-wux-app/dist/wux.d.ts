@@ -360,7 +360,7 @@ declare namespace WUX {
         protected componentDidMount(): void;
         componentWillUnmount(): void;
         protected cs(cs: string): string;
-        getElement(r: number, c?: number): Element;
+        getElement(r: number, c?: number): HTMLElement;
     }
     class WLink extends WComponent<string, string> {
         protected _href: string;

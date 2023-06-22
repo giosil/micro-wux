@@ -191,7 +191,7 @@ namespace WUX {
 					let g = this.grid[r];
 					let cm = g.length;
 					if(!cm) continue;
-					inner += '<div ' + this.cs(g[0]) + ' id="' + this.subId(r + '_') + '">';
+					inner += '<div ' + this.cs(g[0]) + ' id="' + this.subId(r + '_0') + '">';
 					for(let c = 1; c < cm; c++) {
 						inner += '<div id="' + this.subId(r + '_' + c) + '" ' + this.cs(g[c]) + '></div>';
 					}
@@ -229,30 +229,27 @@ namespace WUX {
 			return 'class="' + c + '" style="' + s + '"';
 		}
 
-		getElement(r: number, c: number = -1000): Element {
+		getElement(r: number, c?: number): HTMLElement {
 			if(!this.grid || !this.grid.length) {
 				return null;
 			}
 			if(r < 0) {
+				// r starts at 0
 				r = this.grid.length + r;
 				if(r < 0) r = 0;
 			}
 			if(this.grid.length <= r) {
 				return null;
 			}
-			if(c == -1000) {
-				return document.getElementById(this.subId(r + '_'));
-			}
+			if(!c) return document.getElementById(this.subId(r + '_0'));
 			let g = this.grid[r];
 			if(!g || !g.length) {
 				return null;
 			}
 			if(c < 0) {
-				c = g.length - c;
-				if(c < 0) c = 0;
-			}
-			if(g.length <= c) {
-				return null;
+				c = g.length + c;
+				// c starts at 1
+				if(c < 1) c = 1;
 			}
 			return document.getElementById(this.subId(r + '_' + c));
 		}

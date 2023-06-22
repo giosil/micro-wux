@@ -2612,7 +2612,7 @@ var WUX;
                     var cm = g.length;
                     if (!cm)
                         continue;
-                    inner += '<div ' + this.cs(g[0]) + ' id="' + this.subId(r + '_') + '">';
+                    inner += '<div ' + this.cs(g[0]) + ' id="' + this.subId(r + '_0') + '">';
                     for (var c = 1; c < cm; c++) {
                         inner += '<div id="' + this.subId(r + '_' + c) + '" ' + this.cs(g[c]) + '></div>';
                     }
@@ -2651,7 +2651,6 @@ var WUX;
             return 'class="' + c + '" style="' + s + '"';
         };
         WContainer.prototype.getElement = function (r, c) {
-            if (c === void 0) { c = -1000; }
             if (!this.grid || !this.grid.length) {
                 return null;
             }
@@ -2663,20 +2662,16 @@ var WUX;
             if (this.grid.length <= r) {
                 return null;
             }
-            if (c == -1000) {
-                return document.getElementById(this.subId(r + '_'));
-            }
+            if (!c)
+                return document.getElementById(this.subId(r + '_0'));
             var g = this.grid[r];
             if (!g || !g.length) {
                 return null;
             }
             if (c < 0) {
-                c = g.length - c;
-                if (c < 0)
-                    c = 0;
-            }
-            if (g.length <= c) {
-                return null;
+                c = g.length + c;
+                if (c < 1)
+                    c = 1;
             }
             return document.getElementById(this.subId(r + '_' + c));
         };
