@@ -149,7 +149,7 @@ declare namespace WUX {
         mount(context?: Element): this;
         componentWillUnmount(): void;
         protected componentWillMount(): void;
-        protected render(): any;
+        protected render(): WElement;
         protected componentDidMount(): void;
         protected componentDidCatch?(error: Error, errorInfo: string): void;
         protected shouldComponentUpdate(nextProps: P, nextState: S): boolean;
@@ -334,10 +334,10 @@ declare namespace WUX {
     function formatMonth(m: number, e?: boolean, y?: any): string;
 }
 declare namespace WUX {
-    class WHTML extends WComponent<string, any> {
+    class Wrapp extends WComponent<WElement, any> {
         isText: boolean;
-        constructor(props: string);
-        protected render(): string;
+        constructor(props: WElement);
+        protected render(): WElement;
         protected componentDidMount(): void;
     }
     class WContainer extends WComponent<string, any> {
@@ -348,7 +348,7 @@ declare namespace WUX {
         constructor(id?: string, classStyle?: string, style?: string | WStyle, attributes?: string | object, inline?: boolean, type?: string);
         addRow(classStyle?: string, style?: string | WStyle): this;
         addCol(classStyle?: string, style?: string | WStyle): this;
-        add(component: WComponent | string, constraints?: string): this;
+        add(component: WElement, constraints?: string): this;
         addGroup(w: WWrapper, ...ac: WComponent[]): this;
         addLine(style: string | WStyle, ...ac: WComponent[]): this;
         addStack(style: string | WStyle, ...ac: WComponent[]): this;
@@ -473,7 +473,11 @@ declare namespace WUX {
         protected roww: WWrapper[];
         protected currRow: WField[];
         protected main: WContainer;
+        protected foot: WContainer;
         protected checkboxStyle: string;
+        protected footer: WElement[];
+        protected footerClass: string;
+        protected footerStyle: string | WStyle;
         constructor(id?: string, title?: string, action?: string);
         init(): this;
         focus(): this;
@@ -491,6 +495,7 @@ declare namespace WUX {
         addBlankField(label?: string, classStyle?: string, style?: string | WStyle): this;
         addInternalField(fieldId: string, value?: any): this;
         addComponent(fieldId: string, label: string, component: WComponent): this;
+        addToFooter(c: WElement): this;
         protected componentDidMount(): void;
         componentWillUnmount(): void;
         clear(): this;

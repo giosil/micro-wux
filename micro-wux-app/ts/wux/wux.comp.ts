@@ -1,20 +1,22 @@
 namespace WUX {
-	
-	export class WHTML extends WComponent<string, any> {
+
+	export class Wrapp extends WComponent<WElement, any> {
 		isText: boolean;
-		constructor(props: string) {
-			super(null, 'WHTML', props);
+		constructor(props: WElement) {
+			super(null, 'Wrapp', props);
 		}
-		
+
 		protected render() {
-			if(!this.props || this.props.indexOf('<') < 0) {
-				this.isText = true;
-				return this.buildRoot(this.rootTag, this.props);
-			}
 			this.isText = false;
+			if(typeof this.props == 'string') {
+				if(!this.props || this.props.indexOf('<') < 0) {
+					this.isText = true;
+					return this.buildRoot(this.rootTag, this.props);
+				}
+			}
 			return this.props;
 		}
-		
+
 		protected componentDidMount(): void {
 			if(this.root && !this.isText) {
 				this.rootTag = this.root.tagName;
@@ -24,7 +26,7 @@ namespace WUX {
 			}
 		}
 	}
-	
+
 	export class WContainer extends WComponent<string, any> {
 		cint: WComponent[];
 		comp: WComponent[];
@@ -63,10 +65,14 @@ namespace WUX {
 			return this;
 		}
 
-		add(component: WComponent | string, constraints?: string): this {
+		add(component: WElement, constraints?: string): this {
 			if(!component) return this;
 			if(typeof component == 'string') {
-				this.add(new WHTML(component), constraints);
+				this.add(new Wrapp(component), constraints);
+				return this;
+			}
+			else if(component instanceof Element) {
+				this.add(new Wrapp(component), constraints);
 				return this;
 			}
 			else {
@@ -234,27 +240,30 @@ namespace WUX {
 				return null;
 			}
 			if(r < 0) {
-				// r starts at 0
 				r = this.grid.length + r;
 				if(r < 0) r = 0;
 			}
 			if(this.grid.length <= r) {
 				return null;
 			}
-			if(!c) return document.getElementById(this.subId(r + '_0'));
+			if(c == null) {
+				return document.getElementById(this.subId(r + '_0'));
+			}
 			let g = this.grid[r];
-			if(!g || !g.length) {
+			// g = columns + row
+			if(!g || g.length < 2) {
 				return null;
 			}
 			if(c < 0) {
-				c = g.length + c;
-				// c starts at 1
-				if(c < 1) c = 1;
+				c = g.length - 1 + c;
+				if(c < 0) c = 0;
 			}
+			// c in id starts at 1
+			c++;
 			return document.getElementById(this.subId(r + '_' + c));
 		}
 	}
-	
+
 	export class WLink extends WComponent<string, string> {
 		protected _href: string;
 		protected _target: string;
@@ -1014,7 +1023,11 @@ namespace WUX {
 		protected roww: WWrapper[];
 		protected currRow: WField[];
 		protected main: WContainer;
+		protected foot: WContainer;
 		protected checkboxStyle: string;
+		protected footer: WElement[];
+		protected footerClass: string;
+		protected footerStyle: string | WStyle;
 
 		constructor(id?: string, title?: string, action?: string) {
 			// WComponent init
@@ -1043,6 +1056,7 @@ namespace WUX {
 			this.rows = [];
 			this.roww = [];
 			this.currRow = null;
+			this.footer = [];
 			this.addRow();
 			return this;
 		}
@@ -1203,6 +1217,12 @@ namespace WUX {
 			return this;
 		}
 
+		addToFooter(c: WElement): this {
+			if (!c && !this.footer) return this;
+			this.footer.push(c)
+			return this;
+		}
+
 		protected componentDidMount(): void {
 			this.main = new WContainer(this.id + '-c');
 			for (let i = 0; i < this.rows.length; i++) {
@@ -1254,6 +1274,13 @@ namespace WUX {
 					}
 				}
 			}
+			if (this.footer && this.footer.length) {
+				this.foot = new WContainer(this.subId('__foot'), this.footerClass, this.footerStyle);
+				for(let f of this.footer) {
+					this.foot.addRow().addCol('12').add(f, 'push');
+				}
+				this.main.addRow().addCol('12').add(this.foot);
+			}
 			this.main.mount(this.root);
 		}
 
@@ -1262,7 +1289,6 @@ namespace WUX {
 		}
 
 		clear(): this {
-			if (this.debug) console.log('WUX.WFormPanel.clear');
 			for (let i = 0; i < this.rows.length; i++) {
 				let row = this.rows[i];
 				for (let j = 0; j < row.length; j++) {
@@ -1323,7 +1349,6 @@ namespace WUX {
 		}
 
 		protected updateView() {
-			if (this.debug) console.log('WUX.WFormPanel.updateView()');
 			if (!this.state) {
 				this.clear();
 				return;

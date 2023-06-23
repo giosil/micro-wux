@@ -2405,20 +2405,22 @@ var WUX;
 })(WUX || (WUX = {}));
 var WUX;
 (function (WUX) {
-    var WHTML = (function (_super) {
-        __extends(WHTML, _super);
-        function WHTML(props) {
-            return _super.call(this, null, 'WHTML', props) || this;
+    var Wrapp = (function (_super) {
+        __extends(Wrapp, _super);
+        function Wrapp(props) {
+            return _super.call(this, null, 'Wrapp', props) || this;
         }
-        WHTML.prototype.render = function () {
-            if (!this.props || this.props.indexOf('<') < 0) {
-                this.isText = true;
-                return this.buildRoot(this.rootTag, this.props);
-            }
+        Wrapp.prototype.render = function () {
             this.isText = false;
+            if (typeof this.props == 'string') {
+                if (!this.props || this.props.indexOf('<') < 0) {
+                    this.isText = true;
+                    return this.buildRoot(this.rootTag, this.props);
+                }
+            }
             return this.props;
         };
-        WHTML.prototype.componentDidMount = function () {
+        Wrapp.prototype.componentDidMount = function () {
             if (this.root && !this.isText) {
                 this.rootTag = this.root.tagName;
                 this.id = this.root.getAttribute('id');
@@ -2426,9 +2428,9 @@ var WUX;
                 this._style = this.root.getAttribute('style');
             }
         };
-        return WHTML;
+        return Wrapp;
     }(WUX.WComponent));
-    WUX.WHTML = WHTML;
+    WUX.Wrapp = Wrapp;
     var WContainer = (function (_super) {
         __extends(WContainer, _super);
         function WContainer(id, classStyle, style, attributes, inline, type) {
@@ -2469,7 +2471,11 @@ var WUX;
             if (!component)
                 return this;
             if (typeof component == 'string') {
-                this.add(new WHTML(component), constraints);
+                this.add(new Wrapp(component), constraints);
+                return this;
+            }
+            else if (component instanceof Element) {
+                this.add(new Wrapp(component), constraints);
                 return this;
             }
             else {
@@ -2662,17 +2668,19 @@ var WUX;
             if (this.grid.length <= r) {
                 return null;
             }
-            if (!c)
+            if (c == null) {
                 return document.getElementById(this.subId(r + '_0'));
+            }
             var g = this.grid[r];
-            if (!g || !g.length) {
+            if (!g || g.length < 2) {
                 return null;
             }
             if (c < 0) {
-                c = g.length + c;
-                if (c < 1)
-                    c = 1;
+                c = g.length - 1 + c;
+                if (c < 0)
+                    c = 0;
             }
+            c++;
             return document.getElementById(this.subId(r + '_' + c));
         };
         return WContainer;
@@ -3485,6 +3493,7 @@ var WUX;
             this.rows = [];
             this.roww = [];
             this.currRow = null;
+            this.footer = [];
             this.addRow();
             return this;
         };
@@ -3642,6 +3651,12 @@ var WUX;
             }
             return this;
         };
+        WFormPanel.prototype.addToFooter = function (c) {
+            if (!c && !this.footer)
+                return this;
+            this.footer.push(c);
+            return this;
+        };
         WFormPanel.prototype.componentDidMount = function () {
             this.main = new WContainer(this.id + '-c');
             for (var i = 0; i < this.rows.length; i++) {
@@ -3692,6 +3707,14 @@ var WUX;
                     }
                 }
             }
+            if (this.footer && this.footer.length) {
+                this.foot = new WContainer(this.subId('__foot'), this.footerClass, this.footerStyle);
+                for (var _i = 0, _a = this.footer; _i < _a.length; _i++) {
+                    var f = _a[_i];
+                    this.foot.addRow().addCol('12').add(f, 'push');
+                }
+                this.main.addRow().addCol('12').add(this.foot);
+            }
             this.main.mount(this.root);
         };
         WFormPanel.prototype.componentWillUnmount = function () {
@@ -3699,8 +3722,6 @@ var WUX;
                 this.main.unmount();
         };
         WFormPanel.prototype.clear = function () {
-            if (this.debug)
-                console.log('WUX.WFormPanel.clear');
             for (var i = 0; i < this.rows.length; i++) {
                 var row = this.rows[i];
                 for (var j = 0; j < row.length; j++) {
@@ -3764,8 +3785,6 @@ var WUX;
             }
         };
         WFormPanel.prototype.updateView = function () {
-            if (this.debug)
-                console.log('WUX.WFormPanel.updateView()');
             if (!this.state) {
                 this.clear();
                 return;

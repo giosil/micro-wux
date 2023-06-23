@@ -651,7 +651,7 @@ namespace WUX {
 		protected componentWillMount(): void {
 		}
 
-		protected render(): any {
+		protected render(): WElement {
 			return this.buildRoot(this.rootTag);
 		}
 
