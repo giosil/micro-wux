@@ -32,6 +32,8 @@ namespace WUX {
 		comp: WComponent[];
 		sr_c: string[];
 		grid: string[][];
+		w0: string;
+		w1: string;
 
 		constructor(id?: string, classStyle?: string, style?: string | WStyle, attributes?: string | object, inline?: boolean, type?: string) {
 			// WComponent init
@@ -42,6 +44,12 @@ namespace WUX {
 			this.sr_c = [];
 			this.grid = [];
 			this.rootTag = inline ? 'span' : 'div';
+		}
+
+		wrapp(w0: string, w1: string): this {
+			this.w0 = w0;
+			this.w1 = w1;
+			return this;
 		}
 
 		addRow(classStyle?: string, style?: string | WStyle): this {
@@ -204,7 +212,9 @@ namespace WUX {
 					inner += "</div>";
 				}
 			}
-			return this.buildRoot(this.rootTag, inner);
+			if(!this.w0) this.w0 = '';
+			if(!this.w1) this.w1 = '';
+			return this.w0 + this.buildRoot(this.rootTag, inner) + this.w1;
 		}
 
 		protected componentDidMount(): void {

@@ -38,9 +38,10 @@
 	}
 	
 	export class CSS {
-		static readonly FORM = 'padding-top:16px;';
-		static readonly FORM_GROUP = 'form-group';
-		static readonly FORM_CTRL = 'form-control';
+		static FORM = 'padding-top:16px;';
+		static FORM_GROUP = 'form-group';
+		static FORM_CTRL = 'form-control';
+		static ICON = 'margin-right:8px;';
 	}
 	
 	// Data format utilities

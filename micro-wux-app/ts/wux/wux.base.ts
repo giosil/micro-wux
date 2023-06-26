@@ -1322,12 +1322,13 @@ namespace WUX {
 		if (!icon) return '';
 		if (!before) before = '';
 		if (!after) after = '';
+		let s = CSS.ICON ? ' style="' + CSS.ICON + '"' : '';
 		let t = title ? ' title="' + title + '"' : '';
 		cls = cls ? ' ' + cls : '';
-		if (icon.indexOf('.') > 0) return before + '<img src="' + icon + '"' + t + '>' + after;
-		if (!size || size < 2) return before + '<i class="fa ' + icon + cls + '"' + t + '></i>' + after;
+		if (icon.indexOf('.') > 0) return before + '<img src="' + icon + '"' + t + s + '>' + after;
+		if (!size || size < 2) return before + '<i class="fa ' + icon + cls + '"' + t + s + '></i>' + after;
 		if (size > 5) size = 5;
-		return before + '<i class="fa ' + icon + ' fa-' + size + 'x' + cls + '"' + t + '></i>' + after;
+		return before + '<i class="fa ' + icon + ' fa-' + size + 'x' + cls + '"' + t + s + '></i>' + after;
 	}
 
 	export function build(tagName: string, inner?: string, css?: string | WStyle, attributes?: string | object, id?: string, classStyle?: string): string {

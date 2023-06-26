@@ -1383,15 +1383,16 @@ var WUX;
             before = '';
         if (!after)
             after = '';
+        var s = WUX.CSS.ICON ? ' style="' + WUX.CSS.ICON + '"' : '';
         var t = title ? ' title="' + title + '"' : '';
         cls = cls ? ' ' + cls : '';
         if (icon.indexOf('.') > 0)
-            return before + '<img src="' + icon + '"' + t + '>' + after;
+            return before + '<img src="' + icon + '"' + t + s + '>' + after;
         if (!size || size < 2)
-            return before + '<i class="fa ' + icon + cls + '"' + t + '></i>' + after;
+            return before + '<i class="fa ' + icon + cls + '"' + t + s + '></i>' + after;
         if (size > 5)
             size = 5;
-        return before + '<i class="fa ' + icon + ' fa-' + size + 'x' + cls + '"' + t + '></i>' + after;
+        return before + '<i class="fa ' + icon + ' fa-' + size + 'x' + cls + '"' + t + s + '></i>' + after;
     }
     WUX.buildIcon = buildIcon;
     function build(tagName, inner, css, attributes, id, classStyle) {
@@ -2142,6 +2143,7 @@ var WUX;
         CSS.FORM = 'padding-top:16px;';
         CSS.FORM_GROUP = 'form-group';
         CSS.FORM_CTRL = 'form-control';
+        CSS.ICON = 'margin-right:8px;';
         return CSS;
     }());
     WUX.CSS = CSS;
@@ -2442,6 +2444,11 @@ var WUX;
             _this.rootTag = inline ? 'span' : 'div';
             return _this;
         }
+        WContainer.prototype.wrapp = function (w0, w1) {
+            this.w0 = w0;
+            this.w1 = w1;
+            return this;
+        };
         WContainer.prototype.addRow = function (classStyle, style) {
             if (!classStyle)
                 classStyle = 'row';
@@ -2625,7 +2632,11 @@ var WUX;
                     inner += "</div>";
                 }
             }
-            return this.buildRoot(this.rootTag, inner);
+            if (!this.w0)
+                this.w0 = '';
+            if (!this.w1)
+                this.w1 = '';
+            return this.w0 + this.buildRoot(this.rootTag, inner) + this.w1;
         };
         WContainer.prototype.componentDidMount = function () {
             for (var i = 0; i < this.cint.length; i++) {

@@ -316,9 +316,10 @@ declare namespace WUX {
 declare namespace WUX {
     let global: WGlobal;
     class CSS {
-        static readonly FORM = "padding-top:16px;";
-        static readonly FORM_GROUP = "form-group";
-        static readonly FORM_CTRL = "form-control";
+        static FORM: string;
+        static FORM_GROUP: string;
+        static FORM_CTRL: string;
+        static ICON: string;
     }
     function formatDate(a: any, withDay?: boolean, e?: boolean): string;
     function isoDate(a: any): string;
@@ -345,7 +346,10 @@ declare namespace WUX {
         comp: WComponent[];
         sr_c: string[];
         grid: string[][];
+        w0: string;
+        w1: string;
         constructor(id?: string, classStyle?: string, style?: string | WStyle, attributes?: string | object, inline?: boolean, type?: string);
+        wrapp(w0: string, w1: string): this;
         addRow(classStyle?: string, style?: string | WStyle): this;
         addCol(classStyle?: string, style?: string | WStyle): this;
         add(component: WElement, constraints?: string): this;
