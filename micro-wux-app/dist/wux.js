@@ -4140,5 +4140,120 @@ var WUX;
         return WCalendar;
     }(WUX.WComponent));
     WUX.WCalendar = WCalendar;
+    var WLineChart = (function (_super) {
+        __extends(WLineChart, _super);
+        function WLineChart(id, classStyle, style) {
+            var _this = _super.call(this, id ? id : '*', 'WLineChart', 0, classStyle, style) || this;
+            _this.rootTag = 'canvas';
+            _this.forceOnChange = true;
+            _this._w = 600;
+            _this._h = 300;
+            _this._attributes = 'width="' + _this._w + '" height="' + _this._h + '"';
+            _this.fontSize = 14;
+            _this.fontName = 'Arial';
+            _this.axis = '#808080';
+            _this.grid = '#a0a0a0';
+            _this.line = '#e23222';
+            _this.offx = 30;
+            _this.offy = 30;
+            return _this;
+        }
+        WLineChart.prototype.size = function (width, height) {
+            this._w = width;
+            this._h = height;
+            if (this._w < 40)
+                this._w = 40;
+            if (this._h < 40)
+                this._h = 40;
+            this._attributes = 'width="' + this._w + '" height="' + this._h + '"';
+            return this;
+        };
+        Object.defineProperty(WLineChart.prototype, "width", {
+            get: function () {
+                return this._w;
+            },
+            set: function (v) {
+                this._w = v;
+                if (this._w < 40)
+                    this._w = 40;
+                this._attributes = 'width="' + this._w + '" height="' + this._h + '"';
+            },
+            enumerable: false,
+            configurable: true
+        });
+        Object.defineProperty(WLineChart.prototype, "height", {
+            get: function () {
+                return this._h;
+            },
+            set: function (v) {
+                this._h = v;
+                if (this._h < 40)
+                    this._h = 40;
+                this._attributes = 'width="' + this._w + '" height="' + this._h + '"';
+            },
+            enumerable: false,
+            configurable: true
+        });
+        WLineChart.prototype.componentDidMount = function () {
+            if (!this.state || this.state.length < 2)
+                return;
+            var r = this.root;
+            var ctx = r.getContext('2d');
+            if (!ctx)
+                return;
+            var cw = r.width - this.offx;
+            var ch = r.height - this.offy;
+            var bw = cw / (this.state.length - 1);
+            var my = Math.max.apply(Math, this.state);
+            if (!my)
+                my = 4;
+            var iy = [Math.round(my / 4), Math.round(my / 2), Math.round(my * 3 / 4)];
+            var sy = ch / my;
+            ctx.beginPath();
+            ctx.lineWidth = 2;
+            ctx.strokeStyle = this.line;
+            ctx.moveTo(this.offx, r.height - (this.state[0] * sy));
+            for (var i = 1; i < this.state.length; i++) {
+                var x = this.offx + i * bw;
+                var y = r.height - (this.state[i] * sy);
+                ctx.lineTo(x, y);
+            }
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.lineWidth = 1;
+            ctx.strokeStyle = this.axis;
+            ctx.moveTo(this.offx, this.offy);
+            ctx.lineTo(this.offx, r.height);
+            ctx.lineTo(r.width, r.height);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.setLineDash([4, 8]);
+            ctx.lineWidth = 1;
+            ctx.strokeStyle = this.grid;
+            for (var i = 1; i < this.state.length; i++) {
+                var x = this.offx + i * bw;
+                ctx.moveTo(x, this.offy);
+                ctx.lineTo(x, r.height);
+            }
+            ctx.moveTo(this.offx, this.offy);
+            ctx.lineTo(r.width, this.offy);
+            for (var _i = 0, iy_1 = iy; _i < iy_1.length; _i++) {
+                var vy = iy_1[_i];
+                ctx.moveTo(this.offx, r.height - (vy * sy));
+                ctx.lineTo(r.width, r.height - (vy * sy));
+            }
+            ctx.stroke();
+            ctx.fillStyle = this.axis;
+            ctx.font = this.fontSize + 'px ' + this.fontName;
+            ctx.fillText('0', 0, r.height);
+            for (var _a = 0, iy_2 = iy; _a < iy_2.length; _a++) {
+                var vy = iy_2[_a];
+                ctx.fillText('' + vy, 0, r.height - (vy * sy));
+            }
+            ctx.fillText('' + my, 0, this.offy);
+        };
+        return WLineChart;
+    }(WUX.WComponent));
+    WUX.WLineChart = WLineChart;
 })(WUX || (WUX = {}));
 //# sourceMappingURL=wux.js.map

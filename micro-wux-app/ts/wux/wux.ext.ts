@@ -374,4 +374,134 @@ namespace WUX {
 			});
 		}
 	}
+	
+	export class WLineChart extends WUX.WComponent<number, number[]> {
+		fontName: string;
+		fontSize: number;
+		axis: string;
+		grid: string;
+		line: string;
+		offx: number;
+		offy: number;
+		_w: number;
+		_h: number;
+		
+		constructor(id?: string, classStyle?: string, style?: string | WUX.WStyle) {
+			super(id ? id : '*', 'WLineChart', 0, classStyle, style);
+			this.rootTag = 'canvas';
+			this.forceOnChange = true;
+			
+			this._w = 600;
+			this._h = 300;
+			this._attributes = 'width="' + this._w + '" height="' + this._h + '"';
+			this.fontSize = 14;
+			this.fontName = 'Arial';
+			this.axis = '#808080';
+			this.grid = '#a0a0a0';
+			this.line = '#e23222';
+			this.offx = 30;
+			this.offy = 30;
+		}
+		
+		size(width: number, height: number): this {
+			this._w = width;
+			this._h = height;
+			if(this._w < 40) this._w = 40;
+			if(this._h < 40) this._h = 40;
+			this._attributes = 'width="' + this._w + '" height="' + this._h + '"';
+			return this;
+		}
+		
+		get width(): number {
+			return this._w;
+		}
+		set width(v: number) {
+			this._w = v;
+			if(this._w < 40) this._w = 40;
+			this._attributes = 'width="' + this._w + '" height="' + this._h + '"';
+		}
+		
+		get height(): number {
+			return this._h;
+		}
+		set height(v: number) {
+			this._h = v;
+			if(this._h < 40) this._h = 40;
+			this._attributes = 'width="' + this._w + '" height="' + this._h + '"';
+		}
+		
+		protected componentDidMount(): void {
+			if(!this.state || this.state.length < 2) return;
+			
+			let r = this.root as HTMLCanvasElement;
+			let ctx = r.getContext('2d');
+			if(!ctx) return;
+			
+			// Boundary
+			let cw = r.width - this.offx;
+			let ch = r.height - this.offy;
+			let bw = cw / (this.state.length - 1);
+			// Max Y
+			let my = Math.max(...this.state);
+			if(!my) my = 4;
+			// Intermediate Y
+			let iy = [Math.round(my / 4), Math.round(my / 2), Math.round(my * 3 / 4)];
+			// Step Y
+			let sy = ch / my;
+			
+			// Chart
+			ctx.beginPath();
+			ctx.lineWidth = 2;
+			ctx.strokeStyle = this.line;
+			ctx.moveTo(this.offx, r.height - (this.state[0] * sy));
+			for (let i = 1; i < this.state.length; i++) {
+				let x = this.offx + i * bw;
+				let y = r.height - (this.state[i] * sy);
+				ctx.lineTo(x, y);
+			}
+			ctx.stroke();
+			
+			// Axis
+			ctx.beginPath();
+			ctx.lineWidth = 1;
+			ctx.strokeStyle = this.axis;
+			// Origin
+			ctx.moveTo(this.offx, this.offy);
+			// Y
+			ctx.lineTo(this.offx, r.height);
+			// X
+			ctx.lineTo(r.width, r.height);
+			ctx.stroke();
+			
+			// Grid
+			ctx.beginPath();
+			ctx.setLineDash([4, 8]);
+			ctx.lineWidth = 1;
+			ctx.strokeStyle = this.grid;
+			for (let i = 1; i < this.state.length; i++) {
+				let x = this.offx + i * bw;
+				// X
+				ctx.moveTo(x, this.offy);
+				ctx.lineTo(x, r.height);
+			}
+			// Max Y
+			ctx.moveTo(this.offx, this.offy);
+			ctx.lineTo(r.width, this.offy);
+			// Intermediate Y
+			for(let vy of iy) {
+				ctx.moveTo(this.offx, r.height - (vy * sy));
+				ctx.lineTo(r.width, r.height - (vy * sy));
+			}
+			ctx.stroke();
+			
+			// Labels
+			ctx.fillStyle = this.axis;
+			ctx.font = this.fontSize + 'px ' + this.fontName;
+			ctx.fillText('0', 0, r.height);
+			for(let vy of iy) {
+				ctx.fillText('' + vy, 0, r.height - (vy * sy));
+			}
+			ctx.fillText('' + my, 0, this.offy);
+		}
+	}
 }

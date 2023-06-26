@@ -555,4 +555,22 @@ declare namespace WUX {
         protected body(): string;
         protected componentDidMount(): void;
     }
+    class WLineChart extends WUX.WComponent<number, number[]> {
+        fontName: string;
+        fontSize: number;
+        axis: string;
+        grid: string;
+        line: string;
+        offx: number;
+        offy: number;
+        _w: number;
+        _h: number;
+        constructor(id?: string, classStyle?: string, style?: string | WUX.WStyle);
+        size(width: number, height: number): this;
+        get width(): number;
+        set width(v: number);
+        get height(): number;
+        set height(v: number);
+        protected componentDidMount(): void;
+    }
 }
