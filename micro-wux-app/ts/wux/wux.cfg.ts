@@ -44,6 +44,12 @@
 		static ICON = 'margin-right:8px;';
 	}
 	
+	export class RES {
+		static OK = 'OK';
+		static CLOSE = 'Chiudi';
+		static CANCEL = 'Annulla';
+	}	
+	
 	// Data format utilities
 
 	export function formatDate(a: any, withDay: boolean = false, e: boolean = false): string {

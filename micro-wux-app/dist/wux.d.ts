@@ -321,6 +321,11 @@ declare namespace WUX {
         static FORM_CTRL: string;
         static ICON: string;
     }
+    class RES {
+        static OK: string;
+        static CLOSE: string;
+        static CANCEL: string;
+    }
     function formatDate(a: any, withDay?: boolean, e?: boolean): string;
     function isoDate(a: any): string;
     function formatDateTime(a: any, withSec?: boolean, withDay?: boolean, e?: boolean): string;
@@ -349,16 +354,17 @@ declare namespace WUX {
         w0: string;
         w1: string;
         constructor(id?: string, classStyle?: string, style?: string | WStyle, attributes?: string | object, inline?: boolean, type?: string);
-        wrapp(w0: string, w1: string): this;
         addRow(classStyle?: string, style?: string | WStyle): this;
         addCol(classStyle?: string, style?: string | WStyle): this;
         add(component: WElement, constraints?: string): this;
-        addGroup(w: WWrapper, ...ac: WComponent[]): this;
-        addLine(style: string | WStyle, ...ac: WComponent[]): this;
-        addStack(style: string | WStyle, ...ac: WComponent[]): this;
+        addGroup(w: WWrapper, ...ac: WElement[]): this;
+        addLine(style: string | WStyle, ...ac: WElement[]): this;
+        addStack(style: string | WStyle, ...ac: WElement[]): this;
         addContainer(c: WUX.WContainer, constraints?: string): WContainer;
         addContainer(w: WWrapper, constraints?: string): WContainer;
         addContainer(i: string, classStyle?: string, style?: string, attributes?: string | object, inline?: boolean, type?: string): WContainer;
+        addDiv(height: number, inner?: string, classStyle?: string): WContainer;
+        addDiv(css: string | WStyle, inner?: string, attributes?: string, id?: string): WContainer;
         end(): WContainer;
         protected render(): any;
         protected componentDidMount(): void;
@@ -512,6 +518,54 @@ declare namespace WUX {
     }
 }
 declare namespace WUX {
+    function JQ(e: any): JQuery;
+    class WDialog<P = any, S = any> extends WUX.WComponent<P, S> {
+        cntRoot: WUX.WContainer;
+        cntMain: WUX.WContainer;
+        cntContent: WUX.WContainer;
+        cntHeader: WUX.WContainer;
+        cntBody: WUX.WContainer;
+        cntFooter: WUX.WContainer;
+        _title: string;
+        tagTitle: string;
+        btnClose: WUX.WButton;
+        btnOK: WUX.WButton;
+        btnCancel: WUX.WButton;
+        txtCancel: string;
+        buttons: WUX.WButton[];
+        ok: boolean;
+        cancel: boolean;
+        isShown: boolean;
+        ph: (e?: JQueryEventObject) => any;
+        sh: (e?: JQueryEventObject) => any;
+        hh: (e?: JQueryEventObject) => any;
+        $r: JQuery;
+        constructor(id: string, name?: string, btnOk?: boolean, btnClose?: boolean, classStyle?: string, style?: string | WUX.WStyle, attributes?: string | object);
+        makeUp(title: string, body: string | WUX.WComponent, onHidden?: (e?: JQueryEventObject) => any): this;
+        onShownModal(handler: (e?: JQueryEventObject) => any): void;
+        onHiddenModal(handler: (e?: JQueryEventObject) => any): void;
+        get header(): WUX.WContainer;
+        get body(): WUX.WContainer;
+        get footer(): WUX.WContainer;
+        get title(): string;
+        set title(s: string);
+        protected onClickOk(): boolean;
+        protected onClickCancel(): boolean;
+        protected buildBtnOK(): WUX.WButton;
+        protected buildBtnCancel(): WUX.WButton;
+        buttonOk(): WUX.WButton;
+        buttonCancel(): WUX.WButton;
+        show(parent?: WUX.WComponent, handler?: (e?: JQueryEventObject) => any): void;
+        hide(): void;
+        close(): void;
+        protected beforeShow(): boolean;
+        protected onShown(): void;
+        protected onHidden(): void;
+        protected render(): WContainer;
+        protected componentDidMount(): void;
+        componentWillUnmount(): void;
+        protected buildTitle(): string;
+    }
     class WCalendar extends WComponent<number, Date> {
         ep: HTMLElement;
         em: HTMLElement;

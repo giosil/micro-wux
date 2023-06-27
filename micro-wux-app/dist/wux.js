@@ -2147,6 +2147,15 @@ var WUX;
         return CSS;
     }());
     WUX.CSS = CSS;
+    var RES = (function () {
+        function RES() {
+        }
+        RES.OK = 'OK';
+        RES.CLOSE = 'Chiudi';
+        RES.CANCEL = 'Annulla';
+        return RES;
+    }());
+    WUX.RES = RES;
     function formatDate(a, withDay, e) {
         if (withDay === void 0) { withDay = false; }
         if (e === void 0) { e = false; }
@@ -2444,11 +2453,6 @@ var WUX;
             _this.rootTag = inline ? 'span' : 'div';
             return _this;
         }
-        WContainer.prototype.wrapp = function (w0, w1) {
-            this.w0 = w0;
-            this.w1 = w1;
-            return this;
-        };
         WContainer.prototype.addRow = function (classStyle, style) {
             if (!classStyle)
                 classStyle = 'row';
@@ -2498,6 +2502,10 @@ var WUX;
                 }
                 if (constraints == 'unshift') {
                     this.cint.unshift(component);
+                    return this;
+                }
+                if (this.grid.length == 0) {
+                    this.cint.push(component);
                     return this;
                 }
                 var r = this.grid.length - 1;
@@ -2611,6 +2619,18 @@ var WUX;
             }
             return c;
         };
+        WContainer.prototype.addDiv = function (hcss, inner, cls_att, id) {
+            if (typeof hcss == 'number') {
+                if (hcss < 1)
+                    return this;
+                var r = WUX.build('div', inner, { h: hcss, n: cls_att });
+                return this.add(r);
+            }
+            else {
+                var r = WUX.build('div', inner, hcss, cls_att, id);
+                return this.add(r);
+            }
+        };
         WContainer.prototype.end = function () {
             if (this.parent instanceof WContainer)
                 return this.parent.end();
@@ -2652,8 +2672,12 @@ var WUX;
             }
         };
         WContainer.prototype.componentWillUnmount = function () {
-            for (var _i = 0, _a = this.comp; _i < _a.length; _i++) {
+            for (var _i = 0, _a = this.cint; _i < _a.length; _i++) {
                 var c = _a[_i];
+                c.unmount();
+            }
+            for (var _b = 0, _c = this.comp; _b < _c.length; _b++) {
+                var c = _c[_b];
                 c.unmount();
             }
         };
@@ -3810,6 +3834,257 @@ var WUX;
 })(WUX || (WUX = {}));
 var WUX;
 (function (WUX) {
+    function JQ(e) {
+        var jq = window['$'] ? window['$'] : null;
+        if (!jq)
+            jq = window['jQuery'] ? window['jQuery'] : null;
+        if (!jq) {
+            console.error('[WUX] JQuery not available');
+            return null;
+        }
+        return jq(e);
+    }
+    WUX.JQ = JQ;
+    var WDialog = (function (_super) {
+        __extends(WDialog, _super);
+        function WDialog(id, name, btnOk, btnClose, classStyle, style, attributes) {
+            if (name === void 0) { name = 'WDialog'; }
+            if (btnOk === void 0) { btnOk = true; }
+            if (btnClose === void 0) { btnClose = true; }
+            var _this = _super.call(this, id, name, undefined, classStyle, style, attributes) || this;
+            _this.buttons = [];
+            _this.tagTitle = 'h5';
+            if (btnClose) {
+                if (!btnOk)
+                    _this.txtCancel = WUX.RES.CLOSE;
+                _this.buttonCancel();
+            }
+            if (btnOk)
+                _this.buttonOk();
+            _this.ok = false;
+            _this.cancel = false;
+            _this.isShown = false;
+            if (_this.id && _this.id != '*') {
+                var e = document.getElementById(_this.id);
+                if (e)
+                    e.remove();
+            }
+            WuxDOM.onRender(function (e) {
+                if (_this.mounted)
+                    return;
+                _this.mount(e.element);
+            });
+            return _this;
+        }
+        WDialog.prototype.makeUp = function (title, body, onHidden) {
+            this.title = title;
+            this.body.addRow().addCol('12').add(body);
+            if (onHidden)
+                this.hh = onHidden;
+            return this;
+        };
+        WDialog.prototype.onShownModal = function (handler) {
+            this.sh = handler;
+        };
+        WDialog.prototype.onHiddenModal = function (handler) {
+            this.hh = handler;
+        };
+        Object.defineProperty(WDialog.prototype, "header", {
+            get: function () {
+                if (this.cntHeader)
+                    return this.cntHeader;
+                this.cntHeader = new WUX.WContainer('', 'modal-header');
+                return this.cntHeader;
+            },
+            enumerable: false,
+            configurable: true
+        });
+        Object.defineProperty(WDialog.prototype, "body", {
+            get: function () {
+                if (this.cntBody)
+                    return this.cntBody;
+                this.cntBody = new WUX.WContainer('', WUX.cls('modal-body', this._classStyle), '', this._attributes);
+                return this.cntBody;
+            },
+            enumerable: false,
+            configurable: true
+        });
+        Object.defineProperty(WDialog.prototype, "footer", {
+            get: function () {
+                if (this.cntFooter)
+                    return this.cntFooter;
+                this.cntFooter = new WUX.WContainer('', 'modal-footer');
+                return this.cntFooter;
+            },
+            enumerable: false,
+            configurable: true
+        });
+        Object.defineProperty(WDialog.prototype, "title", {
+            get: function () {
+                return this._title;
+            },
+            set: function (s) {
+                var _this = this;
+                this._title = s;
+                var te = document.getElementById(this.subId('title'));
+                if (te) {
+                    te.innerText = s;
+                }
+                else {
+                    this.btnClose = new WUX.WButton(this.subId('bhc'), '<span aria-hidden="true">&times;</span><span class="sr-only">Close</span>', undefined, 'close', '', 'data-dismiss="modal"');
+                    this.btnClose.on('click', function (e) {
+                        _this.close();
+                    });
+                    this.header.add(this.buildTitle()).add(this.btnClose);
+                }
+            },
+            enumerable: false,
+            configurable: true
+        });
+        WDialog.prototype.onClickOk = function () {
+            return true;
+        };
+        WDialog.prototype.onClickCancel = function () {
+            return true;
+        };
+        WDialog.prototype.buildBtnOK = function () {
+            return new WUX.WButton(this.subId('bfo'), WUX.RES.OK, '', 'btn btn-primary button-sm', '', '');
+        };
+        WDialog.prototype.buildBtnCancel = function () {
+            if (this.txtCancel) {
+                return new WUX.WButton(this.subId('bfc'), this.txtCancel, '', 'btn btn-secondary button-sm', '', '');
+            }
+            return new WUX.WButton(this.subId('bfc'), WUX.RES.CANCEL, '', 'btn btn-secondary button-sm', '', '');
+        };
+        WDialog.prototype.buttonOk = function () {
+            var _this = this;
+            if (this.btnOK)
+                return this.btnOK;
+            this.btnOK = this.buildBtnOK();
+            this.btnOK.on('click', function (e) {
+                if (_this.onClickOk()) {
+                    _this.ok = true;
+                    _this.cancel = false;
+                    if (_this.$r)
+                        _this.$r.modal('hide');
+                }
+            });
+            this.buttons.push(this.btnOK);
+        };
+        WDialog.prototype.buttonCancel = function () {
+            var _this = this;
+            if (this.btnCancel)
+                return this.btnCancel;
+            this.btnCancel = this.buildBtnCancel();
+            this.btnCancel.on('click', function (e) {
+                if (_this.onClickCancel()) {
+                    _this.ok = false;
+                    _this.cancel = true;
+                    if (_this.$r)
+                        _this.$r.modal('hide');
+                }
+            });
+            this.buttons.push(this.btnCancel);
+        };
+        WDialog.prototype.show = function (parent, handler) {
+            if (!this.beforeShow())
+                return;
+            this.ok = false;
+            this.cancel = false;
+            this.parent = parent;
+            this.ph = handler;
+            if (!this.mounted)
+                WuxDOM.mount(this);
+            if (!this.$r)
+                return;
+            this.$r.modal({ backdrop: 'static', keyboard: false, show: false });
+            this.$r.modal('show');
+        };
+        WDialog.prototype.hide = function () {
+            if (this.$r)
+                this.$r.modal('hide');
+        };
+        WDialog.prototype.close = function () {
+            this.ok = false;
+            this.cancel = false;
+            if (this.$r)
+                this.$r.modal('hide');
+        };
+        WDialog.prototype.beforeShow = function () {
+            return true;
+        };
+        WDialog.prototype.onShown = function () {
+        };
+        WDialog.prototype.onHidden = function () {
+        };
+        WDialog.prototype.render = function () {
+            this.isShown = false;
+            this.cntRoot = new WUX.WContainer(this.id, 'modal inmodal fade', '', 'role="dialog" aria-hidden="true"');
+            this.cntMain = this.cntRoot.addContainer('', 'modal-dialog modal-lg', this._style);
+            this.cntContent = this.cntMain.addContainer('', 'modal-content');
+            if (this.cntHeader)
+                this.cntContent.addContainer(this.cntHeader);
+            if (this.cntBody)
+                this.cntContent.addContainer(this.cntBody);
+            for (var _i = 0, _a = this.buttons; _i < _a.length; _i++) {
+                var btn = _a[_i];
+                this.footer.add(btn);
+            }
+            if (this.cntFooter)
+                this.cntContent.addContainer(this.cntFooter);
+            return this.cntRoot;
+        };
+        WDialog.prototype.componentDidMount = function () {
+            var _this = this;
+            if (!this.root)
+                return;
+            this.$r = JQ(this.root);
+            if (!this.$r)
+                return;
+            this.$r.on('shown.bs.modal', function (e) {
+                _this.isShown = true;
+                _this.onShown();
+                if (_this.sh)
+                    _this.sh(e);
+            });
+            this.$r.on('hidden.bs.modal', function (e) {
+                _this.isShown = false;
+                _this.onHidden();
+                if (_this.hh)
+                    _this.hh(e);
+                if (_this.ph) {
+                    _this.ph(e);
+                    _this.ph = null;
+                }
+            });
+        };
+        WDialog.prototype.componentWillUnmount = function () {
+            this.isShown = false;
+            if (this.btnClose)
+                this.btnClose.unmount();
+            if (this.btnCancel)
+                this.btnCancel.unmount();
+            if (this.cntFooter)
+                this.cntFooter.unmount();
+            if (this.cntBody)
+                this.cntBody.unmount();
+            if (this.cntHeader)
+                this.cntHeader.unmount();
+            if (this.cntContent)
+                this.cntContent.unmount();
+            if (this.cntMain)
+                this.cntMain.unmount();
+            if (this.cntRoot)
+                this.cntRoot.unmount();
+        };
+        WDialog.prototype.buildTitle = function () {
+            if (!this.tagTitle)
+                this.tagTitle = 'h3';
+            return '<' + this.tagTitle + ' class="modal-title" id="' + this.subId('title') + '">' + WUX.WUtil.toText(this._title) + '</' + this.tagTitle + '>';
+        };
+        return WDialog;
+    }(WUX.WComponent));
+    WUX.WDialog = WDialog;
     var WCalendar = (function (_super) {
         __extends(WCalendar, _super);
         function WCalendar(id, classStyle, style, attributes) {
@@ -4146,8 +4421,13 @@ var WUX;
             var _this = _super.call(this, id ? id : '*', 'WLineChart', 0, classStyle, style) || this;
             _this.rootTag = 'canvas';
             _this.forceOnChange = true;
-            _this._w = 600;
+            var iw = window.innerWidth;
+            _this._w = 750;
             _this._h = 300;
+            if (iw < 900 || iw > 1920) {
+                _this._w = Math.round(750 * iw / 1400);
+                _this._h = Math.round(300 * _this._w / 750);
+            }
             _this._attributes = 'width="' + _this._w + '" height="' + _this._h + '"';
             _this.fontSize = 14;
             _this.fontName = 'Arial';

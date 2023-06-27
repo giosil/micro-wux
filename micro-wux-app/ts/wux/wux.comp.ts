@@ -46,12 +46,6 @@ namespace WUX {
 			this.rootTag = inline ? 'span' : 'div';
 		}
 
-		wrapp(w0: string, w1: string): this {
-			this.w0 = w0;
-			this.w1 = w1;
-			return this;
-		}
-
 		addRow(classStyle?: string, style?: string | WStyle): this {
 			if(!classStyle) classStyle = 'row';
 			let g: string[] = [];
@@ -97,6 +91,10 @@ namespace WUX {
 					this.cint.unshift(component);
 					return this;
 				}
+				if(this.grid.length == 0) {
+					this.cint.push(component);
+					return this;
+				}
 				let r = this.grid.length - 1;
 				if(constraints) {
 					let x = parseInt(constraints);
@@ -118,7 +116,7 @@ namespace WUX {
 			}
 		}
 
-		addGroup(w: WWrapper, ...ac: WComponent[]): this {
+		addGroup(w: WWrapper, ...ac: WElement[]): this {
 			if (w) {
 				let cnt = this.addContainer(w);
 				if (!ac || !ac.length) return this;
@@ -134,7 +132,7 @@ namespace WUX {
 			return this;
 		}
 
-		addLine(style: string | WStyle, ...ac: WComponent[]): this {
+		addLine(style: string | WStyle, ...ac: WElement[]): this {
 			let w = new WContainer();
 			w.addRow();
 			if(ac) {
@@ -151,7 +149,7 @@ namespace WUX {
 			return this;
 		}
 
-		addStack(style: string | WStyle, ...ac: WComponent[]): this {
+		addStack(style: string | WStyle, ...ac: WElement[]): this {
 			let w = new WContainer();
 			if(ac) {
 				let n = '12';
@@ -190,6 +188,20 @@ namespace WUX {
 				this.add(c, con_cls);
 			}
 			return c;
+		}
+
+		addDiv(height: number, inner?: string, classStyle?: string): WContainer;
+		addDiv(css: string | WStyle, inner?: string, attributes?: string, id?: string): WContainer;
+		addDiv(hcss: number | string | WStyle, inner?: string, cls_att?: string, id?: string): WContainer {
+			if (typeof hcss == 'number') {
+				if (hcss < 1) return this;
+				let r = WUX.build('div', inner, { h: hcss, n: cls_att });
+				return this.add(r);
+			}
+			else {
+				let r = WUX.build('div', inner, hcss, cls_att, id);
+				return this.add(r);
+			}
 		}
 
 		end(): WContainer {
@@ -231,9 +243,8 @@ namespace WUX {
 		}
 
 		componentWillUnmount(): void {
-			for (let c of this.comp) {
-				c.unmount();
-			}
+			for (let c of this.cint) c.unmount();
+			for (let c of this.comp) c.unmount();
 		}
 
 		protected cs(cs: string) {

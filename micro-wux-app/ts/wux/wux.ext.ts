@@ -1,4 +1,247 @@
 namespace WUX {
+	export function JQ(e: any): JQuery {
+		let jq = window['$'] ? window['$'] as JQueryStatic : null;
+		if(!jq) jq = window['jQuery'] ? window['jQuery'] as JQueryStatic : null;
+		if(!jq) {
+			console.error('[WUX] JQuery not available');
+			return null;
+		}
+		return jq(e);
+	}
+	
+	// Bootstrap / JQuery
+	export class WDialog<P = any, S = any> extends WUX.WComponent<P, S> {
+		cntRoot: WUX.WContainer;
+		cntMain: WUX.WContainer;
+		cntContent: WUX.WContainer;
+		cntHeader: WUX.WContainer;
+		cntBody: WUX.WContainer;
+		cntFooter: WUX.WContainer;
+		// GUI
+		_title: string;
+		tagTitle: string;
+		btnClose: WUX.WButton;
+		btnOK: WUX.WButton;
+		btnCancel: WUX.WButton;
+		txtCancel: string;
+		buttons: WUX.WButton[];
+		// Flag
+		ok: boolean;
+		cancel: boolean;
+		isShown: boolean;
+		// Control
+		// parent handler
+		ph: (e?: JQueryEventObject) => any;
+		// show handler
+		sh: (e?: JQueryEventObject) => any;
+		// hidden handler
+		hh: (e?: JQueryEventObject) => any;
+		// JQ(this.root) -> $(this.root)
+		$r: JQuery;
+
+		constructor(id: string, name: string = 'WDialog', btnOk = true, btnClose = true, classStyle?: string, style?: string | WUX.WStyle, attributes?: string | object) {
+			super(id, name, undefined, classStyle, style, attributes);
+			this.buttons = [];
+			this.tagTitle = 'h5';
+			if (btnClose) {
+				if (!btnOk) this.txtCancel = RES.CLOSE;
+				this.buttonCancel();
+			}
+			if (btnOk) this.buttonOk();
+			this.ok = false;
+			this.cancel = false;
+			this.isShown = false;
+			// Auto-mount
+			if (this.id && this.id != '*') {
+				let e = document.getElementById(this.id);
+				if(e) e.remove();
+			}
+			WuxDOM.onRender((e: WUX.WEvent) => {
+				if (this.mounted) return;
+				this.mount(e.element);
+			});
+		}
+
+		makeUp(title: string, body: string | WUX.WComponent, onHidden?: (e?: JQueryEventObject) => any): this {
+			this.title = title;
+			this.body.addRow().addCol('12').add(body);
+			if(onHidden) this.hh = onHidden;
+			return this;
+		}
+
+		onShownModal(handler: (e?: JQueryEventObject) => any) {
+			this.sh = handler;
+		}
+
+		onHiddenModal(handler: (e?: JQueryEventObject) => any) {
+			this.hh = handler;
+		}
+
+		get header(): WUX.WContainer {
+			if (this.cntHeader) return this.cntHeader;
+			this.cntHeader = new WUX.WContainer('', 'modal-header');
+			return this.cntHeader;
+		}
+
+		get body(): WUX.WContainer {
+			if (this.cntBody) return this.cntBody;
+			this.cntBody = new WUX.WContainer('', WUX.cls('modal-body', this._classStyle), '', this._attributes);
+			return this.cntBody;
+		}
+
+		get footer(): WUX.WContainer {
+			if (this.cntFooter) return this.cntFooter;
+			this.cntFooter = new WUX.WContainer('', 'modal-footer');
+			return this.cntFooter;
+		}
+
+		get title(): string {
+			return this._title;
+		}
+		set title(s: string) {
+			this._title = s;
+			let te = document.getElementById(this.subId('title'));
+			if(te) {
+				te.innerText = s;
+			}
+			else {
+				this.btnClose = new WUX.WButton(this.subId('bhc'), '<span aria-hidden="true">&times;</span><span class="sr-only">Close</span>', undefined, 'close', '', 'data-dismiss="modal"');
+				this.btnClose.on('click', (e: PointerEvent) => {
+					this.close();
+				});
+				this.header.add(this.buildTitle()).add(this.btnClose);
+			}
+		}
+
+		protected onClickOk(): boolean {
+			return true;
+		}
+
+		protected onClickCancel(): boolean {
+			return true;
+		}
+
+		protected buildBtnOK(): WUX.WButton {
+			return new WUX.WButton(this.subId('bfo'), RES.OK, '', 'btn btn-primary button-sm', '', '');
+		}
+
+		protected buildBtnCancel(): WUX.WButton {
+			if (this.txtCancel) {
+				return new WUX.WButton(this.subId('bfc'), this.txtCancel, '', 'btn btn-secondary button-sm', '', '');
+			}
+			return new WUX.WButton(this.subId('bfc'), RES.CANCEL, '', 'btn btn-secondary button-sm', '', '');
+		}
+
+		buttonOk(): WUX.WButton {
+			if (this.btnOK) return this.btnOK;
+			this.btnOK = this.buildBtnOK();
+			this.btnOK.on('click', (e: JQueryEventObject) => {
+				if (this.onClickOk()) {
+					this.ok = true;
+					this.cancel = false;
+					if(this.$r) this.$r.modal('hide');
+				}
+			});
+			this.buttons.push(this.btnOK);
+		}
+
+		buttonCancel(): WUX.WButton {
+			if (this.btnCancel) return this.btnCancel;
+			this.btnCancel = this.buildBtnCancel();
+			this.btnCancel.on('click', (e: JQueryEventObject) => {
+				if (this.onClickCancel()) {
+					this.ok = false;
+					this.cancel = true;
+					if(this.$r) this.$r.modal('hide');
+				}
+			});
+			this.buttons.push(this.btnCancel);
+		}
+
+		show(parent?: WUX.WComponent, handler?: (e?: JQueryEventObject) => any): void {
+			if (!this.beforeShow()) return;
+			this.ok = false;
+			this.cancel = false;
+			this.parent = parent;
+			this.ph = handler;
+			if (!this.mounted) WuxDOM.mount(this);
+			if(!this.$r) return;
+			this.$r.modal({ backdrop: 'static', keyboard: false, show: false});
+			this.$r.modal('show');
+		}
+
+		hide(): void {
+			if(this.$r) this.$r.modal('hide');
+		}
+
+		close(): void {
+			this.ok = false;
+			this.cancel = false;
+			if(this.$r) this.$r.modal('hide');
+		}
+
+		protected beforeShow(): boolean {
+			return true;
+		}
+
+		protected onShown() {
+		}
+
+		protected onHidden() {
+		}
+
+		protected render() {
+			this.isShown = false;
+			this.cntRoot = new WUX.WContainer(this.id, 'modal inmodal fade', '', 'role="dialog" aria-hidden="true"');
+			this.cntMain = this.cntRoot.addContainer('', 'modal-dialog modal-lg', this._style);
+			this.cntContent = this.cntMain.addContainer('', 'modal-content');
+			if (this.cntHeader) this.cntContent.addContainer(this.cntHeader);
+			if (this.cntBody) this.cntContent.addContainer(this.cntBody);
+			for (let btn of this.buttons) this.footer.add(btn);
+			if (this.cntFooter) this.cntContent.addContainer(this.cntFooter);
+			return this.cntRoot;
+		}
+
+		protected componentDidMount(): void {
+			if(!this.root) return;
+
+			this.$r = JQ(this.root);
+			if(!this.$r) return;
+
+			this.$r.on('shown.bs.modal', (e: JQueryEventObject) => {
+				this.isShown = true;
+				this.onShown();
+				if (this.sh) this.sh(e);
+			});
+			this.$r.on('hidden.bs.modal', (e: JQueryEventObject) => {
+				this.isShown = false;
+				this.onHidden();
+				if (this.hh) this.hh(e);
+				if (this.ph) {
+					this.ph(e);
+					this.ph = null;
+				}
+			});
+		}
+
+		componentWillUnmount(): void {
+			this.isShown = false;
+			if (this.btnClose) this.btnClose.unmount();
+			if (this.btnCancel) this.btnCancel.unmount();
+			if (this.cntFooter) this.cntFooter.unmount();
+			if (this.cntBody) this.cntBody.unmount();
+			if (this.cntHeader) this.cntHeader.unmount();
+			if (this.cntContent) this.cntContent.unmount();
+			if (this.cntMain) this.cntMain.unmount();
+			if (this.cntRoot) this.cntRoot.unmount();
+		}
+
+		protected buildTitle(): string {
+			if (!this.tagTitle) this.tagTitle = 'h3';
+			return '<' + this.tagTitle + ' class="modal-title" id="' + this.subId('title') + '">' + WUtil.toText(this._title) + '</' + this.tagTitle + '>';
+		}
+	}
+	
 	export class WCalendar extends WComponent<number, Date> {
 		// Element previous
 		ep: HTMLElement;
@@ -42,7 +285,7 @@ namespace WUX {
 		mt: {[k: string]: string} = {};
 		// Last state (converted to string)
 		ls: string;
-		
+
 		constructor(id?: string, classStyle?: string, style?: string | WStyle, attributes?: string | object) {
 			// WComponent init
 			super(id ? id : '*', 'WCalendar', 1, classStyle, style, attributes);
@@ -75,12 +318,12 @@ namespace WUX {
 			// Today
 			this.td = this.str(new Date());
 		}
-		
+
 		onDoubleClick(handler: (e: WEvent) => any): void {
 			if (!this.handlers['_doubleclick']) this.handlers['_doubleclick'] = [];
 			this.handlers['_doubleclick'].push(handler);
 		}
-		
+
 		protected updateState(nextState: Date): void {
 			this.state = nextState;
 			if(!this.state) this.state = new Date();
@@ -89,7 +332,7 @@ namespace WUX {
 			let y = this.state.getFullYear();
 			this.ls = (y * 10000 + (m + 1) * 100 + d) + '';
 		}
-		
+
 		protected render() {
 			if(!this.state) this.state = new Date();
 			// Build table
@@ -111,7 +354,7 @@ namespace WUX {
 			i += '<div class="row"><div class="col-12">' + t + '</div></div>';
 			return this.buildRoot(this.rootTag, i);
 		}
-		
+
 		add(a: number): Date {
 			if(!this.state) this.state = new Date();
 			let d = this.state.getDate();
@@ -136,7 +379,7 @@ namespace WUX {
 			}
 			return n;
 		}
-		
+
 		mark(...p: any[]): this {
 			if(!p || !p.length) return this;
 			for(let o of p) {
@@ -150,7 +393,7 @@ namespace WUX {
 			}
 			return this;
 		}
-		
+
 		unmark(...p: any[]): this {
 			if(!p || !p.length) return this;
 			for(let o of p) {
@@ -161,7 +404,7 @@ namespace WUX {
 			}
 			return this;
 		}
-		
+
 		title(d: any, t: string): this {
 			let dt = WUtil.toDate(d);
 			if(!dt) return this;
@@ -171,7 +414,7 @@ namespace WUX {
 			if(e) e.setAttribute('title', t);
 			return this;
 		}
-		
+
 		unm(i: number, r: boolean = true): void {
 			if(i < 0) return;
 			let k = this.am[i];
@@ -188,7 +431,7 @@ namespace WUX {
 				}
 			}
 		}
-		
+
 		clear(): this {
 			if(this.am && this.am.length) {
 				for(let i = 0; i < this.am.length; i++) {
@@ -205,32 +448,32 @@ namespace WUX {
 			}
 			return this;
 		}
-		
+
 		prev(): Date {
 			return this.add(-1);
 		}
-		
+
 		next(): Date {
 			return this.add(1);
 		}
-		
+
 		ele(dt: Date): HTMLElement {
 			if(!dt) return null;
 			return document.getElementById(this.subId(this.str(dt)));
 		}
-		
+
 		str(dt: Date): string {
 			if(!dt) return null;
 			return (dt.getFullYear() * 10000 + (dt.getMonth() + 1) * 100 + dt.getDate()) + '';
 		}
-		
+
 		from(): string {
 			if(!this.state) this.state = new Date();
 			let m = this.state.getMonth();
 			let y = this.state.getFullYear();
 			return (y * 10000 + (m + 1) * 100 + 1) + '';
 		}
-		
+
 		to(): string {
 			if(!this.state) this.state = new Date();
 			let m = this.state.getMonth();
@@ -240,7 +483,7 @@ namespace WUX {
 			let d = n.getDate();
 			return (y * 10000 + (m + 1) * 100 + d) + '';
 		}
-		
+
 		protected body(): string {
 			if(!this.state) this.state = new Date();
 			let b = '';
@@ -294,7 +537,7 @@ namespace WUX {
 			}
 			return b;
 		}
-		
+
 		protected componentDidMount(): void {
 			this.ep = document.getElementById(this.subId('p'));
 			this.em = document.getElementById(this.subId('m'));
@@ -374,7 +617,7 @@ namespace WUX {
 			});
 		}
 	}
-	
+
 	export class WLineChart extends WUX.WComponent<number, number[]> {
 		fontName: string;
 		fontSize: number;
@@ -385,15 +628,21 @@ namespace WUX {
 		offy: number;
 		_w: number;
 		_h: number;
-		
+
 		constructor(id?: string, classStyle?: string, style?: string | WUX.WStyle) {
 			super(id ? id : '*', 'WLineChart', 0, classStyle, style);
 			this.rootTag = 'canvas';
 			this.forceOnChange = true;
-			
-			this._w = 600;
+
+			let iw = window.innerWidth;
+			this._w = 750;
 			this._h = 300;
+			if(iw < 900 || iw > 1920) {
+				this._w = Math.round(750 * iw / 1400);
+				this._h = Math.round(300 * this._w / 750);
+			}
 			this._attributes = 'width="' + this._w + '" height="' + this._h + '"';
+
 			this.fontSize = 14;
 			this.fontName = 'Arial';
 			this.axis = '#808080';
@@ -402,7 +651,7 @@ namespace WUX {
 			this.offx = 30;
 			this.offy = 30;
 		}
-		
+
 		size(width: number, height: number): this {
 			this._w = width;
 			this._h = height;
@@ -411,7 +660,7 @@ namespace WUX {
 			this._attributes = 'width="' + this._w + '" height="' + this._h + '"';
 			return this;
 		}
-		
+
 		get width(): number {
 			return this._w;
 		}
@@ -420,7 +669,7 @@ namespace WUX {
 			if(this._w < 40) this._w = 40;
 			this._attributes = 'width="' + this._w + '" height="' + this._h + '"';
 		}
-		
+
 		get height(): number {
 			return this._h;
 		}
@@ -429,7 +678,7 @@ namespace WUX {
 			if(this._h < 40) this._h = 40;
 			this._attributes = 'width="' + this._w + '" height="' + this._h + '"';
 		}
-		
+
 		protected componentDidMount(): void {
 			if(!this.state || this.state.length < 2) return;
 			
