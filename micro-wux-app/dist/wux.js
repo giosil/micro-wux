@@ -4421,15 +4421,15 @@ var WUX;
     var WLineChart = (function (_super) {
         __extends(WLineChart, _super);
         function WLineChart(id, classStyle, style) {
-            var _this = _super.call(this, id ? id : '*', 'WLineChart', 0, classStyle, style) || this;
+            var _this = _super.call(this, id ? id : '*', 'WLineChart', '', classStyle, style) || this;
             _this.rootTag = 'canvas';
             _this.forceOnChange = true;
             var iw = window.innerWidth;
             _this._w = 750;
-            _this._h = 300;
+            _this._h = 370;
             if (iw < 900 || iw > 1920) {
                 _this._w = Math.round(750 * iw / 1400);
-                _this._h = Math.round(300 * _this._w / 750);
+                _this._h = Math.round(370 * _this._w / 750);
             }
             _this._attributes = 'width="' + _this._w + '" height="' + _this._h + '"';
             _this.fontSize = 14;
@@ -4478,16 +4478,31 @@ var WUX;
             configurable: true
         });
         WLineChart.prototype.componentDidMount = function () {
-            if (!this.state || this.state.length < 2)
+            if (!this.state)
+                return;
+            var s = this.state.series;
+            if (!s || !s.length)
+                return;
+            var data = s[0];
+            if (!data || data.length < 2)
                 return;
             var r = this.root;
             var ctx = r.getContext('2d');
             if (!ctx)
                 return;
-            var cw = r.width - this.offx;
-            var ch = r.height - this.offy;
-            var bw = cw / (this.state.length - 1);
-            var my = Math.max.apply(Math, this.state);
+            var labels = this.state.labels;
+            var pady = 0;
+            var padx = 0;
+            var drawL = false;
+            if (labels && labels.length == data.length) {
+                pady = this.fontSize * 5 + 4;
+                padx = this.fontSize * 2 + 4;
+                drawL = true;
+            }
+            var cw = r.width - this.offx - padx;
+            var ch = r.height - this.offy - pady;
+            var bw = cw / (data.length - 1);
+            var my = Math.max.apply(Math, data);
             if (!my)
                 my = 4;
             var iy = [Math.round(my / 4), Math.round(my / 2), Math.round(my * 3 / 4)];
@@ -4495,10 +4510,10 @@ var WUX;
             ctx.beginPath();
             ctx.lineWidth = 2;
             ctx.strokeStyle = this.line;
-            ctx.moveTo(this.offx, r.height - (this.state[0] * sy));
-            for (var i = 1; i < this.state.length; i++) {
+            ctx.moveTo(this.offx, r.height - (data[0] * sy));
+            for (var i = 1; i < data.length; i++) {
                 var x = this.offx + i * bw;
-                var y = r.height - (this.state[i] * sy);
+                var y = r.height - pady - (data[i] * sy);
                 ctx.lineTo(x, y);
             }
             ctx.stroke();
@@ -4506,34 +4521,45 @@ var WUX;
             ctx.lineWidth = 1;
             ctx.strokeStyle = this.axis;
             ctx.moveTo(this.offx, this.offy);
-            ctx.lineTo(this.offx, r.height);
-            ctx.lineTo(r.width, r.height);
+            ctx.lineTo(this.offx, r.height - pady);
+            ctx.lineTo(r.width - padx, r.height - pady);
             ctx.stroke();
             ctx.beginPath();
             ctx.setLineDash([4, 8]);
             ctx.lineWidth = 1;
             ctx.strokeStyle = this.grid;
-            for (var i = 1; i < this.state.length; i++) {
+            for (var i = 1; i < data.length; i++) {
                 var x = this.offx + i * bw;
                 ctx.moveTo(x, this.offy);
-                ctx.lineTo(x, r.height);
+                ctx.lineTo(x, r.height - pady);
             }
             ctx.moveTo(this.offx, this.offy);
-            ctx.lineTo(r.width, this.offy);
+            ctx.lineTo(r.width - padx, this.offy);
             for (var _i = 0, iy_1 = iy; _i < iy_1.length; _i++) {
                 var vy = iy_1[_i];
-                ctx.moveTo(this.offx, r.height - (vy * sy));
-                ctx.lineTo(r.width, r.height - (vy * sy));
+                ctx.moveTo(this.offx, r.height - pady - (vy * sy));
+                ctx.lineTo(r.width - padx, r.height - pady - (vy * sy));
             }
             ctx.stroke();
             ctx.fillStyle = this.axis;
             ctx.font = this.fontSize + 'px ' + this.fontName;
-            ctx.fillText('0', 0, r.height);
+            ctx.fillText('0', 0, r.height - pady);
             for (var _a = 0, iy_2 = iy; _a < iy_2.length; _a++) {
                 var vy = iy_2[_a];
-                ctx.fillText('' + vy, 0, r.height - (vy * sy));
+                ctx.fillText('' + vy, 0, r.height - pady - (vy * sy));
             }
             ctx.fillText('' + my, 0, this.offy);
+            if (drawL) {
+                for (var i = 0; i < data.length; i++) {
+                    var x = this.offx + i * bw;
+                    ctx.save();
+                    ctx.translate(x - this.fontSize, r.height);
+                    ctx.rotate(-Math.PI / 3);
+                    ctx.fillStyle = this.axis;
+                    ctx.fillText(labels[i], 0, 0);
+                    ctx.restore();
+                }
+            }
         };
         return WLineChart;
     }(WUX.WComponent));

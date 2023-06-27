@@ -518,6 +518,11 @@ declare namespace WUX {
     }
 }
 declare namespace WUX {
+    interface WChartData {
+        labels?: string[];
+        titles?: string[];
+        series?: number[][];
+    }
     function JQ(e: any): JQuery;
     class WDialog<P = any, S = any> extends WUX.WComponent<P, S> {
         cntRoot: WUX.WContainer;
@@ -609,7 +614,7 @@ declare namespace WUX {
         protected body(): string;
         protected componentDidMount(): void;
     }
-    class WLineChart extends WUX.WComponent<number, number[]> {
+    class WLineChart extends WUX.WComponent<string, WChartData> {
         fontName: string;
         fontSize: number;
         axis: string;

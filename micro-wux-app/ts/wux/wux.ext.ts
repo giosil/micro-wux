@@ -1,4 +1,11 @@
 namespace WUX {
+	
+	export interface WChartData {
+		labels?: string[];
+		titles?: string[];
+		series?: number[][];
+	}
+		
 	export function JQ(e: any): JQuery {
 		let jq = window['jQuery'] ? window['jQuery'] as JQueryStatic : null;
 		if(!jq) {
@@ -622,7 +629,7 @@ namespace WUX {
 		}
 	}
 
-	export class WLineChart extends WUX.WComponent<number, number[]> {
+	export class WLineChart extends WUX.WComponent<string, WChartData> {
 		fontName: string;
 		fontSize: number;
 		axis: string;
@@ -634,16 +641,16 @@ namespace WUX {
 		_h: number;
 
 		constructor(id?: string, classStyle?: string, style?: string | WUX.WStyle) {
-			super(id ? id : '*', 'WLineChart', 0, classStyle, style);
+			super(id ? id : '*', 'WLineChart', '', classStyle, style);
 			this.rootTag = 'canvas';
 			this.forceOnChange = true;
 
 			let iw = window.innerWidth;
 			this._w = 750;
-			this._h = 300;
+			this._h = 370;
 			if(iw < 900 || iw > 1920) {
 				this._w = Math.round(750 * iw / 1400);
-				this._h = Math.round(300 * this._w / 750);
+				this._h = Math.round(370 * this._w / 750);
 			}
 			this._attributes = 'width="' + this._w + '" height="' + this._h + '"';
 
@@ -684,18 +691,34 @@ namespace WUX {
 		}
 
 		protected componentDidMount(): void {
-			if(!this.state || this.state.length < 2) return;
+			// Get data
+			if(!this.state) return;
+			let s = this.state.series;
+			if(!s || !s.length) return;
+			let data = s[0];
+			if(!data || data.length < 2) return;
 			
+			// Get Context
 			let r = this.root as HTMLCanvasElement;
 			let ctx = r.getContext('2d');
 			if(!ctx) return;
 			
+			let labels = this.state.labels;
+			let pady = 0;
+			let padx = 0;
+			let drawL = false;
+			if(labels && labels.length == data.length) {
+				pady = this.fontSize * 5 + 4;
+				padx = this.fontSize * 2 + 4;
+				drawL = true;
+			}
+			
 			// Boundary
-			let cw = r.width - this.offx;
-			let ch = r.height - this.offy;
-			let bw = cw / (this.state.length - 1);
+			let cw = r.width - this.offx - padx;
+			let ch = r.height - this.offy - pady;
+			let bw = cw / (data.length - 1);
 			// Max Y
-			let my = Math.max(...this.state);
+			let my = Math.max(...data);
 			if(!my) my = 4;
 			// Intermediate Y
 			let iy = [Math.round(my / 4), Math.round(my / 2), Math.round(my * 3 / 4)];
@@ -706,10 +729,10 @@ namespace WUX {
 			ctx.beginPath();
 			ctx.lineWidth = 2;
 			ctx.strokeStyle = this.line;
-			ctx.moveTo(this.offx, r.height - (this.state[0] * sy));
-			for (let i = 1; i < this.state.length; i++) {
+			ctx.moveTo(this.offx, r.height - (data[0] * sy));
+			for (let i = 1; i < data.length; i++) {
 				let x = this.offx + i * bw;
-				let y = r.height - (this.state[i] * sy);
+				let y = r.height - pady - (data[i] * sy);
 				ctx.lineTo(x, y);
 			}
 			ctx.stroke();
@@ -721,9 +744,9 @@ namespace WUX {
 			// Origin
 			ctx.moveTo(this.offx, this.offy);
 			// Y
-			ctx.lineTo(this.offx, r.height);
+			ctx.lineTo(this.offx, r.height - pady);
 			// X
-			ctx.lineTo(r.width, r.height);
+			ctx.lineTo(r.width - padx, r.height - pady);
 			ctx.stroke();
 			
 			// Grid
@@ -731,30 +754,43 @@ namespace WUX {
 			ctx.setLineDash([4, 8]);
 			ctx.lineWidth = 1;
 			ctx.strokeStyle = this.grid;
-			for (let i = 1; i < this.state.length; i++) {
+			for (let i = 1; i < data.length; i++) {
 				let x = this.offx + i * bw;
 				// X
 				ctx.moveTo(x, this.offy);
-				ctx.lineTo(x, r.height);
+				ctx.lineTo(x, r.height - pady);
 			}
 			// Max Y
 			ctx.moveTo(this.offx, this.offy);
-			ctx.lineTo(r.width, this.offy);
+			ctx.lineTo(r.width - padx, this.offy);
 			// Intermediate Y
 			for(let vy of iy) {
-				ctx.moveTo(this.offx, r.height - (vy * sy));
-				ctx.lineTo(r.width, r.height - (vy * sy));
+				ctx.moveTo(this.offx, r.height - pady - (vy * sy));
+				ctx.lineTo(r.width - padx, r.height - pady - (vy * sy));
 			}
 			ctx.stroke();
 			
 			// Labels
 			ctx.fillStyle = this.axis;
 			ctx.font = this.fontSize + 'px ' + this.fontName;
-			ctx.fillText('0', 0, r.height);
+			ctx.fillText('0', 0, r.height - pady);
 			for(let vy of iy) {
-				ctx.fillText('' + vy, 0, r.height - (vy * sy));
+				ctx.fillText('' + vy, 0, r.height - pady - (vy * sy));
 			}
 			ctx.fillText('' + my, 0, this.offy);
+			
+			if(drawL) {
+				for (let i = 0; i < data.length; i++) {
+					let x = this.offx + i * bw;
+					// Etichetta inclinata sull'asse X
+					ctx.save();
+					ctx.translate(x - this.fontSize, r.height);
+					ctx.rotate(-Math.PI / 3);
+					ctx.fillStyle = this.axis;
+					ctx.fillText(labels[i], 0, 0);
+					ctx.restore();
+				}
+			}
 		}
 	}
 }
