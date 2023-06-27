@@ -3835,14 +3835,17 @@ var WUX;
 var WUX;
 (function (WUX) {
     function JQ(e) {
-        var jq = window['$'] ? window['$'] : null;
-        if (!jq)
-            jq = window['jQuery'] ? window['jQuery'] : null;
+        var jq = window['jQuery'] ? window['jQuery'] : null;
         if (!jq) {
-            console.error('[WUX] JQuery not available');
+            console.error('[WUX] jQuery is not available');
             return null;
         }
-        return jq(e);
+        var r = jq(e);
+        if (!r.length) {
+            console.error('[WUX] !jQuery(' + e + ').length==true');
+            return null;
+        }
+        return r;
     }
     WUX.JQ = JQ;
     var WDialog = (function (_super) {

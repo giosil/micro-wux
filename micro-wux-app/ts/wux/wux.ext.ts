@@ -1,14 +1,18 @@
 namespace WUX {
 	export function JQ(e: any): JQuery {
-		let jq = window['$'] ? window['$'] as JQueryStatic : null;
-		if(!jq) jq = window['jQuery'] ? window['jQuery'] as JQueryStatic : null;
+		let jq = window['jQuery'] ? window['jQuery'] as JQueryStatic : null;
 		if(!jq) {
-			console.error('[WUX] JQuery not available');
+			console.error('[WUX] jQuery is not available');
 			return null;
 		}
-		return jq(e);
+		let r = jq(e);
+		if(!r.length) {
+			console.error('[WUX] !jQuery(' + e + ').length==true');
+			return null;
+		}
+		return r;
 	}
-	
+
 	// Bootstrap / JQuery
 	export class WDialog<P = any, S = any> extends WUX.WComponent<P, S> {
 		cntRoot: WUX.WContainer;
