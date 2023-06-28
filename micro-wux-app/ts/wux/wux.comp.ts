@@ -412,6 +412,7 @@ namespace WUX {
 		size: number;
 		label: string;
 		placeHolder: string;
+		readonly: boolean;
 
 		constructor(id?: string, type?: string, size?: number, classStyle?: string, style?: string | WStyle, attributes?: string | object) {
 			// WComponent init
@@ -457,12 +458,15 @@ namespace WUX {
 				if (this.size) addAttributes += ' size="' + this.size + '"';
 				if (this.state) addAttributes += ' value="' + this.state + '"';
 				if (this.placeHolder) addAttributes += ' placeholder="' + this.placeHolder + '"';
+				if (this.readonly) addAttributes += ' readonly';
 				return l + this.build(this.rootTag, '', addAttributes);
 			}
 		}
 	}
 
 	export class WTextArea extends WComponent<number, string> {
+		readonly: boolean;
+
 		constructor(id?: string, rows?: number, classStyle?: string, style?: string | WStyle, attributes?: string | object) {
 			// WComponent init
 			super(id ? id : '*', 'WTextArea', rows, classStyle, style, attributes);
@@ -500,6 +504,19 @@ namespace WUX {
 			}
 			else {
 				this._attributes = 'rows="' + this.props + '"';
+			}
+			if(this.readonly) {
+				if(!this._attributes) {
+					this._attributes = 'readonly';
+				}
+				else if(this._attributes.indexOf('readonly') < 0) {
+					this._attributes += ' readonly';
+				}
+			}
+			else {
+				if(this._attributes && this._attributes.indexOf('readonly') >= 0) {
+					this._attributes.replace('readonly', '');
+				}
 			}
 			return WUX.build('textarea', '', this._style, this._attributes, this.id, this._classStyle);
 		}
@@ -1165,6 +1182,7 @@ namespace WUX {
 		addTextField(fieldId: string, label: string, readonly?: boolean): this {
 			let id = this.subId(fieldId);
 			let co = new WInput(id, 'text', 0, CSS.FORM_CTRL);
+			co.readonly = readonly;
 			this.currRow.push({ id: id, label: label, component: co, readonly: readonly, type: 'text' });
 			return this;
 		}
@@ -1173,6 +1191,7 @@ namespace WUX {
 			if (!rows) rows = 3;
 			let id = this.subId(fieldId);
 			let co = new WTextArea(id, rows, CSS.FORM_CTRL);
+			co.readonly = readonly;
 			this.currRow.push({ id: id, label: label, component: co, readonly: readonly, type: 'note' });
 			return this;
 		}
@@ -1180,6 +1199,7 @@ namespace WUX {
 		addDateField(fieldId: string, label: string, readonly?: boolean): this {
 			let id = this.subId(fieldId);
 			let co = new WInput(id, 'date', 0, CSS.FORM_CTRL);
+			co.readonly = readonly;
 			this.currRow.push({ id: id, label: label, component: co, readonly: readonly, type: 'date' });
 			return this;
 		}
@@ -1187,6 +1207,7 @@ namespace WUX {
 		addTimeField(fieldId: string, label: string, readonly?: boolean): this {
 			let id = this.subId(fieldId);
 			let co = new WInput(id, 'time', 0, CSS.FORM_CTRL);
+			co.readonly = readonly;
 			this.currRow.push({ id: id, label: label, component: co, readonly: readonly, type: 'time' });
 			return this;
 		}
@@ -1194,6 +1215,7 @@ namespace WUX {
 		addEmailField(fieldId: string, label: string, readonly?: boolean): this {
 			let id = this.subId(fieldId);
 			let co = new WInput(id, 'email', 0, CSS.FORM_CTRL);
+			co.readonly = readonly;
 			this.currRow.push({ id: id, label: label, component: co, readonly: readonly, type: 'email' });
 			return this;
 		}

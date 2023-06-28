@@ -2901,6 +2901,8 @@ var WUX;
                     addAttributes += ' value="' + this.state + '"';
                 if (this.placeHolder)
                     addAttributes += ' placeholder="' + this.placeHolder + '"';
+                if (this.readonly)
+                    addAttributes += ' readonly';
                 return l + this.build(this.rootTag, '', addAttributes);
             }
         };
@@ -2947,6 +2949,19 @@ var WUX;
             }
             else {
                 this._attributes = 'rows="' + this.props + '"';
+            }
+            if (this.readonly) {
+                if (!this._attributes) {
+                    this._attributes = 'readonly';
+                }
+                else if (this._attributes.indexOf('readonly') < 0) {
+                    this._attributes += ' readonly';
+                }
+            }
+            else {
+                if (this._attributes && this._attributes.indexOf('readonly') >= 0) {
+                    this._attributes.replace('readonly', '');
+                }
             }
             return WUX.build('textarea', '', this._style, this._attributes, this.id, this._classStyle);
         };
@@ -3620,6 +3635,7 @@ var WUX;
         WFormPanel.prototype.addTextField = function (fieldId, label, readonly) {
             var id = this.subId(fieldId);
             var co = new WInput(id, 'text', 0, WUX.CSS.FORM_CTRL);
+            co.readonly = readonly;
             this.currRow.push({ id: id, label: label, component: co, readonly: readonly, type: 'text' });
             return this;
         };
@@ -3628,24 +3644,28 @@ var WUX;
                 rows = 3;
             var id = this.subId(fieldId);
             var co = new WTextArea(id, rows, WUX.CSS.FORM_CTRL);
+            co.readonly = readonly;
             this.currRow.push({ id: id, label: label, component: co, readonly: readonly, type: 'note' });
             return this;
         };
         WFormPanel.prototype.addDateField = function (fieldId, label, readonly) {
             var id = this.subId(fieldId);
             var co = new WInput(id, 'date', 0, WUX.CSS.FORM_CTRL);
+            co.readonly = readonly;
             this.currRow.push({ id: id, label: label, component: co, readonly: readonly, type: 'date' });
             return this;
         };
         WFormPanel.prototype.addTimeField = function (fieldId, label, readonly) {
             var id = this.subId(fieldId);
             var co = new WInput(id, 'time', 0, WUX.CSS.FORM_CTRL);
+            co.readonly = readonly;
             this.currRow.push({ id: id, label: label, component: co, readonly: readonly, type: 'time' });
             return this;
         };
         WFormPanel.prototype.addEmailField = function (fieldId, label, readonly) {
             var id = this.subId(fieldId);
             var co = new WInput(id, 'email', 0, WUX.CSS.FORM_CTRL);
+            co.readonly = readonly;
             this.currRow.push({ id: id, label: label, component: co, readonly: readonly, type: 'email' });
             return this;
         };

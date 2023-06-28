@@ -400,12 +400,14 @@ declare namespace WUX {
         size: number;
         label: string;
         placeHolder: string;
+        readonly: boolean;
         constructor(id?: string, type?: string, size?: number, classStyle?: string, style?: string | WStyle, attributes?: string | object);
         protected updateState(nextState: string): void;
         getState(): string;
         protected render(): string;
     }
     class WTextArea extends WComponent<number, string> {
+        readonly: boolean;
         constructor(id?: string, rows?: number, classStyle?: string, style?: string | WStyle, attributes?: string | object);
         protected updateState(nextState: string): void;
         getState(): string;
