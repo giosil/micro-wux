@@ -745,7 +745,7 @@ namespace WUX {
 				ctx.beginPath();
 				ctx.lineWidth = 2;
 				ctx.strokeStyle = sl;
-				ctx.moveTo(this.offx, r.height - (dj[0] * sy));
+				ctx.moveTo(this.offx, r.height - pady - (dj[0] * sy));
 				// Mind this: < d0.length
 				for (let i = 1; i < d0.length; i++) {
 					let x = this.offx + i * bw;

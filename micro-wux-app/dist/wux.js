@@ -4524,7 +4524,7 @@ var WUX;
                 ctx.beginPath();
                 ctx.lineWidth = 2;
                 ctx.strokeStyle = sl;
-                ctx.moveTo(this.offx, r.height - (dj[0] * sy));
+                ctx.moveTo(this.offx, r.height - pady - (dj[0] * sy));
                 for (var i = 1; i < d0.length; i++) {
                     var x = this.offx + i * bw;
                     var y = r.height - pady - (dj[i] * sy);
