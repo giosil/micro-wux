@@ -623,6 +623,7 @@ declare namespace WUX {
         line: string;
         offx: number;
         offy: number;
+        maxy: number;
         _w: number;
         _h: number;
         constructor(id?: string, classStyle?: string, style?: string | WUX.WStyle);

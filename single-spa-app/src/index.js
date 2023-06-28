@@ -620,7 +620,7 @@ if(e&&!(e.length<2)){var n=this.state.styles,i=this.root,r=i.getContext("2d")
 if(r){var o=this.state.labels,s=0,a=0,h=!1
 if(o&&o.length==e.length){var u=o[0],l=u?u.length:0,c=l>4?Math.ceil(l/2):2
 s=this.fontSize*c+4,a=2*this.fontSize+4,h=!0}var d=i.width-this.offx-a,f=i.height-this.offy-s,p=d/(e.length-1),g=Math.max.apply(Math,e)
-g||(g=4)
+g||(g=4),this.maxy&&this.maxy>g&&(g=this.maxy)
 for(var y=[Math.round(g/4),Math.round(g/2),Math.round(3*g/4)],m=f/g,b=0;b<t.length;b++){var v=t[b]
 if(!v||v.length<e.length)return
 var x=this.line

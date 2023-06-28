@@ -638,6 +638,7 @@ namespace WUX {
 		line: string;
 		offx: number;
 		offy: number;
+		maxy: number;
 		_w: number;
 		_h: number;
 
@@ -726,6 +727,9 @@ namespace WUX {
 			// Max Y
 			let my = Math.max(...d0);
 			if(!my) my = 4;
+			if(this.maxy && this.maxy > my) {
+				my = this.maxy;
+			}
 			// Intermediate Y
 			let iy = [Math.round(my / 4), Math.round(my / 2), Math.round(my * 3 / 4)];
 			// Step Y

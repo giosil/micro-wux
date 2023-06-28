@@ -4509,6 +4509,9 @@ var WUX;
             var my = Math.max.apply(Math, d0);
             if (!my)
                 my = 4;
+            if (this.maxy && this.maxy > my) {
+                my = this.maxy;
+            }
             var iy = [Math.round(my / 4), Math.round(my / 2), Math.round(my * 3 / 4)];
             var sy = ch / my;
             for (var j = 0; j < s.length; j++) {
