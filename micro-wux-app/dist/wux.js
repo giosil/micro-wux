@@ -4483,9 +4483,10 @@ var WUX;
             var s = this.state.series;
             if (!s || !s.length)
                 return;
-            var data = s[0];
-            if (!data || data.length < 2)
+            var d0 = s[0];
+            if (!d0 || d0.length < 2)
                 return;
+            var cs = this.state.styles;
             var r = this.root;
             var ctx = r.getContext('2d');
             if (!ctx)
@@ -4494,29 +4495,43 @@ var WUX;
             var pady = 0;
             var padx = 0;
             var drawL = false;
-            if (labels && labels.length == data.length) {
-                pady = this.fontSize * 5 + 4;
+            if (labels && labels.length == d0.length) {
+                var t0 = labels[0];
+                var l0 = t0 ? t0.length : 0;
+                var dl = l0 > 4 ? Math.ceil(l0 / 2) : 2;
+                pady = this.fontSize * dl + 4;
                 padx = this.fontSize * 2 + 4;
                 drawL = true;
             }
             var cw = r.width - this.offx - padx;
             var ch = r.height - this.offy - pady;
-            var bw = cw / (data.length - 1);
-            var my = Math.max.apply(Math, data);
+            var bw = cw / (d0.length - 1);
+            var my = Math.max.apply(Math, d0);
             if (!my)
                 my = 4;
             var iy = [Math.round(my / 4), Math.round(my / 2), Math.round(my * 3 / 4)];
             var sy = ch / my;
-            ctx.beginPath();
-            ctx.lineWidth = 2;
-            ctx.strokeStyle = this.line;
-            ctx.moveTo(this.offx, r.height - (data[0] * sy));
-            for (var i = 1; i < data.length; i++) {
-                var x = this.offx + i * bw;
-                var y = r.height - pady - (data[i] * sy);
-                ctx.lineTo(x, y);
+            for (var j = 0; j < s.length; j++) {
+                var dj = s[j];
+                if (!dj || dj.length < d0.length)
+                    return;
+                var sl = this.line;
+                if (cs && cs.length > j) {
+                    sl = cs[j];
+                    if (!sl)
+                        sl = this.line;
+                }
+                ctx.beginPath();
+                ctx.lineWidth = 2;
+                ctx.strokeStyle = sl;
+                ctx.moveTo(this.offx, r.height - (dj[0] * sy));
+                for (var i = 1; i < d0.length; i++) {
+                    var x = this.offx + i * bw;
+                    var y = r.height - pady - (dj[i] * sy);
+                    ctx.lineTo(x, y);
+                }
+                ctx.stroke();
             }
-            ctx.stroke();
             ctx.beginPath();
             ctx.lineWidth = 1;
             ctx.strokeStyle = this.axis;
@@ -4528,7 +4543,7 @@ var WUX;
             ctx.setLineDash([4, 8]);
             ctx.lineWidth = 1;
             ctx.strokeStyle = this.grid;
-            for (var i = 1; i < data.length; i++) {
+            for (var i = 1; i < d0.length; i++) {
                 var x = this.offx + i * bw;
                 ctx.moveTo(x, this.offy);
                 ctx.lineTo(x, r.height - pady);
@@ -4550,7 +4565,7 @@ var WUX;
             }
             ctx.fillText('' + my, 0, this.offy);
             if (drawL) {
-                for (var i = 0; i < data.length; i++) {
+                for (var i = 0; i < labels.length; i++) {
                     var x = this.offx + i * bw;
                     ctx.save();
                     ctx.translate(x - this.fontSize, r.height);

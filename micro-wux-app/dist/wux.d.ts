@@ -522,6 +522,7 @@ declare namespace WUX {
         labels?: string[];
         titles?: string[];
         series?: number[][];
+        styles?: string[];
     }
     function JQ(e: any): JQuery;
     class WDialog<P = any, S = any> extends WUX.WComponent<P, S> {

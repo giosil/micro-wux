@@ -4,6 +4,7 @@ namespace WUX {
 		labels?: string[];
 		titles?: string[];
 		series?: number[][];
+		styles?: string[];
 	}
 		
 	export function JQ(e: any): JQuery {
@@ -695,20 +696,25 @@ namespace WUX {
 			if(!this.state) return;
 			let s = this.state.series;
 			if(!s || !s.length) return;
-			let data = s[0];
-			if(!data || data.length < 2) return;
+			let d0 = s[0];
+			if(!d0 || d0.length < 2) return;
+			let cs = this.state.styles;
 			
 			// Get Context
 			let r = this.root as HTMLCanvasElement;
 			let ctx = r.getContext('2d');
 			if(!ctx) return;
 			
+			// Check labels (arguments)
 			let labels = this.state.labels;
 			let pady = 0;
 			let padx = 0;
 			let drawL = false;
-			if(labels && labels.length == data.length) {
-				pady = this.fontSize * 5 + 4;
+			if(labels && labels.length == d0.length) {
+				let t0 = labels[0];
+				let l0 = t0 ? t0.length : 0;
+				let dl = l0 > 4 ? Math.ceil(l0 / 2) : 2;
+				pady = this.fontSize * dl + 4;
 				padx = this.fontSize * 2 + 4;
 				drawL = true;
 			}
@@ -716,9 +722,9 @@ namespace WUX {
 			// Boundary
 			let cw = r.width - this.offx - padx;
 			let ch = r.height - this.offy - pady;
-			let bw = cw / (data.length - 1);
+			let bw = cw / (d0.length - 1);
 			// Max Y
-			let my = Math.max(...data);
+			let my = Math.max(...d0);
 			if(!my) my = 4;
 			// Intermediate Y
 			let iy = [Math.round(my / 4), Math.round(my / 2), Math.round(my * 3 / 4)];
@@ -726,16 +732,28 @@ namespace WUX {
 			let sy = ch / my;
 			
 			// Chart
-			ctx.beginPath();
-			ctx.lineWidth = 2;
-			ctx.strokeStyle = this.line;
-			ctx.moveTo(this.offx, r.height - (data[0] * sy));
-			for (let i = 1; i < data.length; i++) {
-				let x = this.offx + i * bw;
-				let y = r.height - pady - (data[i] * sy);
-				ctx.lineTo(x, y);
+			for(let j = 0; j < s.length; j++) {
+				let dj = s[j];
+				// Mind this: < d0.length
+				if(!dj || dj.length < d0.length) return;
+				let sl = this.line;
+				if(cs && cs.length > j) {
+					sl = cs[j];
+					if(!sl) sl = this.line;
+				}
+				
+				ctx.beginPath();
+				ctx.lineWidth = 2;
+				ctx.strokeStyle = sl;
+				ctx.moveTo(this.offx, r.height - (dj[0] * sy));
+				// Mind this: < d0.length
+				for (let i = 1; i < d0.length; i++) {
+					let x = this.offx + i * bw;
+					let y = r.height - pady - (dj[i] * sy);
+					ctx.lineTo(x, y);
+				}
+				ctx.stroke();
 			}
-			ctx.stroke();
 			
 			// Axis
 			ctx.beginPath();
@@ -754,7 +772,7 @@ namespace WUX {
 			ctx.setLineDash([4, 8]);
 			ctx.lineWidth = 1;
 			ctx.strokeStyle = this.grid;
-			for (let i = 1; i < data.length; i++) {
+			for (let i = 1; i < d0.length; i++) {
 				let x = this.offx + i * bw;
 				// X
 				ctx.moveTo(x, this.offy);
@@ -780,7 +798,7 @@ namespace WUX {
 			ctx.fillText('' + my, 0, this.offy);
 			
 			if(drawL) {
-				for (let i = 0; i < data.length; i++) {
+				for (let i = 0; i < labels.length; i++) {
 					let x = this.offx + i * bw;
 					// Etichetta inclinata sull'asse X
 					ctx.save();
