@@ -472,6 +472,12 @@ declare namespace WUX {
         soId: string[];
         sortBy: number[];
         constructor(id: string, header: string[], keys?: any[], classStyle?: string, style?: string | WStyle, attributes?: string | object, props?: any);
+        onRowPrepared(handler: (e: {
+            element?: Element;
+            rowElement?: Element;
+            data?: any;
+            rowIndex?: number;
+        }) => any): void;
         protected render(): string;
         protected componentDidMount(): void;
         protected componentDidUpdate(prevProps: any, prevState: any): void;

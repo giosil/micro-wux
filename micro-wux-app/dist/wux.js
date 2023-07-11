@@ -3289,6 +3289,11 @@ var WUX;
             _this.widths = [];
             return _this;
         }
+        WTable.prototype.onRowPrepared = function (handler) {
+            if (!this.handlers['_rowprepared'])
+                this.handlers['_rowprepared'] = [];
+            this.handlers['_rowprepared'].push(handler);
+        };
         WTable.prototype.render = function () {
             if (this.sortable && this.sortable.length) {
                 this.soId = [];
@@ -3447,7 +3452,6 @@ var WUX;
                 else {
                     r = '<tr' + WUX.buildCss(this.rowStyle) + '>';
                 }
-                b += r;
                 var j = -1;
                 for (var _b = 0, _c = this.keys; _b < _c.length; _b++) {
                     var key = _c[_b];
@@ -3497,16 +3501,27 @@ var WUX;
                         align = '';
                     }
                     var w = this.widths && this.widths.length > j ? this.widths[j] : 0;
-                    b += '<td' + WUX.buildCss(s, align, { w: w }) + '>' + v + '</td>';
+                    r += '<td' + WUX.buildCss(s, align, { w: w }) + '>' + v + '</td>';
                 }
                 if (this.header && this.header.length > this.keys.length) {
                     for (var i_1 = 0; i_1 < this.header.length - this.keys.length; i_1++) {
-                        b += '<td' + WUX.buildCss(this.colStyle) + '></td>';
+                        r += '<td' + WUX.buildCss(this.colStyle) + '></td>';
                     }
                 }
-                b += '</tr>';
-                tbody.innerHTML = b;
+                r += '</tr>';
+                if (this.handlers['_rowprepared']) {
+                    var t = document.createElement("template");
+                    t.innerHTML = r;
+                    var e = { element: this.root, rowElement: t.content.firstElementChild, data: row, rowIndex: i };
+                    for (var _d = 0, _e = this.handlers['_rowprepared']; _d < _e.length; _d++) {
+                        var handler = _e[_d];
+                        handler(e);
+                    }
+                    r = t.innerHTML;
+                }
+                b += r;
             }
+            tbody.innerHTML = b;
         };
         WTable.prototype.onSort = function (h) {
             if (!this.handlers['_sort'])

@@ -852,6 +852,11 @@ namespace WUX {
 			this.widths = [];
 		}
 
+		onRowPrepared(handler: (e: {element?: Element, rowElement?: Element, data?: any, rowIndex?: number}) => any) {
+			if (!this.handlers['_rowprepared']) this.handlers['_rowprepared'] = [];
+			this.handlers['_rowprepared'].push(handler);
+		}
+
 		protected render() {
 			if (this.sortable && this.sortable.length) {
 				this.soId = [];
@@ -992,7 +997,6 @@ namespace WUX {
 				else {
 					r = '<tr' + buildCss(this.rowStyle) + '>'
 				}
-				b += r;
 				let j = -1;
 				for (let key of this.keys) {
 					let v = row[key];
@@ -1037,16 +1041,24 @@ namespace WUX {
 						align = '';
 					}
 					let w = this.widths && this.widths.length > j ? this.widths[j] : 0;
-					b += '<td' + WUX.buildCss(s, align, { w: w }) + '>' + v + '</td>';
+					r += '<td' + WUX.buildCss(s, align, { w: w }) + '>' + v + '</td>';
 				}
 				if (this.header && this.header.length > this.keys.length) {
 					for (let i = 0; i < this.header.length - this.keys.length; i++) {
-						b += '<td' + WUX.buildCss(this.colStyle) + '></td>';
+						r += '<td' + WUX.buildCss(this.colStyle) + '></td>';
 					}
 				}
-				b += '</tr>';
-				tbody.innerHTML = b;
+				r += '</tr>';
+				if (this.handlers['_rowprepared']) {
+					let t = document.createElement("template");
+					t.innerHTML = r;
+					let e = { element: this.root, rowElement: t.content.firstElementChild, data: row, rowIndex: i };
+					for (let handler of this.handlers['_rowprepared']) handler(e);
+					r = t.innerHTML;
+				}
+				b += r;
 			}
+			tbody.innerHTML = b;
 		}
 
 		onSort(h: (e: WEvent) => any): void {
