@@ -492,7 +492,7 @@ if(this.buildBody(),this.soId)for(var n=0,i=this.soId;n<i.length;n++){var r=i[n]
 !function(n){var i=document.getElementById(n)
 i&&i.addEventListener("click",function(n){var r=t.lastSub(t.getId(n.currentTarget)),o=r.indexOf("_")
 if(!(o<=0)){var s=t.WUtil.toNumber(r.substring(o+1),-1)
-if(s>=0&&e.header&&e.header.length>s){var a=e.handlers._sort,h=!a&&!a.length&&e.keys&&e.keys.length>s,l=e.header[s],u=e.sortBy[s]
+if(s>=0&&e.header&&e.header.length>s){var a=e.handlers._sort,h=!(a&&a.length)&&e.keys&&e.keys.length>s,l=e.header[s],u=e.sortBy[s]
 if(u?1==u?(e.sortBy[s]=-1,l&&(i.innerHTML=l+' &nbsp;<i class="fa fa-sort-desc"></i>'),h&&e.setState(t.WUtil.sort(e.state,!1,e.keys[s]))):-1==u&&(e.sortBy[s]=0,l&&(i.innerHTML=l+' &nbsp;<i class="fa fa-unsorted"></i>')):(e.sortBy[s]=1,l&&(i.innerHTML=l+' &nbsp;<i class="fa fa-sort-asc"></i>'),h&&e.setState(t.WUtil.sort(e.state,!0,e.keys[s]))),a)for(var d=0,c=a;d<c.length;d++){var f=c[d]
 f(e.createEvent("_sort",e.sortBy))}}}})}(r)}var o=document.getElementById(this.id+"-b")
 o&&(o.addEventListener("click",function(n){if(e.selectionMode&&"none"!=e.selectionMode&&e.handlers._selectionchanged){var i=n.target

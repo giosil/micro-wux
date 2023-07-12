@@ -3492,7 +3492,7 @@ var WUX;
                             var c = WUX.WUtil.toNumber(i.substring(x + 1), -1);
                             if (c >= 0 && _this.header && _this.header.length > c) {
                                 var hs = _this.handlers['_sort'];
-                                var ds = !hs && !hs.length && _this.keys && _this.keys.length > c;
+                                var ds = !(hs && hs.length) && _this.keys && _this.keys.length > c;
                                 var h = _this.header[c];
                                 var v = _this.sortBy[c];
                                 if (!v) {

@@ -1036,7 +1036,7 @@ namespace WUX {
 							if(c >= 0 && this.header && this.header.length > c) {
 								// Default sort?
 								let hs = this.handlers['_sort'];
-								let ds = !hs && !hs.length && this.keys && this.keys.length > c;
+								let ds = !(hs && hs.length) && this.keys && this.keys.length > c;
 								let h = this.header[c];
 								let v = this.sortBy[c];
 								if(!v) {
