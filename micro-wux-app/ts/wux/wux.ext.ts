@@ -320,9 +320,9 @@ namespace WUX {
 			// Style day over
 			this.so = 'text-align:center;background-color:#f6f6f6;cursor:pointer;';
 			// Style day selected
-			this.ss = 'text-align:center;background-color:#d9e2f3;';
+			this.ss = 'text-align:center;background-color:#d3e5f5;';
 			// Style day marked
-			this.sk = 'text-align:center;background-color:#ffe66d;';
+			this.sk = 'text-align:center;background-color:#ffea8e;';
 			// Style empty
 			this.se = 'background-color:#f0f0f0;';
 			// Style today
