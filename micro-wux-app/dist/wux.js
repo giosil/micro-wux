@@ -4316,21 +4316,26 @@ var WUX;
         WCalendar.prototype.render = function () {
             if (!this.state)
                 this.state = new Date();
-            var t = '<div class="' + this.cd + '"><table id="' + this.subId('t') + '" class="' + this.ct + '"><thead><tr>';
+            var t = '<table id="' + this.subId('t') + '" class="' + this.ct + '"><thead><tr>';
             for (var x = 0; x < 7; x++) {
                 var k_1 = x == 6 ? 0 : x + 1;
                 t += '<th id="' + this.subId(k_1 + '') + '" style="' + this.sw + '">' + WUX.formatDay(k_1, false) + '</th>';
             }
             t += '</tr></thead><tbody id="' + this.subId('b') + '">';
             t += this.body();
-            t += '</tbody></table></div>';
+            t += '</tbody></table>';
             var m = this.state.getMonth();
             var y = this.state.getFullYear();
             var k = y * 100 + m + 1;
             var p = '<a id="' + this.subId('p') + '" title="Mese precedente"><i class="fa fa-arrow-circle-left"></i></a>';
             var n = '<a id="' + this.subId('n') + '" title="Mese successivo"><i class="fa fa-arrow-circle-right"></i></a>';
             var i = '<div class="row"><div class="col-2" style="' + this.sp + '">' + p + '</div><div id="' + this.subId('m') + '" class="col-8" style="' + this.sm + '">' + WUX.formatMonth(k, true, true) + '</div><div class="col-2" style="' + this.sn + '">' + n + '</div></div>';
-            i += '<div class="row"><div class="col-12">' + t + '</div></div>';
+            if (this.cd) {
+                i += '<div class="row"><div class="' + this.cd + '">' + t + '</div></div>';
+            }
+            else {
+                i += '<div class="row"><div class="col-12">' + t + '</div></div>';
+            }
             return this.buildRoot(this.rootTag, i);
         };
         WCalendar.prototype.add = function (a) {
