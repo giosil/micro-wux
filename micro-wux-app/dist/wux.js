@@ -1346,6 +1346,9 @@ var WUX;
     function removeClassOf(e, name) {
         if (!e)
             return;
+        var c = e.getAttribute('class');
+        if (!c)
+            return;
         e.setAttribute('class', removeClass(e.getAttribute('class'), name));
     }
     WUX.removeClassOf = removeClassOf;
@@ -2144,6 +2147,7 @@ var WUX;
         CSS.FORM_GROUP = 'form-group';
         CSS.FORM_CTRL = 'form-control';
         CSS.ICON = 'margin-right:8px;';
+        CSS.SEL_ROW = 'primary-bg-a2';
         return CSS;
     }());
     WUX.CSS = CSS;
@@ -3275,6 +3279,7 @@ var WUX;
         __extends(WTable, _super);
         function WTable(id, header, keys, classStyle, style, attributes, props) {
             var _this = _super.call(this, id ? id : '*', 'WTable', props, classStyle, style, attributes) || this;
+            _this.selectedRow = -1;
             _this.rootTag = 'table';
             _this.header = header;
             if (keys && keys.length) {
@@ -3287,12 +3292,118 @@ var WUX;
                         _this.keys.push(i);
             }
             _this.widths = [];
+            _this.selClass = WUX.CSS.SEL_ROW;
             return _this;
         }
+        WTable.prototype.onSelectionChanged = function (handler) {
+            if (!this.handlers['_selectionchanged'])
+                this.handlers['_selectionchanged'] = [];
+            this.handlers['_selectionchanged'].push(handler);
+        };
+        WTable.prototype.onDoubleClick = function (handler) {
+            if (!this.handlers['_doubleclick'])
+                this.handlers['_doubleclick'] = [];
+            this.handlers['_doubleclick'].push(handler);
+        };
         WTable.prototype.onRowPrepared = function (handler) {
             if (!this.handlers['_rowprepared'])
                 this.handlers['_rowprepared'] = [];
             this.handlers['_rowprepared'].push(handler);
+        };
+        WTable.prototype.clearSelection = function () {
+            this.selectedRow = -1;
+            if (!this.mounted)
+                return this;
+            var b = document.getElementById(this.id + '-b');
+            if (b && this.selClass) {
+                var an = b.childNodes;
+                for (var i = 0; i < b.childElementCount; i++) {
+                    WUX.removeClassOf(an[i], this.selClass);
+                }
+            }
+            if (!this.handlers['_selectionchanged'])
+                return this;
+            for (var _i = 0, _a = this.handlers['_selectionchanged']; _i < _a.length; _i++) {
+                var handler = _a[_i];
+                handler({ element: this.root, selectedRowsData: [] });
+            }
+            return this;
+        };
+        WTable.prototype.select = function (idxs) {
+            if (!idxs)
+                idxs = [];
+            this.selectedRow = idxs.length ? idxs[0] : -1;
+            if (!this.mounted)
+                return this;
+            var b = document.getElementById(this.id + '-b');
+            if (b && this.selClass) {
+                var an = b.childNodes;
+                for (var i = 0; i < b.childElementCount; i++) {
+                    if (idxs.indexOf(i) >= 0) {
+                        WUX.addClassOf(an[i], this.selClass);
+                    }
+                    else {
+                        WUX.removeClassOf(an[i], this.selClass);
+                    }
+                }
+            }
+            if (!this.handlers['_selectionchanged'])
+                return this;
+            var srd = [];
+            for (var _i = 0, idxs_1 = idxs; _i < idxs_1.length; _i++) {
+                var idx = idxs_1[_i];
+                if (this.state && this.state.length > idx) {
+                    srd.push(this.state[idx]);
+                }
+            }
+            for (var _a = 0, _b = this.handlers['_selectionchanged']; _a < _b.length; _a++) {
+                var handler = _b[_a];
+                handler({ element: this.root, selectedRowsData: srd });
+            }
+            return this;
+        };
+        WTable.prototype.selectAll = function (toggle) {
+            if (!this.mounted)
+                return this;
+            if (toggle && this.selectedRow >= 0) {
+                return this.clearSelection();
+            }
+            this.selectedRow = -1;
+            if (this.state && this.state.length) {
+                this.selectedRow = 0;
+            }
+            var b = document.getElementById(this.id + '-b');
+            if (b && this.selClass) {
+                var an = b.childNodes;
+                for (var i = 0; i < b.childElementCount; i++) {
+                    WUX.addClassOf(an[i], this.selClass);
+                }
+            }
+            if (!this.handlers['_selectionchanged'])
+                return this;
+            for (var _i = 0, _a = this.handlers['_selectionchanged']; _i < _a.length; _i++) {
+                var handler = _a[_i];
+                handler({ element: this.root, selectedRowsData: this.state });
+            }
+            return this;
+        };
+        WTable.prototype.getSelectedRows = function () {
+            if (!this.mounted)
+                return [];
+            if (this.selectedRow < 0)
+                return [];
+            return [this.selectedRow];
+        };
+        WTable.prototype.getSelectedRowsData = function () {
+            if (!this.mounted)
+                return [];
+            if (this.selectedRow < 0)
+                return [];
+            if (!this.state || !this.state.length)
+                return [];
+            if (this.state.length <= this.selectedRow)
+                return [];
+            return [this.state[this.selectedRow]];
         };
         WTable.prototype.render = function () {
             if (this.sortable && this.sortable.length) {
@@ -3373,44 +3484,87 @@ var WUX;
                 var _loop_1 = function (aid) {
                     var a = document.getElementById(aid);
                     if (a) {
-                        a.onclick = function (e) {
+                        a.addEventListener('click', function (e) {
                             var i = WUX.lastSub(WUX.getId(e.currentTarget));
                             var x = i.indexOf('_');
                             if (x <= 0)
                                 return;
                             var c = WUX.WUtil.toNumber(i.substring(x + 1), -1);
-                            if (c >= 0 && _this.keys.length > c) {
-                                var h = _this.header ? _this.header[c] : '';
+                            if (c >= 0 && _this.header && _this.header.length > c) {
+                                var hs = _this.handlers['_sort'];
+                                var ds = !hs && !hs.length && _this.keys && _this.keys.length > c;
+                                var h = _this.header[c];
                                 var v = _this.sortBy[c];
                                 if (!v) {
                                     _this.sortBy[c] = 1;
                                     if (h)
                                         a.innerHTML = h + ' &nbsp;<i class="fa fa-sort-asc"></i>';
+                                    if (ds)
+                                        _this.setState(WUX.WUtil.sort(_this.state, true, _this.keys[c]));
                                 }
                                 else if (v == 1) {
                                     _this.sortBy[c] = -1;
                                     if (h)
                                         a.innerHTML = h + ' &nbsp;<i class="fa fa-sort-desc"></i>';
+                                    if (ds)
+                                        _this.setState(WUX.WUtil.sort(_this.state, false, _this.keys[c]));
                                 }
                                 else if (v == -1) {
                                     _this.sortBy[c] = 0;
                                     if (h)
                                         a.innerHTML = h + ' &nbsp;<i class="fa fa-unsorted"></i>';
                                 }
-                                if (_this.handlers['_sort']) {
-                                    for (var _i = 0, _a = _this.handlers['_sort']; _i < _a.length; _i++) {
-                                        var h_1 = _a[_i];
-                                        h_1(_this.createEvent('_sort', _this.sortBy));
+                                if (hs) {
+                                    for (var _i = 0, hs_2 = hs; _i < hs_2.length; _i++) {
+                                        var hr = hs_2[_i];
+                                        hr(_this.createEvent('_sort', _this.sortBy));
                                     }
                                 }
                             }
-                        };
+                        });
                     }
                 };
                 for (var _i = 0, _a = this.soId; _i < _a.length; _i++) {
                     var aid = _a[_i];
                     _loop_1(aid);
                 }
+            }
+            var b = document.getElementById(this.id + '-b');
+            if (b) {
+                b.addEventListener('click', function (e) {
+                    if (!_this.selectionMode || _this.selectionMode == 'none')
+                        return;
+                    if (!_this.handlers['_selectionchanged'])
+                        return;
+                    var t = e.target;
+                    if (!t)
+                        return;
+                    var tr = t.closest('tr');
+                    if (!tr)
+                        return;
+                    var i = WUX.WUtil.toNumber(WUX.lastSub(tr), -1);
+                    if (i < 0)
+                        return;
+                    _this.select([i]);
+                });
+                b.addEventListener('dblclick', function (e) {
+                    if (!_this.handlers['_doubleclick'])
+                        return;
+                    var t = e.target;
+                    if (!t)
+                        return;
+                    var tr = t.closest('tr');
+                    if (!tr)
+                        return;
+                    var i = WUX.WUtil.toNumber(WUX.lastSub(tr), -1);
+                    if (i < 0)
+                        return;
+                    var d = _this.state && _this.state.length > i ? _this.state[i] : null;
+                    for (var _i = 0, _a = _this.handlers['_doubleclick']; _i < _a.length; _i++) {
+                        var h = _a[_i];
+                        h({ element: _this.root, rowElement: tr, data: d, rowIndex: i });
+                    }
+                });
             }
         };
         WTable.prototype.componentDidUpdate = function (prevProps, prevState) {
@@ -3443,14 +3597,14 @@ var WUX;
                 var r = '';
                 if (i == this.state.length - 1) {
                     if (this.footerStyle) {
-                        r = '<tr' + WUX.buildCss(this.footerStyle) + '>';
+                        r = '<tr' + WUX.buildCss(this.footerStyle) + ' id="' + this.id + '-' + i + '">';
                     }
                     else {
-                        r = '<tr' + WUX.buildCss(this.rowStyle) + '>';
+                        r = '<tr' + WUX.buildCss(this.rowStyle) + ' id="' + this.id + '-' + i + '">';
                     }
                 }
                 else {
-                    r = '<tr' + WUX.buildCss(this.rowStyle) + '>';
+                    r = '<tr' + WUX.buildCss(this.rowStyle) + ' id="' + this.id + '-' + i + '">';
                 }
                 var j = -1;
                 for (var _b = 0, _c = this.keys; _b < _c.length; _b++) {

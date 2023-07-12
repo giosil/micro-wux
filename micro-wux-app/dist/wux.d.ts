@@ -320,6 +320,7 @@ declare namespace WUX {
         static FORM_GROUP: string;
         static FORM_CTRL: string;
         static ICON: string;
+        static SEL_ROW: string;
     }
     class RES {
         static OK: string;
@@ -471,13 +472,31 @@ declare namespace WUX {
         sortable: number[];
         soId: string[];
         sortBy: number[];
+        selClass: string;
+        selectionMode: 'single' | 'multiple' | 'none';
+        selectedRow: number;
         constructor(id: string, header: string[], keys?: any[], classStyle?: string, style?: string | WStyle, attributes?: string | object, props?: any);
+        onSelectionChanged(handler: (e: {
+            element?: Element;
+            selectedRowsData?: any[];
+        }) => any): void;
+        onDoubleClick(handler: (e: {
+            element?: Element;
+            rowElement?: Element;
+            data?: any;
+            rowIndex?: number;
+        }) => any): void;
         onRowPrepared(handler: (e: {
             element?: Element;
             rowElement?: Element;
             data?: any;
             rowIndex?: number;
         }) => any): void;
+        clearSelection(): this;
+        select(idxs: number[]): this;
+        selectAll(toggle?: boolean): this;
+        getSelectedRows(): number[];
+        getSelectedRowsData(): any[];
         protected render(): string;
         protected componentDidMount(): void;
         protected componentDidUpdate(prevProps: any, prevState: any): void;

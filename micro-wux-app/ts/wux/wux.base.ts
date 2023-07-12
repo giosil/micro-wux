@@ -1296,6 +1296,8 @@ namespace WUX {
 
 	export function removeClassOf(e: Element, name: string) {
 		if (!e) return;
+		let c = e.getAttribute('class');
+		if(!c) return;
 		e.setAttribute('class', removeClass(e.getAttribute('class'), name));
 	}
 

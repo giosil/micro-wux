@@ -838,6 +838,10 @@ namespace WUX {
 		soId: string[];
 		sortBy: number[];
 
+		selClass: string;
+		selectionMode: 'single' | 'multiple' | 'none';
+		selectedRow: number = -1;
+
 		constructor(id: string, header: string[], keys?: any[], classStyle?: string, style?: string | WStyle, attributes?: string | object, props?: any) {
 			super(id ? id : '*', 'WTable', props, classStyle, style, attributes);
 			this.rootTag = 'table';
@@ -850,11 +854,105 @@ namespace WUX {
 				if (this.header) for (let i = 0; i < this.header.length; i++) this.keys.push(i);
 			}
 			this.widths = [];
+			this.selClass = CSS.SEL_ROW;
+		}
+
+		onSelectionChanged(handler: (e: {element?: Element, selectedRowsData?: any[]}) => any): void {
+			if (!this.handlers['_selectionchanged']) this.handlers['_selectionchanged'] = [];
+			this.handlers['_selectionchanged'].push(handler);
+		}
+
+		onDoubleClick(handler: (e: {element?: Element, rowElement?: Element, data?: any, rowIndex?: number}) => any): void {
+			if (!this.handlers['_doubleclick']) this.handlers['_doubleclick'] = [];
+			this.handlers['_doubleclick'].push(handler);
 		}
 
 		onRowPrepared(handler: (e: {element?: Element, rowElement?: Element, data?: any, rowIndex?: number}) => any) {
 			if (!this.handlers['_rowprepared']) this.handlers['_rowprepared'] = [];
 			this.handlers['_rowprepared'].push(handler);
+		}
+
+		clearSelection(): this {
+			this.selectedRow = -1;
+			if (!this.mounted) return this;
+			let b = document.getElementById(this.id + '-b');
+			if(b && this.selClass) {
+				let an = b.childNodes as any;
+				for(let i = 0; i < b.childElementCount; i++) {
+					WUX.removeClassOf(an[i], this.selClass);
+				}
+			}
+			if (!this.handlers['_selectionchanged']) return this;
+			for (let handler of this.handlers['_selectionchanged']) {
+				handler({ element: this.root, selectedRowsData: [] });
+			}
+			return this;
+		}
+
+		select(idxs: number[]): this {
+			if(!idxs) idxs = [];
+			this.selectedRow = idxs.length ? idxs[0] : -1;
+			if (!this.mounted) return this;
+			let b = document.getElementById(this.id + '-b');
+			if(b && this.selClass) {
+				let an = b.childNodes as any;
+				for(let i = 0; i < b.childElementCount; i++) {
+					if(idxs.indexOf(i) >= 0) {
+						WUX.addClassOf(an[i], this.selClass);
+					}
+					else {
+						WUX.removeClassOf(an[i], this.selClass);
+					}
+				}
+			}
+			if (!this.handlers['_selectionchanged']) return this;
+			let srd = [];
+			for (let idx of idxs) {
+				if(this.state && this.state.length > idx) {
+					srd.push(this.state[idx]);
+				}
+			}
+			for (let handler of this.handlers['_selectionchanged']) {
+				handler({ element: this.root, selectedRowsData: srd });
+			}
+			return this;
+		}
+
+		selectAll(toggle?: boolean): this {
+			if (!this.mounted) return this;
+			if(toggle && this.selectedRow >= 0) {
+				return this.clearSelection();
+			}
+			this.selectedRow = -1;
+			if(this.state && this.state.length) {
+				this.selectedRow = 0;
+			}
+			let b = document.getElementById(this.id + '-b');
+			if(b && this.selClass) {
+				let an = b.childNodes as any;
+				for(let i = 0; i < b.childElementCount; i++) {
+					WUX.addClassOf(an[i], this.selClass);
+				}
+			}
+			if (!this.handlers['_selectionchanged']) return this;
+			for (let handler of this.handlers['_selectionchanged']) {
+				handler({ element: this.root, selectedRowsData: this.state });
+			}
+			return this;
+		}
+
+		getSelectedRows(): number[] {
+			if (!this.mounted) return [];
+			if (this.selectedRow < 0) return [];
+			return [this.selectedRow];
+		}
+
+		getSelectedRowsData(): any[] {
+			if (!this.mounted) return [];
+			if (this.selectedRow < 0) return [];
+			if (!this.state || !this.state.length) return [];
+			if (this.state.length <= this.selectedRow) return [];
+			return [this.state[this.selectedRow]];
 		}
 
 		protected render() {
@@ -930,33 +1028,65 @@ namespace WUX {
 				for(let aid of this.soId) {
 					let a = document.getElementById(aid);
 					if(a) {
-						a.onclick = (e: PointerEvent) => {
+						a.addEventListener('click', (e: PointerEvent) => {
 							let i = WUX.lastSub(WUX.getId(e.currentTarget));
 							let x = i.indexOf('_');
 							if(x <= 0) return;
 							let c = WUtil.toNumber(i.substring(x + 1), -1);
-							if(c >= 0 && this.keys.length > c) {
-								let h = this.header ? this.header[c] : '';
+							if(c >= 0 && this.header && this.header.length > c) {
+								// Default sort?
+								let hs = this.handlers['_sort'];
+								let ds = !hs && !hs.length && this.keys && this.keys.length > c;
+								let h = this.header[c];
 								let v = this.sortBy[c];
 								if(!v) {
 									this.sortBy[c] = 1;
 									if(h) a.innerHTML = h + ' &nbsp;<i class="fa fa-sort-asc"></i>';
+									if(ds) this.setState(WUtil.sort(this.state, true, this.keys[c]));
 								}
 								else if(v == 1) {
 									this.sortBy[c] = -1;
 									if(h) a.innerHTML = h + ' &nbsp;<i class="fa fa-sort-desc"></i>';
+									if(ds) this.setState(WUtil.sort(this.state, false, this.keys[c]));
 								}
 								else if(v == -1) {
 									this.sortBy[c] = 0;
 									if(h) a.innerHTML = h + ' &nbsp;<i class="fa fa-unsorted"></i>';
 								}
-								if (this.handlers['_sort']) {
-									for (let h of this.handlers['_sort']) h(this.createEvent('_sort', this.sortBy));
+								if(hs) {
+									for (let hr of hs) hr(this.createEvent('_sort', this.sortBy));
 								}
 							}
-						};
+						});
 					}
 				}
+			}
+			let b = document.getElementById(this.id + '-b');
+			if(b) {
+				b.addEventListener('click', (e: PointerEvent) => {
+					if(!this.selectionMode || this.selectionMode == 'none') return;
+					if(!this.handlers['_selectionchanged']) return;
+					let t = e.target as HTMLElement;
+					if(!t) return;
+					let tr = t.closest('tr');
+					if(!tr) return;
+					let i = WUtil.toNumber(WUX.lastSub(tr), -1);
+					if(i < 0) return;
+					this.select([i]);
+				});
+				b.addEventListener('dblclick', (e: PointerEvent) => {
+					if(!this.handlers['_doubleclick']) return;
+					let t = e.target as HTMLElement;
+					if(!t) return;
+					let tr = t.closest('tr');
+					if(!tr) return;
+					let i = WUtil.toNumber(WUX.lastSub(tr), -1);
+					if(i < 0) return;
+					let d = this.state && this.state.length > i ? this.state[i] : null;
+					for (let h of this.handlers['_doubleclick']) {
+						h({ element: this.root, rowElement: tr, data: d, rowIndex: i });
+					}
+				});
 			}
 		}
 
@@ -988,14 +1118,14 @@ namespace WUX {
 				let r: string = '';
 				if (i == this.state.length - 1) {
 					if (this.footerStyle) {
-						r = '<tr' + buildCss(this.footerStyle) + '>'
+						r = '<tr' + buildCss(this.footerStyle) + ' id="' + this.id + '-' + i + '">';
 					}
 					else {
-						r = '<tr' + buildCss(this.rowStyle) + '>'
+						r = '<tr' + buildCss(this.rowStyle) + ' id="' + this.id + '-' + i + '">';
 					}
 				}
 				else {
-					r = '<tr' + buildCss(this.rowStyle) + '>'
+					r = '<tr' + buildCss(this.rowStyle) + ' id="' + this.id + '-' + i + '">';
 				}
 				let j = -1;
 				for (let key of this.keys) {

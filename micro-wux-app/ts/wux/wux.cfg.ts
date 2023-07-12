@@ -42,6 +42,7 @@
 		static FORM_GROUP = 'form-group';
 		static FORM_CTRL = 'form-control';
 		static ICON = 'margin-right:8px;';
+		static SEL_ROW = 'primary-bg-a2';
 	}
 	
 	export class RES {
