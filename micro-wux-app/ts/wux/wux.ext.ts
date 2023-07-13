@@ -319,10 +319,10 @@ namespace WUX {
 			this.sd = 'text-align:center;';
 			// Style day over
 			this.so = 'text-align:center;background-color:#f6f6f6;cursor:pointer;';
-			// Style day selected
-			this.ss = 'text-align:center;background-color:#d3e5f5;';
-			// Style day marked
-			this.sk = 'text-align:center;background-color:#ffea8e;';
+			// Style day selected (table-primary)
+			this.ss = 'text-align:center;background-color:#b8d4f1;'; 
+			// Style day marked (table-warning)
+			this.sk = 'text-align:center;background-color:#e6d3b8;';
 			// Style empty
 			this.se = 'background-color:#f0f0f0;';
 			// Style today

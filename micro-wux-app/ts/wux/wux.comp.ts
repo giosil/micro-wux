@@ -28,17 +28,17 @@ namespace WUX {
 	}
 
 	export class WContainer extends WComponent<string, any> {
-		cint: WComponent[];
+		cext: WComponent[]; // external components 
+		cint: WComponent[]; // internal components
 		comp: WComponent[];
 		sr_c: string[];
 		grid: string[][];
-		w0: string;
-		w1: string;
 
 		constructor(id?: string, classStyle?: string, style?: string | WStyle, attributes?: string | object, inline?: boolean, type?: string) {
 			// WComponent init
 			super(id ? id : '*', 'WContainer', type, classStyle, WUX.style(style), attributes);
 			// WContainer init
+			this.cext = [];
 			this.cint = [];
 			this.comp = [];
 			this.sr_c = [];
@@ -47,7 +47,7 @@ namespace WUX {
 		}
 
 		addRow(classStyle?: string, style?: string | WStyle): this {
-			if(!classStyle) classStyle = 'row';
+			if(classStyle == null) classStyle = 'row';
 			let g: string[] = [];
 			let s = WUX.style(style);
 			if(s) classStyle += '^' + s;
@@ -67,6 +67,13 @@ namespace WUX {
 			return this;
 		}
 
+		begin(component: WComponent): this {
+			if(!component) return this;
+			if(!component.parent) component.parent = this;
+			this.cext.push(component);
+			return this;
+		}
+
 		add(component: WElement, constraints?: string): this {
 			if(!component) return this;
 			if(typeof component == 'string') {
@@ -80,7 +87,12 @@ namespace WUX {
 			else {
 				if(!component.parent) component.parent = this;
 				if(!this.grid.length) {
-					this.cint.push(component);
+					if(constraints == 'unshift') {
+						this.cint.unshift(component);
+					}
+					else {
+						this.cint.push(component);
+					}
 					return this;
 				}
 				if(constraints == 'push') {
@@ -91,8 +103,8 @@ namespace WUX {
 					this.cint.unshift(component);
 					return this;
 				}
-				if(this.grid.length == 0) {
-					this.cint.push(component);
+				if(constraints == 'begin') {
+					this.cext.push(component);
 					return this;
 				}
 				let r = this.grid.length - 1;
@@ -209,6 +221,12 @@ namespace WUX {
 			return this;
 		}
 
+		protected componentWillMount(): void {
+			for(let i = 0; i < this.cext.length; i++) {
+				this.cext[i].mount(this.context);
+			}
+		}
+
 		protected render(): any {
 			let inner = '';
 			let rm = this.grid.length;
@@ -224,15 +242,12 @@ namespace WUX {
 					inner += "</div>";
 				}
 			}
-			if(!this.w0) this.w0 = '';
-			if(!this.w1) this.w1 = '';
-			return this.w0 + this.buildRoot(this.rootTag, inner) + this.w1;
+			return this.buildRoot(this.rootTag, inner);
 		}
 
 		protected componentDidMount(): void {
 			for(let i = 0; i < this.cint.length; i++) {
-				let c = this.cint[i];
-				c.mount(this.root);
+				this.cint[i].mount(this.root);
 			}
 			for(let i = 0; i < this.comp.length; i++) {
 				let c = this.comp[i];
@@ -243,6 +258,7 @@ namespace WUX {
 		}
 
 		componentWillUnmount(): void {
+			for (let c of this.cext) c.unmount();
 			for (let c of this.cint) c.unmount();
 			for (let c of this.comp) c.unmount();
 		}

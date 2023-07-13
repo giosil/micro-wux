@@ -321,6 +321,13 @@ declare namespace WUX {
         static FORM_CTRL: string;
         static ICON: string;
         static SEL_ROW: string;
+        static PRIMARY: WStyle;
+        static SECONDARY: WStyle;
+        static SUCCESS: WStyle;
+        static DANGER: WStyle;
+        static WARNING: WStyle;
+        static INFO: WStyle;
+        static LIGHT: WStyle;
     }
     class RES {
         static OK: string;
@@ -348,15 +355,15 @@ declare namespace WUX {
         protected componentDidMount(): void;
     }
     class WContainer extends WComponent<string, any> {
+        cext: WComponent[];
         cint: WComponent[];
         comp: WComponent[];
         sr_c: string[];
         grid: string[][];
-        w0: string;
-        w1: string;
         constructor(id?: string, classStyle?: string, style?: string | WStyle, attributes?: string | object, inline?: boolean, type?: string);
         addRow(classStyle?: string, style?: string | WStyle): this;
         addCol(classStyle?: string, style?: string | WStyle): this;
+        begin(component: WComponent): this;
         add(component: WElement, constraints?: string): this;
         addGroup(w: WWrapper, ...ac: WElement[]): this;
         addLine(style: string | WStyle, ...ac: WElement[]): this;
@@ -367,6 +374,7 @@ declare namespace WUX {
         addDiv(height: number, inner?: string, classStyle?: string): WContainer;
         addDiv(css: string | WStyle, inner?: string, attributes?: string, id?: string): WContainer;
         end(): WContainer;
+        protected componentWillMount(): void;
         protected render(): any;
         protected componentDidMount(): void;
         componentWillUnmount(): void;

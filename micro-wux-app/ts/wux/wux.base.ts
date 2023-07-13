@@ -556,7 +556,7 @@ namespace WUX {
 				if (this.context) {
 					if (this.debug) console.log('[' + str(this) + '] render ctx=' + str(context) + ' root=' + str(this.root));
 					let r = this.render();
-					if (r !== undefined && r !== null) {
+					if (r) {
 						if (r instanceof WComponent) {
 							if (this.debug) console.log('[' + str(this) + '] render -> ' + str(r));
 							this.internal = r;

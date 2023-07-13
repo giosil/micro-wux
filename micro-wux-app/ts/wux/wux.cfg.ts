@@ -43,6 +43,14 @@
 		static FORM_CTRL = 'form-control';
 		static ICON = 'margin-right:8px;';
 		static SEL_ROW = 'primary-bg-a2';
+
+		static PRIMARY: WStyle = { bg: '#b8d4f1' };
+		static SECONDARY: WStyle = { bg: '#d1d7dc' };
+		static SUCCESS: WStyle = { bg: '#b8ddd0' };
+		static DANGER: WStyle = { bg: '#f4c7ce' };
+		static WARNING: WStyle = { bg: '#e6d3b8' };
+		static INFO: WStyle = { bg: '#e2e2e2' };
+		static LIGHT: WStyle = { bg: '#f9f8fb' };
 	}
 	
 	export class RES {
