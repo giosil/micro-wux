@@ -8,7 +8,7 @@ Here is also an example of Javascript microfrontend using [single-spa](https://s
 - `single-spa-app`  - single-spa application
 - `single-spa-root` - single-spa root config 
 
-The single-spa root config has been created with `npx create-single-spa --moduleType root-config`.
+The single-spa root config has been created with `npx create-single-spa`.
 
 ## Build micro-WUX
 
