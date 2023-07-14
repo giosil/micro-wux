@@ -28,7 +28,8 @@ namespace WUX {
 	}
 
 	export class WContainer extends WComponent<string, any> {
-		cext: WComponent[]; // external components 
+		cbef: WElement[];   // Before elements 
+		caft: WElement[];   // After elements
 		cint: WComponent[]; // internal components
 		comp: WComponent[];
 		sr_c: string[];
@@ -38,7 +39,8 @@ namespace WUX {
 			// WComponent init
 			super(id ? id : '*', 'WContainer', type, classStyle, WUX.style(style), attributes);
 			// WContainer init
-			this.cext = [];
+			this.cbef = [];
+			this.caft = [];
 			this.cint = [];
 			this.comp = [];
 			this.sr_c = [];
@@ -67,10 +69,15 @@ namespace WUX {
 			return this;
 		}
 
-		begin(component: WComponent): this {
-			if(!component) return this;
-			if(!component.parent) component.parent = this;
-			this.cext.push(component);
+		before(...items: WElement[]): this {
+			if(!items) return this;
+			this.cbef = items;
+			return this;
+		}
+
+		after(...items: WElement[]): this {
+			if(!items) return this;
+			this.caft = items;
 			return this;
 		}
 
@@ -87,24 +94,19 @@ namespace WUX {
 			else {
 				if(!component.parent) component.parent = this;
 				if(!this.grid.length) {
-					if(constraints == 'unshift') {
-						this.cint.unshift(component);
-					}
-					else {
-						this.cint.push(component);
-					}
-					return this;
-				}
-				if(constraints == 'push') {
 					this.cint.push(component);
 					return this;
 				}
-				if(constraints == 'unshift') {
-					this.cint.unshift(component);
+				if(constraints == 'internal') {
+					this.cint.push(component);
 					return this;
 				}
-				if(constraints == 'begin') {
-					this.cext.push(component);
+				if(constraints == 'before') {
+					this.cbef.push(component);
+					return this;
+				}
+				if(constraints == 'after') {
+					this.caft.push(component);
 					return this;
 				}
 				let r = this.grid.length - 1;
@@ -222,8 +224,18 @@ namespace WUX {
 		}
 
 		protected componentWillMount(): void {
-			for(let i = 0; i < this.cext.length; i++) {
-				this.cext[i].mount(this.context);
+			for(let e of this.cbef) {
+				if(typeof e == 'string') {
+					// string (see render)
+				}
+				else if(e instanceof Element) {
+					// Element
+					if(this.context) this.context.append(e);
+				}
+				else {
+					// WComponent
+					e.mount(this.context);
+				}
 			}
 		}
 
@@ -242,7 +254,17 @@ namespace WUX {
 					inner += "</div>";
 				}
 			}
-			return this.buildRoot(this.rootTag, inner);
+			let s0 = '';
+			let s1 = '';
+			// Before
+			for(let e of this.cbef) {
+				if(typeof e == 'string') s0 += e;
+			}
+			// After
+			for(let e of this.caft) {
+				if(typeof e == 'string') s1 += e;
+			}
+			return s0 + this.buildRoot(this.rootTag, inner) + s1;
 		}
 
 		protected componentDidMount(): void {
@@ -255,12 +277,30 @@ namespace WUX {
 				if(!e) continue;
 				c.mount(e);
 			}
+			for(let e of this.caft) {
+				if(typeof e == 'string') {
+					// string (see render)
+				}
+				else if(e instanceof Element) {
+					// Element
+					if(this.context) this.context.append(e);
+				}
+				else {
+					// WComponent
+					e.mount(this.context);
+				}
+			}
 		}
 
 		componentWillUnmount(): void {
-			for (let c of this.cext) c.unmount();
-			for (let c of this.cint) c.unmount();
-			for (let c of this.comp) c.unmount();
+			for(let e of this.cbef) {
+				if(e instanceof WComponent) e.unmount();
+			}
+			for(let c of this.cint) c.unmount();
+			for(let c of this.comp) c.unmount();
+			for(let e of this.caft) {
+				if(e instanceof WComponent) e.unmount();
+			}
 		}
 
 		protected cs(cs: string) {

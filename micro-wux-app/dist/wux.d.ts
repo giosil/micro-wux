@@ -355,7 +355,8 @@ declare namespace WUX {
         protected componentDidMount(): void;
     }
     class WContainer extends WComponent<string, any> {
-        cext: WComponent[];
+        cbef: WElement[];
+        caft: WElement[];
         cint: WComponent[];
         comp: WComponent[];
         sr_c: string[];
@@ -363,7 +364,8 @@ declare namespace WUX {
         constructor(id?: string, classStyle?: string, style?: string | WStyle, attributes?: string | object, inline?: boolean, type?: string);
         addRow(classStyle?: string, style?: string | WStyle): this;
         addCol(classStyle?: string, style?: string | WStyle): this;
-        begin(component: WComponent): this;
+        before(...items: WElement[]): this;
+        after(...items: WElement[]): this;
         add(component: WElement, constraints?: string): this;
         addGroup(w: WWrapper, ...ac: WElement[]): this;
         addLine(style: string | WStyle, ...ac: WElement[]): this;

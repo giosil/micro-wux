@@ -2457,7 +2457,8 @@ var WUX;
         __extends(WContainer, _super);
         function WContainer(id, classStyle, style, attributes, inline, type) {
             var _this = _super.call(this, id ? id : '*', 'WContainer', type, classStyle, WUX.style(style), attributes) || this;
-            _this.cext = [];
+            _this.cbef = [];
+            _this.caft = [];
             _this.cint = [];
             _this.comp = [];
             _this.sr_c = [];
@@ -2490,12 +2491,24 @@ var WUX;
             g.push(classStyle);
             return this;
         };
-        WContainer.prototype.begin = function (component) {
-            if (!component)
+        WContainer.prototype.before = function () {
+            var items = [];
+            for (var _i = 0; _i < arguments.length; _i++) {
+                items[_i] = arguments[_i];
+            }
+            if (!items)
                 return this;
-            if (!component.parent)
-                component.parent = this;
-            this.cext.push(component);
+            this.cbef = items;
+            return this;
+        };
+        WContainer.prototype.after = function () {
+            var items = [];
+            for (var _i = 0; _i < arguments.length; _i++) {
+                items[_i] = arguments[_i];
+            }
+            if (!items)
+                return this;
+            this.caft = items;
             return this;
         };
         WContainer.prototype.add = function (component, constraints) {
@@ -2513,24 +2526,19 @@ var WUX;
                 if (!component.parent)
                     component.parent = this;
                 if (!this.grid.length) {
-                    if (constraints == 'unshift') {
-                        this.cint.unshift(component);
-                    }
-                    else {
-                        this.cint.push(component);
-                    }
-                    return this;
-                }
-                if (constraints == 'push') {
                     this.cint.push(component);
                     return this;
                 }
-                if (constraints == 'unshift') {
-                    this.cint.unshift(component);
+                if (constraints == 'internal') {
+                    this.cint.push(component);
                     return this;
                 }
-                if (constraints == 'begin') {
-                    this.cext.push(component);
+                if (constraints == 'before') {
+                    this.cbef.push(component);
+                    return this;
+                }
+                if (constraints == 'after') {
+                    this.caft.push(component);
                     return this;
                 }
                 var r = this.grid.length - 1;
@@ -2662,8 +2670,17 @@ var WUX;
             return this;
         };
         WContainer.prototype.componentWillMount = function () {
-            for (var i = 0; i < this.cext.length; i++) {
-                this.cext[i].mount(this.context);
+            for (var _i = 0, _a = this.cbef; _i < _a.length; _i++) {
+                var e = _a[_i];
+                if (typeof e == 'string') {
+                }
+                else if (e instanceof Element) {
+                    if (this.context)
+                        this.context.append(e);
+                }
+                else {
+                    e.mount(this.context);
+                }
             }
         };
         WContainer.prototype.render = function () {
@@ -2682,7 +2699,19 @@ var WUX;
                     inner += "</div>";
                 }
             }
-            return this.buildRoot(this.rootTag, inner);
+            var s0 = '';
+            var s1 = '';
+            for (var _i = 0, _a = this.cbef; _i < _a.length; _i++) {
+                var e = _a[_i];
+                if (typeof e == 'string')
+                    s0 += e;
+            }
+            for (var _b = 0, _c = this.caft; _b < _c.length; _b++) {
+                var e = _c[_b];
+                if (typeof e == 'string')
+                    s1 += e;
+            }
+            return s0 + this.buildRoot(this.rootTag, inner) + s1;
         };
         WContainer.prototype.componentDidMount = function () {
             for (var i = 0; i < this.cint.length; i++) {
@@ -2695,11 +2724,24 @@ var WUX;
                     continue;
                 c.mount(e);
             }
+            for (var _i = 0, _a = this.caft; _i < _a.length; _i++) {
+                var e = _a[_i];
+                if (typeof e == 'string') {
+                }
+                else if (e instanceof Element) {
+                    if (this.context)
+                        this.context.append(e);
+                }
+                else {
+                    e.mount(this.context);
+                }
+            }
         };
         WContainer.prototype.componentWillUnmount = function () {
-            for (var _i = 0, _a = this.cext; _i < _a.length; _i++) {
-                var c = _a[_i];
-                c.unmount();
+            for (var _i = 0, _a = this.cbef; _i < _a.length; _i++) {
+                var e = _a[_i];
+                if (e instanceof WUX.WComponent)
+                    e.unmount();
             }
             for (var _b = 0, _c = this.cint; _b < _c.length; _b++) {
                 var c = _c[_b];
@@ -2708,6 +2750,11 @@ var WUX;
             for (var _d = 0, _e = this.comp; _d < _e.length; _d++) {
                 var c = _e[_d];
                 c.unmount();
+            }
+            for (var _f = 0, _g = this.caft; _f < _g.length; _f++) {
+                var e = _g[_f];
+                if (e instanceof WUX.WComponent)
+                    e.unmount();
             }
         };
         WContainer.prototype.cs = function (cs) {
