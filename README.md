@@ -6,7 +6,7 @@ Here is also an example of Javascript microfrontend using [single-spa](https://s
 
 - `micro-wux-app`   - typescript application with micro-wux library
 - `single-spa-app`  - single-spa application
-- `single-spa-root` - single-spa root config
+- `single-spa-root` - single-spa root config `created with npx create-single-spa --moduleType root-config`
 
 ## Build micro-WUX
 
