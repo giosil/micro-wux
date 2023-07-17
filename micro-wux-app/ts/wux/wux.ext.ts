@@ -5,6 +5,7 @@ namespace WUX {
 		titles?: string[];
 		series?: number[][];
 		styles?: string[];
+		type?: string;
 	}
 		
 	export function JQ(e: any): JQuery {
@@ -251,6 +252,92 @@ namespace WUX {
 		protected buildTitle(): string {
 			if (!this.tagTitle) this.tagTitle = 'h3';
 			return '<' + this.tagTitle + ' class="modal-title" id="' + this.subId('title') + '">' + WUtil.toText(this._title) + '</' + this.tagTitle + '>';
+		}
+	}
+	
+	export class WTab extends WComponent<any, number> {
+		tabs: WContainer[];
+
+		constructor(id?: string, classStyle?: string, style?: string | WStyle, attributes?: string | object, props?: any) {
+			// WComponent init
+			super(id ? id : '*', 'WTab', props, classStyle, style, attributes);
+			// WTab init
+			this.tabs = [];
+		}
+
+		addTab(title: string, icon?: string): WContainer {
+			let tab = new WContainer('', 'panel-body');
+			tab.name = WUX.buildIcon(icon, '', ' ') + title;
+			this.tabs.push(tab);
+			return tab;
+		}
+
+		protected render() {
+			if (this.state == null) this.state = 0;
+			let r: string = '<div';
+			if (this._classStyle) {
+				r += ' class="tabs-container ' + this._classStyle + '"';
+			}
+			else {
+				r += ' class="tabs-container"';
+			}
+			r += ' id="' + this.id + '"';
+			if (this._style) r += ' style="' + this._style + '"';
+			if (this.attributes) r += ' ' + this.attributes;
+			r += '>';
+			r += '<ul class="nav nav-tabs auto" role="tablist">';
+			for (let i = 0; i < this.tabs.length; i++) {
+				let tab = this.tabs[i];
+				if (i == this.state) {
+					r += '<li class="nav-item"><a class="nav-link active" data-toggle="tab" href="#' + this.id + '-' + i + '"> ' + tab.name + '</a></li>';
+				}
+				else {
+					r += '<li class="nav-item"><a class="nav-link" data-toggle="tab" href="#' + this.id + '-' + i + '"> ' + tab.name + '</a></li>';
+				}
+			}
+			r += '</ul>';
+			r += '<div class="tab-content">';
+			for (let i = 0; i < this.tabs.length; i++) {
+				if (i == this.state) {
+					r += '<div id="' + this.id + '-' + i + '" class="tab-pane active"></div>';
+				}
+				else {
+					r += '<div id="' + this.id + '-' + i + '" class="tab-pane"></div>';
+				}
+			}
+			r += '</div></div>';
+			return r;
+		}
+
+		protected componentDidUpdate(prevProps: any, prevState: any): void {
+			let $t = JQ('.nav-tabs a[href="#' + this.id + '-' + this.state + '"]');
+			if(!$t) return;
+			$t.tab('show');
+		}
+
+		protected componentDidMount(): void {
+			if (!this.tabs.length) return;
+			for (let i = 0; i < this.tabs.length; i++) {
+				let container = this.tabs[i];
+				let tabPane = document.getElementById(this.id + '-' + i);
+				if (!tabPane) continue;
+				container.mount(tabPane);
+			}
+			let $r = JQ(this.root);
+			if(!$r) return;
+			$r.find('a[data-toggle="tab"]').on('shown.bs.tab', (e?: JQueryEventObject) => {
+				let href = $(e.target).attr('href');
+				if (href) {
+					let sep = href.lastIndexOf('-');
+					if (sep >= 0) this.setState(parseInt(href.substring(sep + 1)));
+				}
+			});
+		}
+
+		componentWillUnmount(): void {
+			for (let c of this.tabs) {
+				if(c) c.unmount();
+			}
 		}
 	}
 	
@@ -635,7 +722,7 @@ namespace WUX {
 		}
 	}
 
-	export class WLineChart extends WUX.WComponent<string, WChartData> {
+	export class WChart extends WUX.WComponent<string, WChartData> {
 		fontName: string;
 		fontSize: number;
 		axis: string;
@@ -644,11 +731,12 @@ namespace WUX {
 		offx: number;
 		offy: number;
 		maxy: number;
+		barw: number;
 		_w: number;
 		_h: number;
 
 		constructor(id?: string, classStyle?: string, style?: string | WUX.WStyle) {
-			super(id ? id : '*', 'WLineChart', '', classStyle, style);
+			super(id ? id : '*', 'WChart', '', classStyle, style);
 			this.rootTag = 'canvas';
 			this.forceOnChange = true;
 
@@ -668,6 +756,7 @@ namespace WUX {
 			this.line = '#e23222';
 			this.offx = 30;
 			this.offy = 30;
+			this.barw = 16;
 		}
 
 		size(width: number, height: number): this {
@@ -740,30 +829,6 @@ namespace WUX {
 			// Step Y
 			let sy = ch / my;
 			
-			// Chart
-			for(let j = 0; j < s.length; j++) {
-				let dj = s[j];
-				// Mind this: < d0.length
-				if(!dj || dj.length < d0.length) return;
-				let sl = this.line;
-				if(cs && cs.length > j) {
-					sl = cs[j];
-					if(!sl) sl = this.line;
-				}
-				
-				ctx.beginPath();
-				ctx.lineWidth = 2;
-				ctx.strokeStyle = sl;
-				ctx.moveTo(this.offx, r.height - pady - (dj[0] * sy));
-				// Mind this: < d0.length
-				for (let i = 1; i < d0.length; i++) {
-					let x = this.offx + i * bw;
-					let y = r.height - pady - (dj[i] * sy);
-					ctx.lineTo(x, y);
-				}
-				ctx.stroke();
-			}
-			
 			// Axis
 			ctx.beginPath();
 			ctx.lineWidth = 1;
@@ -816,6 +881,60 @@ namespace WUX {
 					ctx.fillStyle = this.axis;
 					ctx.fillText(labels[i], 0, 0);
 					ctx.restore();
+				}
+			}
+			
+			// Chart
+			let type = this.state.type;
+			if(!type || type != 'bar') {
+				ctx.setLineDash([]);
+				for(let j = 0; j < s.length; j++) {
+					let dj = s[j];
+					// Mind this: < d0.length
+					if(!dj || dj.length < d0.length) return;
+					let sl = this.line;
+					if(cs && cs.length > j) {
+						sl = cs[j];
+						if(!sl) sl = this.line;
+					}
+					
+					ctx.beginPath();
+					ctx.lineWidth = 2;
+					ctx.strokeStyle = sl;
+					ctx.moveTo(this.offx, r.height - pady - (dj[0] * sy));
+					// Mind this: < d0.length
+					for (let i = 1; i < d0.length; i++) {
+						let x = this.offx + i * bw;
+						let y = r.height - pady - (dj[i] * sy);
+						ctx.lineTo(x, y);
+					}
+					ctx.stroke();
+				}
+			}
+			else {
+				if(this.barw < 4) this.barw = 4;
+				for(let j = 0; j < s.length; j++) {
+					let dj = s[j];
+					// Mind this: < d0.length
+					if(!dj || dj.length < d0.length) return;
+					let sl = this.line;
+					if(cs && cs.length > j) {
+						sl = cs[j];
+						if(!sl) sl = this.line;
+					}
+					ctx.fillStyle = sl;
+					// Mind this: < d0.length
+					for (let i = 0; i < d0.length; i++) {
+						let x = this.offx + i * bw;
+						let y = r.height - pady - (dj[i] * sy);
+						if(i == 0) {
+							// Review first bar drawing!
+							ctx.fillRect(x, y, this.barw, dj[i] * sy);
+						}
+						else {
+							ctx.fillRect(x - (this.barw / 2), y, this.barw, dj[i] * sy);
+						}
+					}
 				}
 			}
 		}

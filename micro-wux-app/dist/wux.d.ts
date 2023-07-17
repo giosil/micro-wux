@@ -560,6 +560,7 @@ declare namespace WUX {
         titles?: string[];
         series?: number[][];
         styles?: string[];
+        type?: string;
     }
     function JQ(e: any): JQuery;
     class WDialog<P = any, S = any> extends WUX.WComponent<P, S> {
@@ -609,6 +610,15 @@ declare namespace WUX {
         componentWillUnmount(): void;
         protected buildTitle(): string;
     }
+    class WTab extends WComponent<any, number> {
+        tabs: WContainer[];
+        constructor(id?: string, classStyle?: string, style?: string | WStyle, attributes?: string | object, props?: any);
+        addTab(title: string, icon?: string): WContainer;
+        protected render(): string;
+        protected componentDidUpdate(prevProps: any, prevState: any): void;
+        protected componentDidMount(): void;
+        componentWillUnmount(): void;
+    }
     class WCalendar extends WComponent<number, Date> {
         ep: HTMLElement;
         em: HTMLElement;
@@ -652,7 +662,7 @@ declare namespace WUX {
         protected body(): string;
         protected componentDidMount(): void;
     }
-    class WLineChart extends WUX.WComponent<string, WChartData> {
+    class WChart extends WUX.WComponent<string, WChartData> {
         fontName: string;
         fontSize: number;
         axis: string;
@@ -661,6 +671,7 @@ declare namespace WUX {
         offx: number;
         offy: number;
         maxy: number;
+        barw: number;
         _w: number;
         _h: number;
         constructor(id?: string, classStyle?: string, style?: string | WUX.WStyle);

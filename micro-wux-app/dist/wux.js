@@ -4349,6 +4349,97 @@ var WUX;
         return WDialog;
     }(WUX.WComponent));
     WUX.WDialog = WDialog;
+    var WTab = (function (_super) {
+        __extends(WTab, _super);
+        function WTab(id, classStyle, style, attributes, props) {
+            var _this = _super.call(this, id ? id : '*', 'WTab', props, classStyle, style, attributes) || this;
+            _this.tabs = [];
+            return _this;
+        }
+        WTab.prototype.addTab = function (title, icon) {
+            var tab = new WUX.WContainer('', 'panel-body');
+            tab.name = WUX.buildIcon(icon, '', ' ') + title;
+            this.tabs.push(tab);
+            return tab;
+        };
+        WTab.prototype.render = function () {
+            if (this.state == null)
+                this.state = 0;
+            var r = '<div';
+            if (this._classStyle) {
+                r += ' class="tabs-container ' + this._classStyle + '"';
+            }
+            else {
+                r += ' class="tabs-container"';
+            }
+            r += ' id="' + this.id + '"';
+            if (this._style)
+                r += ' style="' + this._style + '"';
+            if (this.attributes)
+                r += ' ' + this.attributes;
+            r += '>';
+            r += '<ul class="nav nav-tabs auto" role="tablist">';
+            for (var i = 0; i < this.tabs.length; i++) {
+                var tab = this.tabs[i];
+                if (i == this.state) {
+                    r += '<li class="nav-item"><a class="nav-link active" data-toggle="tab" href="#' + this.id + '-' + i + '"> ' + tab.name + '</a></li>';
+                }
+                else {
+                    r += '<li class="nav-item"><a class="nav-link" data-toggle="tab" href="#' + this.id + '-' + i + '"> ' + tab.name + '</a></li>';
+                }
+            }
+            r += '</ul>';
+            r += '<div class="tab-content">';
+            for (var i = 0; i < this.tabs.length; i++) {
+                if (i == this.state) {
+                    r += '<div id="' + this.id + '-' + i + '" class="tab-pane active"></div>';
+                }
+                else {
+                    r += '<div id="' + this.id + '-' + i + '" class="tab-pane"></div>';
+                }
+            }
+            r += '</div></div>';
+            return r;
+        };
+        WTab.prototype.componentDidUpdate = function (prevProps, prevState) {
+            var $t = JQ('.nav-tabs a[href="#' + this.id + '-' + this.state + '"]');
+            if (!$t)
+                return;
+            $t.tab('show');
+        };
+        WTab.prototype.componentDidMount = function () {
+            var _this = this;
+            if (!this.tabs.length)
+                return;
+            for (var i = 0; i < this.tabs.length; i++) {
+                var container = this.tabs[i];
+                var tabPane = document.getElementById(this.id + '-' + i);
+                if (!tabPane)
+                    continue;
+                container.mount(tabPane);
+            }
+            var $r = JQ(this.root);
+            if (!$r)
+                return;
+            $r.find('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+                var href = $(e.target).attr('href');
+                if (href) {
+                    var sep = href.lastIndexOf('-');
+                    if (sep >= 0)
+                        _this.setState(parseInt(href.substring(sep + 1)));
+                }
+            });
+        };
+        WTab.prototype.componentWillUnmount = function () {
+            for (var _i = 0, _a = this.tabs; _i < _a.length; _i++) {
+                var c = _a[_i];
+                if (c)
+                    c.unmount();
+            }
+        };
+        return WTab;
+    }(WUX.WComponent));
+    WUX.WTab = WTab;
     var WCalendar = (function (_super) {
         __extends(WCalendar, _super);
         function WCalendar(id, classStyle, style, attributes) {
@@ -4684,10 +4775,10 @@ var WUX;
         return WCalendar;
     }(WUX.WComponent));
     WUX.WCalendar = WCalendar;
-    var WLineChart = (function (_super) {
-        __extends(WLineChart, _super);
-        function WLineChart(id, classStyle, style) {
-            var _this = _super.call(this, id ? id : '*', 'WLineChart', '', classStyle, style) || this;
+    var WChart = (function (_super) {
+        __extends(WChart, _super);
+        function WChart(id, classStyle, style) {
+            var _this = _super.call(this, id ? id : '*', 'WChart', '', classStyle, style) || this;
             _this.rootTag = 'canvas';
             _this.forceOnChange = true;
             var iw = window.innerWidth;
@@ -4705,9 +4796,10 @@ var WUX;
             _this.line = '#e23222';
             _this.offx = 30;
             _this.offy = 30;
+            _this.barw = 16;
             return _this;
         }
-        WLineChart.prototype.size = function (width, height) {
+        WChart.prototype.size = function (width, height) {
             this._w = width;
             this._h = height;
             if (this._w < 40)
@@ -4717,7 +4809,7 @@ var WUX;
             this._attributes = 'width="' + this._w + '" height="' + this._h + '"';
             return this;
         };
-        Object.defineProperty(WLineChart.prototype, "width", {
+        Object.defineProperty(WChart.prototype, "width", {
             get: function () {
                 return this._w;
             },
@@ -4730,7 +4822,7 @@ var WUX;
             enumerable: false,
             configurable: true
         });
-        Object.defineProperty(WLineChart.prototype, "height", {
+        Object.defineProperty(WChart.prototype, "height", {
             get: function () {
                 return this._h;
             },
@@ -4743,7 +4835,7 @@ var WUX;
             enumerable: false,
             configurable: true
         });
-        WLineChart.prototype.componentDidMount = function () {
+        WChart.prototype.componentDidMount = function () {
             if (!this.state)
                 return;
             var s = this.state.series;
@@ -4780,27 +4872,6 @@ var WUX;
             }
             var iy = [Math.round(my / 4), Math.round(my / 2), Math.round(my * 3 / 4)];
             var sy = ch / my;
-            for (var j = 0; j < s.length; j++) {
-                var dj = s[j];
-                if (!dj || dj.length < d0.length)
-                    return;
-                var sl = this.line;
-                if (cs && cs.length > j) {
-                    sl = cs[j];
-                    if (!sl)
-                        sl = this.line;
-                }
-                ctx.beginPath();
-                ctx.lineWidth = 2;
-                ctx.strokeStyle = sl;
-                ctx.moveTo(this.offx, r.height - pady - (dj[0] * sy));
-                for (var i = 1; i < d0.length; i++) {
-                    var x = this.offx + i * bw;
-                    var y = r.height - pady - (dj[i] * sy);
-                    ctx.lineTo(x, y);
-                }
-                ctx.stroke();
-            }
             ctx.beginPath();
             ctx.lineWidth = 1;
             ctx.strokeStyle = this.axis;
@@ -4844,9 +4915,60 @@ var WUX;
                     ctx.restore();
                 }
             }
+            var type = this.state.type;
+            if (!type || type != 'bar') {
+                ctx.setLineDash([]);
+                for (var j = 0; j < s.length; j++) {
+                    var dj = s[j];
+                    if (!dj || dj.length < d0.length)
+                        return;
+                    var sl = this.line;
+                    if (cs && cs.length > j) {
+                        sl = cs[j];
+                        if (!sl)
+                            sl = this.line;
+                    }
+                    ctx.beginPath();
+                    ctx.lineWidth = 2;
+                    ctx.strokeStyle = sl;
+                    ctx.moveTo(this.offx, r.height - pady - (dj[0] * sy));
+                    for (var i = 1; i < d0.length; i++) {
+                        var x = this.offx + i * bw;
+                        var y = r.height - pady - (dj[i] * sy);
+                        ctx.lineTo(x, y);
+                    }
+                    ctx.stroke();
+                }
+            }
+            else {
+                if (this.barw < 4)
+                    this.barw = 4;
+                for (var j = 0; j < s.length; j++) {
+                    var dj = s[j];
+                    if (!dj || dj.length < d0.length)
+                        return;
+                    var sl = this.line;
+                    if (cs && cs.length > j) {
+                        sl = cs[j];
+                        if (!sl)
+                            sl = this.line;
+                    }
+                    ctx.fillStyle = sl;
+                    for (var i = 0; i < d0.length; i++) {
+                        var x = this.offx + i * bw;
+                        var y = r.height - pady - (dj[i] * sy);
+                        if (i == 0) {
+                            ctx.fillRect(x, y, this.barw, dj[i] * sy);
+                        }
+                        else {
+                            ctx.fillRect(x - (this.barw / 2), y, this.barw, dj[i] * sy);
+                        }
+                    }
+                }
+            }
         };
-        return WLineChart;
+        return WChart;
     }(WUX.WComponent));
-    WUX.WLineChart = WLineChart;
+    WUX.WChart = WChart;
 })(WUX || (WUX = {}));
 //# sourceMappingURL=wux.js.map
