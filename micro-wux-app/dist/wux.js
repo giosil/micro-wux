@@ -4446,9 +4446,10 @@ var WUX;
             var _this = _super.call(this, id ? id : '*', 'WCalendar', 1, classStyle, style, attributes) || this;
             _this.am = [];
             _this.mt = {};
-            _this.ct = 'table';
+            _this.pm = 'Mese precedente';
+            _this.nm = 'Mese successivo';
+            _this.ct = 'table table-sm';
             _this.cd = 'table-responsive';
-            _this.ct = 'table';
             _this.sp = 'padding:1rem;text-align:center;font-weight:bold;background-color:#eeeeee;';
             _this.sm = _this.sp;
             _this.sn = _this.sp;
@@ -4490,8 +4491,8 @@ var WUX;
             var m = this.state.getMonth();
             var y = this.state.getFullYear();
             var k = y * 100 + m + 1;
-            var p = '<a id="' + this.subId('p') + '" title="Mese precedente"><i class="fa fa-arrow-circle-left"></i></a>';
-            var n = '<a id="' + this.subId('n') + '" title="Mese successivo"><i class="fa fa-arrow-circle-right"></i></a>';
+            var p = '<a id="' + this.subId('p') + '" title="' + this.pm + '"><i class="fa fa-arrow-circle-left"></i></a>';
+            var n = '<a id="' + this.subId('n') + '" title="' + this.nm + '"><i class="fa fa-arrow-circle-right"></i></a>';
             var i = '<div class="row"><div class="col-2" style="' + this.sp + '">' + p + '</div><div id="' + this.subId('m') + '" class="col-8" style="' + this.sm + '">' + WUX.formatMonth(k, true, true) + '</div><div class="col-2" style="' + this.sn + '">' + n + '</div></div>';
             if (this.cd) {
                 i += '<div class="row"><div class="' + this.cd + '">' + t + '</div></div>';
@@ -4954,14 +4955,18 @@ var WUX;
                             sl = this.line;
                     }
                     ctx.fillStyle = sl;
+                    var sx = j * (this.barw + 1);
                     for (var i = 0; i < d0.length; i++) {
                         var x = this.offx + i * bw;
                         var y = r.height - pady - (dj[i] * sy);
                         if (i == 0) {
-                            ctx.fillRect(x, y, this.barw, dj[i] * sy);
+                            ctx.fillRect(x + sx, y, this.barw, dj[i] * sy);
+                        }
+                        else if (s.length < 3) {
+                            ctx.fillRect(x + sx - (this.barw / 2), y, this.barw, dj[i] * sy);
                         }
                         else {
-                            ctx.fillRect(x - (this.barw / 2), y, this.barw, dj[i] * sy);
+                            ctx.fillRect(x + sx - (this.barw / 2) - ((this.barw + 1) * (s.length - 2)), y, this.barw, dj[i] * sy);
                         }
                     }
                 }

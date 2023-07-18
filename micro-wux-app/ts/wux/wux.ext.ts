@@ -348,6 +348,10 @@ namespace WUX {
 		em: HTMLElement;
 		// Element next
 		en: HTMLElement;
+		// Prev month
+		pm: string;
+		// Next month
+		nm: string;
 		// Element table
 		et: HTMLElement;
 		// Element table body
@@ -378,6 +382,7 @@ namespace WUX {
 		st: string;
 		// Today
 		td: string;
+
 		// Array of marker
 		am: string[] = [];
 		// Map date - title
@@ -388,12 +393,14 @@ namespace WUX {
 		constructor(id?: string, classStyle?: string, style?: string | WStyle, attributes?: string | object) {
 			// WComponent init
 			super(id ? id : '*', 'WCalendar', 1, classStyle, style, attributes);
+			// Prev month
+			this.pm = 'Mese precedente';
+			// Next month
+			this.nm = 'Mese successivo';
 			// Class table
-			this.ct = 'table';
+			this.ct = 'table table-sm';
 			// Class div table
 			this.cd = 'table-responsive';
-			// Class div table
-			this.ct = 'table';
 			// Style previous
 			this.sp = 'padding:1rem;text-align:center;font-weight:bold;background-color:#eeeeee;';
 			// Style month
@@ -447,8 +454,8 @@ namespace WUX {
 			let m = this.state.getMonth();
 			let y = this.state.getFullYear();
 			let k = y * 100 + m + 1;
-			let p = '<a id="' + this.subId('p') + '" title="Mese precedente"><i class="fa fa-arrow-circle-left"></i></a>';
-			let n = '<a id="' + this.subId('n') + '" title="Mese successivo"><i class="fa fa-arrow-circle-right"></i></a>';
+			let p = '<a id="' + this.subId('p') + '" title="' + this.pm + '"><i class="fa fa-arrow-circle-left"></i></a>';
+			let n = '<a id="' + this.subId('n') + '" title="' + this.nm + '"><i class="fa fa-arrow-circle-right"></i></a>';
 			let i = '<div class="row"><div class="col-2" style="' + this.sp + '">' + p + '</div><div id="' + this.subId('m') + '" class="col-8" style="' + this.sm + '">' + WUX.formatMonth(k, true, true) + '</div><div class="col-2" style="' + this.sn + '">' + n + '</div></div>';
 			if(this.cd) {
 				i += '<div class="row"><div class="' + this.cd + '">' + t + '</div></div>';
@@ -923,16 +930,20 @@ namespace WUX {
 						if(!sl) sl = this.line;
 					}
 					ctx.fillStyle = sl;
+					let sx = j * (this.barw + 1);
 					// Mind this: < d0.length
 					for (let i = 0; i < d0.length; i++) {
 						let x = this.offx + i * bw;
 						let y = r.height - pady - (dj[i] * sy);
 						if(i == 0) {
 							// Review first bar drawing!
-							ctx.fillRect(x, y, this.barw, dj[i] * sy);
+							ctx.fillRect(x + sx, y, this.barw, dj[i] * sy);
+						}
+						else if(s.length < 3) {
+							ctx.fillRect(x + sx - (this.barw / 2), y, this.barw, dj[i] * sy);
 						}
 						else {
-							ctx.fillRect(x - (this.barw / 2), y, this.barw, dj[i] * sy);
+							ctx.fillRect(x + sx - (this.barw / 2) - ((this.barw + 1) * (s.length - 2)), y, this.barw, dj[i] * sy);
 						}
 					}
 				}

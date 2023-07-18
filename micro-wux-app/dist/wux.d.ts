@@ -623,6 +623,8 @@ declare namespace WUX {
         ep: HTMLElement;
         em: HTMLElement;
         en: HTMLElement;
+        pm: string;
+        nm: string;
         et: HTMLElement;
         eb: HTMLElement;
         ct: string;

@@ -607,12 +607,12 @@ i>=0&&t.setState(parseInt(n.substring(i+1)))}})}},i.prototype.componentWillUnmou
 n&&n.unmount()}},i}(t.WComponent)
 t.WTab=i
 var r=function(e){function n(t,n,i,r){var o=e.call(this,t||"*","WCalendar",1,n,i,r)||this
-return o.am=[],o.mt={},o.ct="table",o.cd="table-responsive",o.ct="table",o.sp="padding:1rem;text-align:center;font-weight:bold;background-color:#eeeeee;",o.sm=o.sp,o.sn=o.sp,o.sw="text-align:center;",o.sd="text-align:center;",o.so="text-align:center;background-color:#f6f6f6;cursor:pointer;",o.ss="text-align:center;background-color:#b8d4f1;",o.sk="text-align:center;background-color:#e6d3b8;",o.se="background-color:#f0f0f0;",o.st="font-weight:bold;",o.td=o.str(new Date),o}return __extends(n,e),n.prototype.onDoubleClick=function(t){this.handlers._doubleclick||(this.handlers._doubleclick=[]),this.handlers._doubleclick.push(t)},n.prototype.updateState=function(t){this.state=t,this.state||(this.state=new Date)
+return o.am=[],o.mt={},o.pm="Mese precedente",o.nm="Mese successivo",o.ct="table table-sm",o.cd="table-responsive",o.sp="padding:1rem;text-align:center;font-weight:bold;background-color:#eeeeee;",o.sm=o.sp,o.sn=o.sp,o.sw="text-align:center;",o.sd="text-align:center;",o.so="text-align:center;background-color:#f6f6f6;cursor:pointer;",o.ss="text-align:center;background-color:#b8d4f1;",o.sk="text-align:center;background-color:#e6d3b8;",o.se="background-color:#f0f0f0;",o.st="font-weight:bold;",o.td=o.str(new Date),o}return __extends(n,e),n.prototype.onDoubleClick=function(t){this.handlers._doubleclick||(this.handlers._doubleclick=[]),this.handlers._doubleclick.push(t)},n.prototype.updateState=function(t){this.state=t,this.state||(this.state=new Date)
 var e=this.state.getDate(),n=this.state.getMonth(),i=this.state.getFullYear()
 this.ls=1e4*i+100*(n+1)+e+""},n.prototype.render=function(){this.state||(this.state=new Date)
 for(var e='<table id="'+this.subId("t")+'" class="'+this.ct+'"><thead><tr>',n=0;n<7;n++){var i=6==n?0:n+1
 e+='<th id="'+this.subId(i+"")+'" style="'+this.sw+'">'+t.formatDay(i,!1)+"</th>"}e+='</tr></thead><tbody id="'+this.subId("b")+'">',e+=this.body(),e+="</tbody></table>"
-var r=this.state.getMonth(),o=this.state.getFullYear(),s=100*o+r+1,a='<a id="'+this.subId("p")+'" title="Mese precedente"><i class="fa fa-arrow-circle-left"></i></a>',h='<a id="'+this.subId("n")+'" title="Mese successivo"><i class="fa fa-arrow-circle-right"></i></a>',l='<div class="row"><div class="col-2" style="'+this.sp+'">'+a+'</div><div id="'+this.subId("m")+'" class="col-8" style="'+this.sm+'">'+t.formatMonth(s,!0,!0)+'</div><div class="col-2" style="'+this.sn+'">'+h+"</div></div>"
+var r=this.state.getMonth(),o=this.state.getFullYear(),s=100*o+r+1,a='<a id="'+this.subId("p")+'" title="'+this.pm+'"><i class="fa fa-arrow-circle-left"></i></a>',h='<a id="'+this.subId("n")+'" title="'+this.nm+'"><i class="fa fa-arrow-circle-right"></i></a>',l='<div class="row"><div class="col-2" style="'+this.sp+'">'+a+'</div><div id="'+this.subId("m")+'" class="col-8" style="'+this.sm+'">'+t.formatMonth(s,!0,!0)+'</div><div class="col-2" style="'+this.sn+'">'+h+"</div></div>"
 return this.cd?l+='<div class="row"><div class="'+this.cd+'">'+e+"</div></div>":l+='<div class="row"><div class="col-12">'+e+"</div></div>",this.buildRoot(this.rootTag,l)},n.prototype.add=function(e){this.state||(this.state=new Date)
 var n=this.state.getDate(),i=this.state.getMonth(),r=this.state.getFullYear(),o=i+e,s=new Date(r,o,n),a=s.getMonth()
 a!=o&&(s=new Date(r,o+1,0),a=s.getMonth())
@@ -686,14 +686,14 @@ for(var D=0;D<t.length;D++){var M=t[D]
 if(!M||M.length<e.length)return
 var W=this.line
 n&&n.length>D&&((W=n[D])||(W=this.line)),r.fillStyle=W
-for(var y=0;y<e.length;y++){var v=this.offx+y*p,I=i.height-s-M[y]*m
-0==y?r.fillRect(v,I,this.barw,M[y]*m):r.fillRect(v-this.barw/2,I,this.barw,M[y]*m)}}}else{r.setLineDash([])
+for(var I=D*(this.barw+1),y=0;y<e.length;y++){var v=this.offx+y*p,T=i.height-s-M[y]*m
+0==y?r.fillRect(v+I,T,this.barw,M[y]*m):t.length<3?r.fillRect(v+I-this.barw/2,T,this.barw,M[y]*m):r.fillRect(v+I-this.barw/2-(this.barw+1)*(t.length-2),T,this.barw,M[y]*m)}}}else{r.setLineDash([])
 for(var D=0;D<t.length;D++){var M=t[D]
 if(!M||M.length<e.length)return
 var W=this.line
 n&&n.length>D&&((W=n[D])||(W=this.line)),r.beginPath(),r.lineWidth=2,r.strokeStyle=W,r.moveTo(this.offx,i.height-s-M[0]*m)
-for(var y=1;y<e.length;y++){var v=this.offx+y*p,I=i.height-s-M[y]*m
-r.lineTo(v,I)}r.stroke()}}}}}}},e}(t.WComponent)
+for(var y=1;y<e.length;y++){var v=this.offx+y*p,T=i.height-s-M[y]*m
+r.lineTo(v,T)}r.stroke()}}}}}}},e}(t.WComponent)
 t.WChart=o}(WUX||(WUX={}))
 var APP
 !function(n){var t=function(n){function t(){return null!==n&&n.apply(this,arguments)||this}return __extends(t,n),t.prototype.render=function(){return"<div>Hello World.</div>"},t}(WUX.WComponent)
