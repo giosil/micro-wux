@@ -346,6 +346,8 @@ declare namespace WUX {
     function format(a: any): string;
     function formatDay(d: number, e?: boolean): string;
     function formatMonth(m: number, e?: boolean, y?: any): string;
+    function saveFile(base64: string, fileName: string, mimeType?: string): void;
+    function viewFile(base64: string, fileName: string, mimeType?: string): void;
 }
 declare namespace WUX {
     class Wrapp extends WComponent<WElement, any> {

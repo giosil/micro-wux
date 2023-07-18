@@ -286,4 +286,37 @@
 		}
 		return '';
 	}
+	
+	export function saveFile(base64: string, fileName: string, mimeType: string = 'application/octet-stream') {
+		const ab = atob(base64);
+		const an = new Array(ab.length);
+		for (let i = 0; i < ab.length; i++) {
+			an[i] = ab.charCodeAt(i);
+		}
+		const ui8a = new Uint8Array(an);
+		const blob = new Blob([ui8a], {type: mimeType});
+		const link = document.createElement('a');
+		link.href = URL.createObjectURL(blob);
+		link.download = fileName;
+		link.click();
+	}
+	
+	export function viewFile(base64: string, fileName: string, mimeType: string = 'application/octet-stream') {
+		const ab = atob(base64);
+		const an = new Array(ab.length);
+		for (let i = 0; i < ab.length; i++) {
+			an[i] = ab.charCodeAt(i);
+		}
+		const ui8a = new Uint8Array(an);
+		const blob = new Blob([ui8a], {type: mimeType});
+		const url = URL.createObjectURL(blob);
+		const link = document.createElement('a');
+		link.href = url;
+		link.target = '_blank';
+		link.rel = 'noopener noreferrer';
+		link.title = fileName;
+		link.click();
+		// Rilascia l'URL del blob dopo che la scheda e' stata aperta
+		setTimeout(() => { URL.revokeObjectURL(url); }, 1000);
+	}
 }

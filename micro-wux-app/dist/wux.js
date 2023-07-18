@@ -2424,6 +2424,40 @@ var WUX;
         return '';
     }
     WUX.formatMonth = formatMonth;
+    function saveFile(base64, fileName, mimeType) {
+        if (mimeType === void 0) { mimeType = 'application/octet-stream'; }
+        var ab = atob(base64);
+        var an = new Array(ab.length);
+        for (var i = 0; i < ab.length; i++) {
+            an[i] = ab.charCodeAt(i);
+        }
+        var ui8a = new Uint8Array(an);
+        var blob = new Blob([ui8a], { type: mimeType });
+        var link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = fileName;
+        link.click();
+    }
+    WUX.saveFile = saveFile;
+    function viewFile(base64, fileName, mimeType) {
+        if (mimeType === void 0) { mimeType = 'application/octet-stream'; }
+        var ab = atob(base64);
+        var an = new Array(ab.length);
+        for (var i = 0; i < ab.length; i++) {
+            an[i] = ab.charCodeAt(i);
+        }
+        var ui8a = new Uint8Array(an);
+        var blob = new Blob([ui8a], { type: mimeType });
+        var url = URL.createObjectURL(blob);
+        var link = document.createElement('a');
+        link.href = url;
+        link.target = '_blank';
+        link.rel = 'noopener noreferrer';
+        link.title = fileName;
+        link.click();
+        setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+    }
+    WUX.viewFile = viewFile;
 })(WUX || (WUX = {}));
 var WUX;
 (function (WUX) {
