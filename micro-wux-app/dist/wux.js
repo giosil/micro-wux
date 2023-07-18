@@ -4422,12 +4422,16 @@ var WUX;
             if (!$r)
                 return;
             $r.find('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
-                var href = $(e.target).attr('href');
-                if (href) {
-                    var sep = href.lastIndexOf('-');
-                    if (sep >= 0)
-                        _this.setState(parseInt(href.substring(sep + 1)));
+                var t = e.target;
+                var href = '';
+                if (t instanceof Element) {
+                    href = t.getAttribute('href');
                 }
+                if (!href)
+                    return;
+                var sep = href.lastIndexOf('-');
+                if (sep >= 0)
+                    _this.setState(parseInt(href.substring(sep + 1)));
             });
         };
         WTab.prototype.componentWillUnmount = function () {

@@ -326,11 +326,14 @@ namespace WUX {
 			let $r = JQ(this.root);
 			if(!$r) return;
 			$r.find('a[data-toggle="tab"]').on('shown.bs.tab', (e?: JQueryEventObject) => {
-				let href = $(e.target).attr('href');
-				if (href) {
-					let sep = href.lastIndexOf('-');
-					if (sep >= 0) this.setState(parseInt(href.substring(sep + 1)));
+				let t = e.target;
+				let href = '';
+				if(t instanceof Element) {
+					href = t.getAttribute('href');
 				}
+				if(!href) return;
+				let sep = href.lastIndexOf('-');
+				if (sep >= 0) this.setState(parseInt(href.substring(sep + 1)));
 			});
 		}
 

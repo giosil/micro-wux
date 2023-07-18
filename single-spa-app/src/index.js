@@ -601,9 +601,9 @@ return t+="</div></div>"},i.prototype.componentDidUpdate=function(t,n){var i=e('
 i&&i.tab("show")},i.prototype.componentDidMount=function(){var t=this
 if(this.tabs.length){for(var n=0;n<this.tabs.length;n++){var i=this.tabs[n],r=document.getElementById(this.id+"-"+n)
 r&&i.mount(r)}var o=e(this.root)
-o&&o.find('a[data-toggle="tab"]').on("shown.bs.tab",function(e){var n=$(e.target).attr("href")
-if(n){var i=n.lastIndexOf("-")
-i>=0&&t.setState(parseInt(n.substring(i+1)))}})}},i.prototype.componentWillUnmount=function(){for(var t=0,e=this.tabs;t<e.length;t++){var n=e[t]
+o&&o.find('a[data-toggle="tab"]').on("shown.bs.tab",function(e){var n=e.target,i=""
+if(n instanceof Element&&(i=n.getAttribute("href")),i){var r=i.lastIndexOf("-")
+r>=0&&t.setState(parseInt(i.substring(r+1)))}})}},i.prototype.componentWillUnmount=function(){for(var t=0,e=this.tabs;t<e.length;t++){var n=e[t]
 n&&n.unmount()}},i}(t.WComponent)
 t.WTab=i
 var r=function(e){function n(t,n,i,r){var o=e.call(this,t||"*","WCalendar",1,n,i,r)||this
