@@ -2167,6 +2167,8 @@ var WUX;
         CSS.FORM = 'padding-top:16px;';
         CSS.FORM_GROUP = 'form-group';
         CSS.FORM_CTRL = 'form-control';
+        CSS.FORM_CHECK = 'form-check form-check-inline';
+        CSS.CHECK_STYLE = 'padding-top:1.5rem;';
         CSS.ICON = 'margin-right:8px;';
         CSS.SEL_ROW = 'primary-bg-a2';
         CSS.PRIMARY = { bg: '#b8d4f1' };
@@ -3266,7 +3268,21 @@ var WUX;
             var addAttributes = 'name="' + this.id + '" type="checkbox"';
             addAttributes += this.props ? ' checked="checked"' : '';
             var inner = this._text ? '&nbsp;' + this._text : '';
-            return this.build(this.rootTag, inner, addAttributes);
+            var r0 = '';
+            var r1 = '';
+            if (this.divClass || this.divStyle) {
+                r0 += '<div ';
+                if (this.divClass)
+                    r0 += ' class="' + this.divClass + '"';
+                if (this.divStyle)
+                    r0 += ' style="' + this.divStyle + '"';
+                r0 += '>';
+            }
+            if (this.label)
+                r1 += '<label for="' + this.id + '">' + this.label + '</label>';
+            if (r0)
+                r1 += '</div>';
+            return r0 + this.build(this.rootTag, inner, addAttributes) + r1;
         };
         WCheck.prototype.componentDidMount = function () {
             var _this = this;
@@ -4151,15 +4167,18 @@ var WUX;
         };
         WFormPanel.prototype.addRadioField = function (fieldId, label, options, attributes, readonly) {
             var id = this.subId(fieldId);
-            var co = new WRadio(id, options, WUX.CSS.FORM_CTRL, 'padding-top:1.5rem;', attributes);
+            var co = new WRadio(id, options, WUX.CSS.FORM_CTRL, WUX.CSS.CHECK_STYLE, attributes);
             co.enabled = !readonly;
             this.currRow.push({ id: id, label: label, component: co, readonly: readonly, type: 'select' });
             return this;
         };
-        WFormPanel.prototype.addBooleanField = function (fieldId, label) {
+        WFormPanel.prototype.addBooleanField = function (fieldId, label, labelCheck) {
             var id = this.subId(fieldId);
             var co = new WCheck(id, '');
+            co.divClass = WUX.CSS.FORM_CHECK;
+            co.divStyle = WUX.CSS.CHECK_STYLE;
             co.classStyle = WUX.CSS.FORM_CTRL;
+            co.label = labelCheck;
             this.currRow.push({ id: id, label: label, component: co, 'type': 'boolean' });
             return this;
         };

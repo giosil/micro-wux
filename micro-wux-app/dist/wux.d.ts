@@ -321,6 +321,8 @@ declare namespace WUX {
         static FORM: string;
         static FORM_GROUP: string;
         static FORM_CTRL: string;
+        static FORM_CHECK: string;
+        static CHECK_STYLE: string;
         static ICON: string;
         static SEL_ROW: string;
         static PRIMARY: WStyle;
@@ -444,7 +446,9 @@ declare namespace WUX {
         protected componentWillUpdate(nextProps: any, nextState: any): void;
     }
     class WCheck extends WComponent<boolean, any> {
-        wrapper: WUX.WContainer;
+        divClass: string;
+        divStyle: string;
+        label: string;
         value: any;
         protected _text: string;
         protected _obs: MutationObserver;
@@ -559,7 +563,7 @@ declare namespace WUX {
         addEmailField(fieldId: string, label: string, readonly?: boolean): this;
         addOptionsField(fieldId: string, label: string, options?: (string | WEntity)[], attributes?: string | object, readonly?: boolean): this;
         addRadioField(fieldId: string, label: string, options?: (string | WEntity)[], attributes?: string | object, readonly?: boolean): this;
-        addBooleanField(fieldId: string, label: string): this;
+        addBooleanField(fieldId: string, label: string, labelCheck?: string): this;
         addBlankField(label?: string, classStyle?: string, style?: string | WStyle): this;
         addInternalField(fieldId: string, value?: any): this;
         addComponent(fieldId: string, label: string, component: WComponent): this;

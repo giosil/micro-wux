@@ -41,6 +41,8 @@
 		static FORM = 'padding-top:16px;';
 		static FORM_GROUP = 'form-group';
 		static FORM_CTRL = 'form-control';
+		static FORM_CHECK = 'form-check form-check-inline';
+		static CHECK_STYLE = 'padding-top:1.5rem;';
 		static ICON = 'margin-right:8px;';
 		static SEL_ROW = 'primary-bg-a2';
 

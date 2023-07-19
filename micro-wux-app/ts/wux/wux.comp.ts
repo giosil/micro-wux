@@ -665,9 +665,11 @@ namespace WUX {
 			this.root.innerHTML = html;
 		}
 	}
-	
+
 	export class WCheck extends WComponent<boolean, any> {
-		wrapper: WUX.WContainer;
+		divClass: string;
+		divStyle: string;
+		label: string;
 		value: any;
 		protected _text: string;
 		protected _obs: MutationObserver;
@@ -708,7 +710,7 @@ namespace WUX {
 			super.updateProps(nextProps);
 			this.state = this.props ? this.value : undefined;
 			if (this.root) {
-				if(this.props) {
+				if (this.props) {
 					this.root.setAttribute('checked', 'checked');
 				}
 				else {
@@ -724,7 +726,7 @@ namespace WUX {
 			super.updateState(nextState);
 			this.props = this.state != undefined;
 			if (this.root) {
-				if(this.props) {
+				if (this.props) {
 					this.root.setAttribute('checked', 'checked');
 				}
 				else {
@@ -737,7 +739,17 @@ namespace WUX {
 			let addAttributes = 'name="' + this.id + '" type="checkbox"';
 			addAttributes += this.props ? ' checked="checked"' : '';
 			let inner = this._text ? '&nbsp;' + this._text : '';
-			return this.build(this.rootTag, inner, addAttributes);
+			let r0 = '';
+			let r1 = '';
+			if (this.divClass || this.divStyle) {
+				r0 += '<div ';
+				if(this.divClass) r0 += ' class="' + this.divClass + '"';
+				if(this.divStyle) r0 += ' style="' + this.divStyle + '"';
+				r0 += '>';
+			}
+			if (this.label) r1 += '<label for="' + this.id + '">' + this.label + '</label>';
+			if (r0) r1 += '</div>';
+			return r0 + this.build(this.rootTag, inner, addAttributes) + r1;
 		}
 
 		protected componentDidMount(): void {
@@ -1581,16 +1593,19 @@ namespace WUX {
 
 		addRadioField(fieldId: string, label: string, options?: (string | WEntity)[], attributes?: string | object, readonly?: boolean): this {
 			let id = this.subId(fieldId);
-			let co = new WRadio(id, options, CSS.FORM_CTRL, 'padding-top:1.5rem;', attributes);
+			let co = new WRadio(id, options, CSS.FORM_CTRL, CSS.CHECK_STYLE, attributes);
 			co.enabled = !readonly;
 			this.currRow.push({ id: id, label: label, component: co, readonly: readonly, type: 'select' });
 			return this;
 		}
 
-		addBooleanField(fieldId: string, label: string): this {
+		addBooleanField(fieldId: string, label: string, labelCheck?: string): this {
 			let id = this.subId(fieldId);
 			let co = new WCheck(id, '');
+			co.divClass = CSS.FORM_CHECK;
+			co.divStyle = CSS.CHECK_STYLE;
 			co.classStyle = CSS.FORM_CTRL;
+			co.label = labelCheck;
 			this.currRow.push({ id: id, label: label, component: co, 'type': 'boolean'});
 			return this;
 		}
