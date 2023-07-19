@@ -179,6 +179,8 @@ declare namespace WUX {
     function getState(id: string, d?: any): any;
     function newInstance(n: string): WUX.WComponent;
     function same(e1: WElement, e2: WElement): boolean;
+    function match(i: any, o: string | WEntity): boolean;
+    function hashCode(a: any): number;
     function divide(s: string): [string, string, string];
     function str(a: any): string;
     function getTagName(c: any): string;
@@ -413,15 +415,19 @@ declare namespace WUX {
         size: number;
         label: string;
         placeHolder: string;
-        readonly: boolean;
+        _ro: boolean;
         constructor(id?: string, type?: string, size?: number, classStyle?: string, style?: string | WStyle, attributes?: string | object);
+        get readonly(): boolean;
+        set readonly(v: boolean);
         protected updateState(nextState: string): void;
         getState(): string;
         protected render(): string;
     }
     class WTextArea extends WComponent<number, string> {
-        readonly: boolean;
+        _ro: boolean;
         constructor(id?: string, rows?: number, classStyle?: string, style?: string | WStyle, attributes?: string | object);
+        get readonly(): boolean;
+        set readonly(v: boolean);
         protected updateState(nextState: string): void;
         getState(): string;
         protected render(): string;
@@ -452,6 +458,18 @@ declare namespace WUX {
         protected updateState(nextState: any): void;
         protected render(): string;
         protected componentDidMount(): void;
+    }
+    class WRadio extends WComponent implements WISelectable {
+        options: Array<string | WEntity>;
+        label: string;
+        constructor(id?: string, options?: Array<string | WEntity>, classStyle?: string, style?: string | WStyle, attributes?: string | object, props?: any);
+        get enabled(): boolean;
+        set enabled(b: boolean);
+        set tooltip(s: string);
+        select(i: number): this;
+        protected render(): string;
+        protected componentDidMount(): void;
+        protected componentDidUpdate(prevProps: any, prevState: any): void;
     }
     class WSelect extends WComponent implements WISelectable {
         options: Array<string | WEntity>;
@@ -540,6 +558,7 @@ declare namespace WUX {
         addTimeField(fieldId: string, label: string, readonly?: boolean): this;
         addEmailField(fieldId: string, label: string, readonly?: boolean): this;
         addOptionsField(fieldId: string, label: string, options?: (string | WEntity)[], attributes?: string | object, readonly?: boolean): this;
+        addRadioField(fieldId: string, label: string, options?: (string | WEntity)[], attributes?: string | object, readonly?: boolean): this;
         addBooleanField(fieldId: string, label: string): this;
         addBlankField(label?: string, classStyle?: string, style?: string | WStyle): this;
         addInternalField(fieldId: string, value?: any): this;
@@ -634,6 +653,7 @@ declare namespace WUX {
         sp: string;
         sm: string;
         sn: string;
+        tr: string;
         sw: string;
         sd: string;
         so: string;
@@ -678,7 +698,7 @@ declare namespace WUX {
         barw: number;
         _w: number;
         _h: number;
-        constructor(id?: string, classStyle?: string, style?: string | WUX.WStyle);
+        constructor(id?: string, type?: string, classStyle?: string, style?: string | WUX.WStyle);
         size(width: number, height: number): this;
         get width(): number;
         set width(v: number);

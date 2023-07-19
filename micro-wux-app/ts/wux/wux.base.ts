@@ -925,6 +925,23 @@ namespace WUX {
 		return id1 && id2 && id1 == id2;
 	}
 
+	export function match(i: any, o: string | WEntity): boolean {
+		if (!o) return !i;
+		if (i == null) return typeof o == 'string' ? o == '' : !o.id;
+		if (typeof i == 'object') return typeof o == 'string' ? o == i.id : o.id == i.id;
+		return typeof o == 'string' ? o == i : o.id == i;
+	}
+
+	export function hashCode(a: any): number {
+		if (!a) return 0;
+		let s = '' + a;
+		let h = 0, l = s.length, i = 0;
+		if (l > 0)
+			while (i < l)
+				h = (h << 5) - h + s.charCodeAt(i++) | 0;
+		return h;
+	}
+
 	/**
 	 * Split content "before<>content<>after" -> ["before", "content", "after"] 
 	 * As well " content " -> ["&nbsp;", "content", "&nbsp;"]

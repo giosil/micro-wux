@@ -468,7 +468,7 @@ namespace WUX {
 		size: number;
 		label: string;
 		placeHolder: string;
-		readonly: boolean;
+		_ro: boolean;
 
 		constructor(id?: string, type?: string, size?: number, classStyle?: string, style?: string | WStyle, attributes?: string | object) {
 			// WComponent init
@@ -476,6 +476,21 @@ namespace WUX {
 			this.rootTag = 'input';
 			// WInput init
 			this.size = size;
+		}
+		
+		get readonly(): boolean {
+			return this._ro;
+		}
+		set readonly(v: boolean) {
+			this._ro = v;
+			if(this.mounted) {
+				if(v) {
+					this.root.setAttribute('readonly', '');
+				}
+				else {
+					this.root.removeAttribute('readonly');
+				}
+			}
 		}
 
 		protected updateState(nextState: string) {
@@ -514,20 +529,35 @@ namespace WUX {
 				if (this.size) addAttributes += ' size="' + this.size + '"';
 				if (this.state) addAttributes += ' value="' + this.state + '"';
 				if (this.placeHolder) addAttributes += ' placeholder="' + this.placeHolder + '"';
-				if (this.readonly) addAttributes += ' readonly';
+				if (this._ro) addAttributes += ' readonly';
 				return l + this.build(this.rootTag, '', addAttributes);
 			}
 		}
 	}
 
 	export class WTextArea extends WComponent<number, string> {
-		readonly: boolean;
+		_ro: boolean;
 
 		constructor(id?: string, rows?: number, classStyle?: string, style?: string | WStyle, attributes?: string | object) {
 			// WComponent init
 			super(id ? id : '*', 'WTextArea', rows, classStyle, style, attributes);
 			this.rootTag = 'textarea';
 			if (!rows) this.props = 5;
+		}
+
+		get readonly(): boolean {
+			return this._ro;
+		}
+		set readonly(v: boolean) {
+			this._ro = v;
+			if(this.mounted) {
+				if(v) {
+					this.root.setAttribute('readonly', '');
+				}
+				else {
+					this.root.removeAttribute('readonly');
+				}
+			}
 		}
 
 		protected updateState(nextState: string) {
@@ -561,7 +591,7 @@ namespace WUX {
 			else {
 				this._attributes = 'rows="' + this.props + '"';
 			}
-			if(this.readonly) {
+			if(this._ro) {
 				if(!this._attributes) {
 					this._attributes = 'readonly';
 				}
@@ -720,6 +750,120 @@ namespace WUX {
 		}
 	}
 	
+	export class WRadio extends WComponent implements WISelectable {
+		options: Array<string | WEntity>;
+		label: string;
+
+		constructor(id?: string, options?: Array<string | WEntity>, classStyle?: string, style?: string | WStyle, attributes?: string | object, props?: any) {
+			// WComponent init
+			super(id ? id : '*', 'WRadio', props, classStyle, style, attributes);
+			// WRadio init 
+			this.options = options;
+		}
+		
+		get enabled(): boolean {
+			return this._enabled;
+		}
+		set enabled(b: boolean) {
+			this._enabled = b;
+			if (this.mounted) {
+				for (let i = 0; i < this.options.length; i++) {
+					let item = document.getElementById(this.id + '-' + i);
+					if (!item) continue;
+					if (b) {
+						item.removeAttribute('disabled');
+					}
+					else {
+						item.setAttribute('disabled', '');
+					}
+				}
+			}
+		}
+
+		set tooltip(s: string) {
+			this._tooltip = s;
+			if (!this.mounted) return;
+			if (this.internal) this.internal.tooltip = s;
+			if (!this.options || !this.options.length) return;
+			for (let i = 0; i < this.options.length; i++) {
+				let item = document.getElementById(this.id + '-' + i);
+				if (!item) continue;
+				item.setAttribute('title', this._tooltip);
+			}
+		}
+
+		select(i: number): this {
+			if (!this.root || !this.options) return this;
+			this.setState(this.options.length > i ? this.options[i] : null);
+			return this;
+		}
+
+		protected render() {
+			let r = '';
+			if (this.label) {
+				r += this.id ? '<label for="' + this.id + '">' : '<label>'
+				r += this.label.replace('<', '&lt;').replace('>', '&gt;')
+				r += '</label> ';
+			}
+			let d = '';
+			if(this._enabled != null && !this._enabled) d = ' disabled';
+			if (!this.options) this.options = [];
+			let l = this.options.length;
+			if (this.state === undefined && l) this.state = this.options[0];
+			for (let i = 0; i < l; i++) {
+				r += '<div class="form-check form-check-inline">';
+				let opt = this.options[i];
+				if (typeof opt == "string") {
+					if (match(this.state, opt)) {
+						r += '<input type="radio" value="' + opt + '" name="' + this.id + '" id="' + this.id + '-' + i + '" checked' + d + '>';
+					}
+					else {
+						r += '<input type="radio" value="' + opt + '" name="' + this.id + '" id="' + this.id + '-' + i + '"' + d + '>';
+					}
+					r += '<label for="' + this.id + '-' + i + '">' +  opt + '</label>';
+				}
+				else {
+					if (match(this.state, opt)) {
+						r += '<input type="radio" value="' + opt.id + '" name="' + this.id + '" id="' + this.id + '-' + i + '" checked' + d + '>';
+					}
+					else {
+						r += '<input type="radio" value="' + opt.id + '" name="' + this.id + '" id="' + this.id + '-' + i + '"' + d + '>';
+					}
+					r += '<label for="' + this.id + '-' + i + '">' +  opt.text + '</label>';
+				}
+				r += '</div>';
+			}
+			return WUX.build('div', r, this._style, this._attributes, this.id, this._classStyle);
+		}
+
+		protected componentDidMount(): void {
+			if (!this.options || !this.options.length) return;
+			for (let i = 0; i < this.options.length; i++) {
+				let item = document.getElementById(this.id + '-' + i);
+				if (!item) continue;
+				if (this._tooltip) item.setAttribute('title', this._tooltip);
+				let opt = this.options[i];
+				item.addEventListener('click', (e: PointerEvent) => {
+					this.setState(opt);
+				});
+			}
+		}
+
+		protected componentDidUpdate(prevProps: any, prevState: any): void {
+			let idx = -1;
+			for (let i = 0; i < this.options.length; i++) {
+				if (match(this.state, this.options[i])) {
+					idx = i;
+					break;
+				}
+			}
+			if (idx >= 0) {
+				let item = document.getElementById(this.id + '-' + idx);
+				if (item) item.setAttribute('checked', 'true');
+			}
+		}
+	}
+	
 	export class WSelect extends WComponent implements WISelectable {
 		options: Array<string | WEntity>;
 		multiple: boolean;
@@ -846,6 +990,9 @@ namespace WUX {
 			let o = this.buildOptions();
 			let addAttributes = 'name="' + this.id + '"';
 			if (this.multiple) addAttributes += ' multiple="multiple"';
+			let d = '';
+			if(this._enabled != null && !this._enabled) d = ' disabled';
+			addAttributes += d;
 			return this.buildRoot('select', o, addAttributes);
 		}
 
@@ -1421,6 +1568,15 @@ namespace WUX {
 		addOptionsField(fieldId: string, label: string, options?: (string | WEntity)[], attributes?: string | object, readonly?: boolean): this {
 			let id = this.subId(fieldId);
 			let co = new WSelect(id, options, false, CSS.FORM_CTRL, '', attributes);
+			co.enabled = !readonly;
+			this.currRow.push({ id: id, label: label, component: co, readonly: readonly, type: 'select' });
+			return this;
+		}
+
+		addRadioField(fieldId: string, label: string, options?: (string | WEntity)[], attributes?: string | object, readonly?: boolean): this {
+			let id = this.subId(fieldId);
+			let co = new WRadio(id, options, CSS.FORM_CTRL, 'padding-top:1.5rem;', attributes);
+			co.enabled = !readonly;
 			this.currRow.push({ id: id, label: label, component: co, readonly: readonly, type: 'select' });
 			return this;
 		}

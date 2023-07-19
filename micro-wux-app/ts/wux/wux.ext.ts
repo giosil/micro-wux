@@ -369,6 +369,8 @@ namespace WUX {
 		sm: string;
 		// Style next
 		sn: string;
+		// Row (<tr>) style
+		tr: string
 		// Style week day
 		sw: string;
 		// Style day
@@ -410,16 +412,18 @@ namespace WUX {
 			this.sm = this.sp;
 			// Style next
 			this.sn = this.sp;
+			// Row (<tr>) style
+			this.tr = 'height:3rem;';
 			// Style week day
 			this.sw = 'text-align:center;';
 			// Style day
-			this.sd = 'text-align:center;';
+			this.sd = 'text-align:center;vertical-align:middle;';
 			// Style day over
-			this.so = 'text-align:center;background-color:#f6f6f6;cursor:pointer;';
+			this.so = 'text-align:center;vertical-align:middle;background-color:#f6f6f6;cursor:pointer;';
 			// Style day selected (table-primary)
-			this.ss = 'text-align:center;background-color:#b8d4f1;'; 
+			this.ss = 'text-align:center;vertical-align:middle;background-color:#b8d4f1;'; 
 			// Style day marked (table-warning)
-			this.sk = 'text-align:center;background-color:#e6d3b8;';
+			this.sk = 'text-align:center;vertical-align:middle;background-color:#e6d3b8;';
 			// Style empty
 			this.se = 'background-color:#f0f0f0;';
 			// Style today
@@ -615,7 +619,12 @@ namespace WUX {
 			let l = j.getDate();
 			let z = 1;
 			for(let r = 1; r <= 6; r++) {
-				b += '<tr>';
+				if(this.tr) {
+					b += '<tr style="' + this.tr + '">';
+				}
+				else {
+					b += '<tr>';
+				}
 				// rows
 				for(let c = 1; c <= 7; c++) {
 					// cols
@@ -732,6 +741,11 @@ namespace WUX {
 		}
 	}
 
+	/** 
+		Chart Component.
+		P: string - Chart type (bar, line)
+		S: WChartData - Chart data
+	*/
 	export class WChart extends WUX.WComponent<string, WChartData> {
 		fontName: string;
 		fontSize: number;
@@ -745,8 +759,8 @@ namespace WUX {
 		_w: number;
 		_h: number;
 
-		constructor(id?: string, classStyle?: string, style?: string | WUX.WStyle) {
-			super(id ? id : '*', 'WChart', '', classStyle, style);
+		constructor(id?: string, type?: string, classStyle?: string, style?: string | WUX.WStyle) {
+			super(id ? id : '*', 'WChart', type, classStyle, style);
 			this.rootTag = 'canvas';
 			this.forceOnChange = true;
 
@@ -895,8 +909,10 @@ namespace WUX {
 			}
 			
 			// Chart
-			let type = this.state.type;
-			if(!type || type != 'bar') {
+			let type = this.props;
+			if(!type) type = this.state.type;
+			if(!type) type = 'line';
+			if(type != 'bar') {
 				ctx.setLineDash([]);
 				for(let j = 0; j < s.length; j++) {
 					let dj = s[j];

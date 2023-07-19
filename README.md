@@ -49,7 +49,7 @@ namespace APP {
 ## Run micro-WUX application standalone
 
 ```html
-<!doctype html>
+<!DOCTYPE html>
 <html>
   <head>
     <title>Micro WUX</title>

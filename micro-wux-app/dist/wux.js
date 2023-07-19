@@ -986,6 +986,27 @@ var WUX;
         return id1 && id2 && id1 == id2;
     }
     WUX.same = same;
+    function match(i, o) {
+        if (!o)
+            return !i;
+        if (i == null)
+            return typeof o == 'string' ? o == '' : !o.id;
+        if (typeof i == 'object')
+            return typeof o == 'string' ? o == i.id : o.id == i.id;
+        return typeof o == 'string' ? o == i : o.id == i;
+    }
+    WUX.match = match;
+    function hashCode(a) {
+        if (!a)
+            return 0;
+        var s = '' + a;
+        var h = 0, l = s.length, i = 0;
+        if (l > 0)
+            while (i < l)
+                h = (h << 5) - h + s.charCodeAt(i++) | 0;
+        return h;
+    }
+    WUX.hashCode = hashCode;
     function divide(s) {
         if (!s)
             return ['', '', ''];
@@ -2972,6 +2993,24 @@ var WUX;
             _this.size = size;
             return _this;
         }
+        Object.defineProperty(WInput.prototype, "readonly", {
+            get: function () {
+                return this._ro;
+            },
+            set: function (v) {
+                this._ro = v;
+                if (this.mounted) {
+                    if (v) {
+                        this.root.setAttribute('readonly', '');
+                    }
+                    else {
+                        this.root.removeAttribute('readonly');
+                    }
+                }
+            },
+            enumerable: false,
+            configurable: true
+        });
         WInput.prototype.updateState = function (nextState) {
             if (!nextState)
                 nextState = '';
@@ -3011,7 +3050,7 @@ var WUX;
                     addAttributes += ' value="' + this.state + '"';
                 if (this.placeHolder)
                     addAttributes += ' placeholder="' + this.placeHolder + '"';
-                if (this.readonly)
+                if (this._ro)
                     addAttributes += ' readonly';
                 return l + this.build(this.rootTag, '', addAttributes);
             }
@@ -3028,6 +3067,24 @@ var WUX;
                 _this.props = 5;
             return _this;
         }
+        Object.defineProperty(WTextArea.prototype, "readonly", {
+            get: function () {
+                return this._ro;
+            },
+            set: function (v) {
+                this._ro = v;
+                if (this.mounted) {
+                    if (v) {
+                        this.root.setAttribute('readonly', '');
+                    }
+                    else {
+                        this.root.removeAttribute('readonly');
+                    }
+                }
+            },
+            enumerable: false,
+            configurable: true
+        });
         WTextArea.prototype.updateState = function (nextState) {
             if (!nextState)
                 nextState = '';
@@ -3060,7 +3117,7 @@ var WUX;
             else {
                 this._attributes = 'rows="' + this.props + '"';
             }
-            if (this.readonly) {
+            if (this._ro) {
                 if (!this._attributes) {
                     this._attributes = 'readonly';
                 }
@@ -3224,6 +3281,138 @@ var WUX;
         return WCheck;
     }(WUX.WComponent));
     WUX.WCheck = WCheck;
+    var WRadio = (function (_super) {
+        __extends(WRadio, _super);
+        function WRadio(id, options, classStyle, style, attributes, props) {
+            var _this = _super.call(this, id ? id : '*', 'WRadio', props, classStyle, style, attributes) || this;
+            _this.options = options;
+            return _this;
+        }
+        Object.defineProperty(WRadio.prototype, "enabled", {
+            get: function () {
+                return this._enabled;
+            },
+            set: function (b) {
+                this._enabled = b;
+                if (this.mounted) {
+                    for (var i = 0; i < this.options.length; i++) {
+                        var item = document.getElementById(this.id + '-' + i);
+                        if (!item)
+                            continue;
+                        if (b) {
+                            item.removeAttribute('disabled');
+                        }
+                        else {
+                            item.setAttribute('disabled', '');
+                        }
+                    }
+                }
+            },
+            enumerable: false,
+            configurable: true
+        });
+        Object.defineProperty(WRadio.prototype, "tooltip", {
+            set: function (s) {
+                this._tooltip = s;
+                if (!this.mounted)
+                    return;
+                if (this.internal)
+                    this.internal.tooltip = s;
+                if (!this.options || !this.options.length)
+                    return;
+                for (var i = 0; i < this.options.length; i++) {
+                    var item = document.getElementById(this.id + '-' + i);
+                    if (!item)
+                        continue;
+                    item.setAttribute('title', this._tooltip);
+                }
+            },
+            enumerable: false,
+            configurable: true
+        });
+        WRadio.prototype.select = function (i) {
+            if (!this.root || !this.options)
+                return this;
+            this.setState(this.options.length > i ? this.options[i] : null);
+            return this;
+        };
+        WRadio.prototype.render = function () {
+            var r = '';
+            if (this.label) {
+                r += this.id ? '<label for="' + this.id + '">' : '<label>';
+                r += this.label.replace('<', '&lt;').replace('>', '&gt;');
+                r += '</label> ';
+            }
+            var d = '';
+            if (this._enabled != null && !this._enabled)
+                d = ' disabled';
+            if (!this.options)
+                this.options = [];
+            var l = this.options.length;
+            if (this.state === undefined && l)
+                this.state = this.options[0];
+            for (var i = 0; i < l; i++) {
+                r += '<div class="form-check form-check-inline">';
+                var opt = this.options[i];
+                if (typeof opt == "string") {
+                    if (WUX.match(this.state, opt)) {
+                        r += '<input type="radio" value="' + opt + '" name="' + this.id + '" id="' + this.id + '-' + i + '" checked' + d + '>';
+                    }
+                    else {
+                        r += '<input type="radio" value="' + opt + '" name="' + this.id + '" id="' + this.id + '-' + i + '"' + d + '>';
+                    }
+                    r += '<label for="' + this.id + '-' + i + '">' + opt + '</label>';
+                }
+                else {
+                    if (WUX.match(this.state, opt)) {
+                        r += '<input type="radio" value="' + opt.id + '" name="' + this.id + '" id="' + this.id + '-' + i + '" checked' + d + '>';
+                    }
+                    else {
+                        r += '<input type="radio" value="' + opt.id + '" name="' + this.id + '" id="' + this.id + '-' + i + '"' + d + '>';
+                    }
+                    r += '<label for="' + this.id + '-' + i + '">' + opt.text + '</label>';
+                }
+                r += '</div>';
+            }
+            return WUX.build('div', r, this._style, this._attributes, this.id, this._classStyle);
+        };
+        WRadio.prototype.componentDidMount = function () {
+            var _this = this;
+            if (!this.options || !this.options.length)
+                return;
+            var _loop_1 = function (i) {
+                var item = document.getElementById(this_1.id + '-' + i);
+                if (!item)
+                    return "continue";
+                if (this_1._tooltip)
+                    item.setAttribute('title', this_1._tooltip);
+                var opt = this_1.options[i];
+                item.addEventListener('click', function (e) {
+                    _this.setState(opt);
+                });
+            };
+            var this_1 = this;
+            for (var i = 0; i < this.options.length; i++) {
+                _loop_1(i);
+            }
+        };
+        WRadio.prototype.componentDidUpdate = function (prevProps, prevState) {
+            var idx = -1;
+            for (var i = 0; i < this.options.length; i++) {
+                if (WUX.match(this.state, this.options[i])) {
+                    idx = i;
+                    break;
+                }
+            }
+            if (idx >= 0) {
+                var item = document.getElementById(this.id + '-' + idx);
+                if (item)
+                    item.setAttribute('checked', 'true');
+            }
+        };
+        return WRadio;
+    }(WUX.WComponent));
+    WUX.WRadio = WRadio;
     var WSelect = (function (_super) {
         __extends(WSelect, _super);
         function WSelect(id, options, multiple, classStyle, style, attributes) {
@@ -3351,6 +3540,10 @@ var WUX;
             var addAttributes = 'name="' + this.id + '"';
             if (this.multiple)
                 addAttributes += ' multiple="multiple"';
+            var d = '';
+            if (this._enabled != null && !this._enabled)
+                d = ' disabled';
+            addAttributes += d;
             return this.buildRoot('select', o, addAttributes);
         };
         WSelect.prototype.componentDidMount = function () {
@@ -3587,7 +3780,7 @@ var WUX;
             var _this = this;
             this.buildBody();
             if (this.soId) {
-                var _loop_1 = function (aid) {
+                var _loop_2 = function (aid) {
                     var a = document.getElementById(aid);
                     if (a) {
                         a.addEventListener('click', function (e) {
@@ -3632,7 +3825,7 @@ var WUX;
                 };
                 for (var _i = 0, _a = this.soId; _i < _a.length; _i++) {
                     var aid = _a[_i];
-                    _loop_1(aid);
+                    _loop_2(aid);
                 }
             }
             var b = document.getElementById(this.id + '-b');
@@ -3947,6 +4140,14 @@ var WUX;
         WFormPanel.prototype.addOptionsField = function (fieldId, label, options, attributes, readonly) {
             var id = this.subId(fieldId);
             var co = new WSelect(id, options, false, WUX.CSS.FORM_CTRL, '', attributes);
+            co.enabled = !readonly;
+            this.currRow.push({ id: id, label: label, component: co, readonly: readonly, type: 'select' });
+            return this;
+        };
+        WFormPanel.prototype.addRadioField = function (fieldId, label, options, attributes, readonly) {
+            var id = this.subId(fieldId);
+            var co = new WRadio(id, options, WUX.CSS.FORM_CTRL, 'padding-top:1.5rem;', attributes);
+            co.enabled = !readonly;
             this.currRow.push({ id: id, label: label, component: co, readonly: readonly, type: 'select' });
             return this;
         };
@@ -4491,11 +4692,12 @@ var WUX;
             _this.sp = 'padding:1rem;text-align:center;font-weight:bold;background-color:#eeeeee;';
             _this.sm = _this.sp;
             _this.sn = _this.sp;
+            _this.tr = 'height:3rem;';
             _this.sw = 'text-align:center;';
-            _this.sd = 'text-align:center;';
-            _this.so = 'text-align:center;background-color:#f6f6f6;cursor:pointer;';
-            _this.ss = 'text-align:center;background-color:#b8d4f1;';
-            _this.sk = 'text-align:center;background-color:#e6d3b8;';
+            _this.sd = 'text-align:center;vertical-align:middle;';
+            _this.so = 'text-align:center;vertical-align:middle;background-color:#f6f6f6;cursor:pointer;';
+            _this.ss = 'text-align:center;vertical-align:middle;background-color:#b8d4f1;';
+            _this.sk = 'text-align:center;vertical-align:middle;background-color:#e6d3b8;';
             _this.se = 'background-color:#f0f0f0;';
             _this.st = 'font-weight:bold;';
             _this.td = _this.str(new Date());
@@ -4699,7 +4901,12 @@ var WUX;
             var l = j.getDate();
             var z = 1;
             for (var r = 1; r <= 6; r++) {
-                b += '<tr>';
+                if (this.tr) {
+                    b += '<tr style="' + this.tr + '">';
+                }
+                else {
+                    b += '<tr>';
+                }
                 for (var c = 1; c <= 7; c++) {
                     if (r == 1 && c < w) {
                         b += '<td style="' + this.se + '"></td>';
@@ -4816,8 +5023,8 @@ var WUX;
     WUX.WCalendar = WCalendar;
     var WChart = (function (_super) {
         __extends(WChart, _super);
-        function WChart(id, classStyle, style) {
-            var _this = _super.call(this, id ? id : '*', 'WChart', '', classStyle, style) || this;
+        function WChart(id, type, classStyle, style) {
+            var _this = _super.call(this, id ? id : '*', 'WChart', type, classStyle, style) || this;
             _this.rootTag = 'canvas';
             _this.forceOnChange = true;
             var iw = window.innerWidth;
@@ -4954,8 +5161,12 @@ var WUX;
                     ctx.restore();
                 }
             }
-            var type = this.state.type;
-            if (!type || type != 'bar') {
+            var type = this.props;
+            if (!type)
+                type = this.state.type;
+            if (!type)
+                type = 'line';
+            if (type != 'bar') {
                 ctx.setLineDash([]);
                 for (var j = 0; j < s.length; j++) {
                     var dj = s[j];
