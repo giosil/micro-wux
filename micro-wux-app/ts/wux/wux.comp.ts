@@ -1171,6 +1171,12 @@ namespace WUX {
 			let ts = this.style ? ' style="' + this.style + '"' : '';
 			let r = '';
 			if(this.div) r += '<div id="' + this.id + '-c" class="' + this.div + '">';
+			let sm = this.selectionMode;
+			if(sm && sm != 'none') {
+				if(tableClass.indexOf('table-hover') < 0) {
+					tableClass += ' table-hover';
+				}
+			}
 			r += '<table id="' + this.id + '" class="' + tableClass + '"' + ts + '>';
 			if (this.header && this.header.length) {
 				let ths = false;
@@ -1268,7 +1274,6 @@ namespace WUX {
 			if(b) {
 				b.addEventListener('click', (e: PointerEvent) => {
 					if(!this.selectionMode || this.selectionMode == 'none') return;
-					if(!this.handlers['_selectionchanged']) return;
 					let t = e.target as HTMLElement;
 					if(!t) return;
 					let tr = t.closest('tr');
@@ -1314,6 +1319,7 @@ namespace WUX {
 				tbody.innerHTML = '';
 				return;
 			}
+			let sr = this.selectionMode && this.selectionMode != 'none' ? ' style="cursor:pointer;"' : '';
 			let b = '';
 			let i = -1;
 			for (let row of this.state) {
@@ -1321,14 +1327,14 @@ namespace WUX {
 				let r: string = '';
 				if (i == this.state.length - 1) {
 					if (this.footerStyle) {
-						r = '<tr' + buildCss(this.footerStyle) + ' id="' + this.id + '-' + i + '">';
+						r = '<tr' + buildCss(this.footerStyle) + ' id="' + this.id + '-' + i + '"' + sr + '>';
 					}
 					else {
-						r = '<tr' + buildCss(this.rowStyle) + ' id="' + this.id + '-' + i + '">';
+						r = '<tr' + buildCss(this.rowStyle) + ' id="' + this.id + '-' + i + '"' + sr + '>';
 					}
 				}
 				else {
-					r = '<tr' + buildCss(this.rowStyle) + ' id="' + this.id + '-' + i + '">';
+					r = '<tr' + buildCss(this.rowStyle) + ' id="' + this.id + '-' + i + '"' + sr + '>';
 				}
 				let j = -1;
 				for (let key of this.keys) {

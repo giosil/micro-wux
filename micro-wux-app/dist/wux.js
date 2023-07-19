@@ -3719,6 +3719,12 @@ var WUX;
             var r = '';
             if (this.div)
                 r += '<div id="' + this.id + '-c" class="' + this.div + '">';
+            var sm = this.selectionMode;
+            if (sm && sm != 'none') {
+                if (tableClass.indexOf('table-hover') < 0) {
+                    tableClass += ' table-hover';
+                }
+            }
             r += '<table id="' + this.id + '" class="' + tableClass + '"' + ts + '>';
             if (this.header && this.header.length) {
                 var ths = false;
@@ -3833,8 +3839,6 @@ var WUX;
                 b.addEventListener('click', function (e) {
                     if (!_this.selectionMode || _this.selectionMode == 'none')
                         return;
-                    if (!_this.handlers['_selectionchanged'])
-                        return;
                     var t = e.target;
                     if (!t)
                         return;
@@ -3888,6 +3892,7 @@ var WUX;
                 tbody.innerHTML = '';
                 return;
             }
+            var sr = this.selectionMode && this.selectionMode != 'none' ? ' style="cursor:pointer;"' : '';
             var b = '';
             var i = -1;
             for (var _i = 0, _a = this.state; _i < _a.length; _i++) {
@@ -3896,14 +3901,14 @@ var WUX;
                 var r = '';
                 if (i == this.state.length - 1) {
                     if (this.footerStyle) {
-                        r = '<tr' + WUX.buildCss(this.footerStyle) + ' id="' + this.id + '-' + i + '">';
+                        r = '<tr' + WUX.buildCss(this.footerStyle) + ' id="' + this.id + '-' + i + '"' + sr + '>';
                     }
                     else {
-                        r = '<tr' + WUX.buildCss(this.rowStyle) + ' id="' + this.id + '-' + i + '">';
+                        r = '<tr' + WUX.buildCss(this.rowStyle) + ' id="' + this.id + '-' + i + '"' + sr + '>';
                     }
                 }
                 else {
-                    r = '<tr' + WUX.buildCss(this.rowStyle) + ' id="' + this.id + '-' + i + '">';
+                    r = '<tr' + WUX.buildCss(this.rowStyle) + ' id="' + this.id + '-' + i + '"' + sr + '>';
                 }
                 var j = -1;
                 for (var _b = 0, _c = this.keys; _b < _c.length; _b++) {
