@@ -78,6 +78,14 @@ declare namespace WUX {
         color?: string;
         value?: number;
     }
+    interface WAction {
+        name: string;
+        ref?: string;
+        idx?: number;
+        obj?: any;
+        tag?: string;
+        comp?: WComponent;
+    }
     interface WISelectable extends WComponent {
         options: Array<string | WEntity>;
         select(i: number): this;
@@ -180,7 +188,6 @@ declare namespace WUX {
     function newInstance(n: string): WUX.WComponent;
     function same(e1: WElement, e2: WElement): boolean;
     function match(i: any, o: string | WEntity): boolean;
-    function hashCode(a: any): number;
     function divide(s: string): [string, string, string];
     function str(a: any): string;
     function getTagName(c: any): string;
@@ -352,6 +359,8 @@ declare namespace WUX {
     function formatMonth(m: number, e?: boolean, y?: any): string;
     function saveFile(base64: string, fileName: string, mimeType?: string): void;
     function viewFile(base64: string, fileName: string, mimeType?: string): void;
+    function getAction(ie: string | Event, c?: WUX.WComponent, tag?: string): WAction;
+    function action(name: string, ref?: string | number, ele?: string, comp?: WUX.WComponent, inner?: string, cls?: string): string;
 }
 declare namespace WUX {
     class Wrapp extends WComponent<WElement, any> {
@@ -450,13 +459,11 @@ declare namespace WUX {
         divStyle: string;
         label: string;
         value: any;
-        protected _text: string;
-        protected _obs: MutationObserver;
+        text: string;
         constructor(id?: string, text?: string, value?: any, checked?: boolean, classStyle?: string, style?: string | WStyle, attributes?: string | object);
-        get text(): string;
-        set text(s: string);
         get checked(): boolean;
         set checked(b: boolean);
+        set tooltip(s: string);
         getState(): any;
         protected updateProps(nextProps: boolean): void;
         protected updateState(nextState: any): void;
@@ -563,7 +570,7 @@ declare namespace WUX {
         addEmailField(fieldId: string, label: string, readonly?: boolean): this;
         addOptionsField(fieldId: string, label: string, options?: (string | WEntity)[], attributes?: string | object, readonly?: boolean): this;
         addRadioField(fieldId: string, label: string, options?: (string | WEntity)[], attributes?: string | object, readonly?: boolean): this;
-        addBooleanField(fieldId: string, label: string, labelCheck?: string): this;
+        addBooleanField(fieldId: string, label: string, labelCheck?: string, tooltip?: string): this;
         addBlankField(label?: string, classStyle?: string, style?: string | WStyle): this;
         addInternalField(fieldId: string, value?: any): this;
         addComponent(fieldId: string, label: string, component: WComponent): this;

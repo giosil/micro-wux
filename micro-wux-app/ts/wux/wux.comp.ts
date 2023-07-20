@@ -671,8 +671,7 @@ namespace WUX {
 		divStyle: string;
 		label: string;
 		value: any;
-		protected _text: string;
-		protected _obs: MutationObserver;
+		text: string;
 
 		constructor(id?: string, text?: string, value?: any, checked?: boolean, classStyle?: string, style?: string | WStyle, attributes?: string | object) {
 			// WComponent init
@@ -681,14 +680,7 @@ namespace WUX {
 			// WCheck init
 			this.value = value ? value : '1';
 			if (checked) this.updateState(value);
-			this._text = text;
-		}
-
-		get text(): string {
-			return this._text;
-		}
-		set text(s: string) {
-			this._text = s;
+			this.text = text;
 		}
 
 		get checked(): boolean {
@@ -700,6 +692,17 @@ namespace WUX {
 			this.setProps(b);
 		}
 
+		set tooltip(s: string) {
+			this._tooltip = s;
+			let l = document.getElementById(this.id + '-l');
+			if(l) {
+				l.setAttribute('title', this._tooltip);
+			}
+			else if (this.root) {
+				this.root.setAttribute('title', this._tooltip);
+			}
+		}
+
 		getState(): any {
 			if(this.root) this.props = !!this.root['checked'];
 			this.state = this.props ? this.value : undefined;
@@ -708,37 +711,27 @@ namespace WUX {
 
 		protected updateProps(nextProps: boolean) {
 			super.updateProps(nextProps);
+			if(this.props == null) this.props = false;
 			this.state = this.props ? this.value : undefined;
-			if (this.root) {
-				if (this.props) {
-					this.root.setAttribute('checked', 'checked');
-				}
-				else {
-					this.root.removeAttribute('checked');
-				}
-			}
+			if (this.root) this.root['checked'] = this.props;
 		}
 
 		protected updateState(nextState: any) {
-			if (typeof nextState == 'boolean') {
-				nextState = nextState ? this.value : undefined;
-			}
 			super.updateState(nextState);
-			this.props = this.state != undefined;
-			if (this.root) {
-				if (this.props) {
-					this.root.setAttribute('checked', 'checked');
-				}
-				else {
-					this.root.removeAttribute('checked');
-				}
+			if (typeof this.state == 'boolean') {
+				this.props = this.state;
+				this.state = this.props ? this.value : undefined;
 			}
+			else {
+				this.props = !this.state && this.state == this.value;
+			}
+			if (this.root) this.root['checked'] = this.props;
 		}
 
 		protected render() {
 			let addAttributes = 'name="' + this.id + '" type="checkbox"';
 			addAttributes += this.props ? ' checked="checked"' : '';
-			let inner = this._text ? '&nbsp;' + this._text : '';
+			let inner = this.text ? '&nbsp;' + this.text : '';
 			let r0 = '';
 			let r1 = '';
 			if (this.divClass || this.divStyle) {
@@ -747,18 +740,33 @@ namespace WUX {
 				if(this.divStyle) r0 += ' style="' + this.divStyle + '"';
 				r0 += '>';
 			}
-			if (this.label) r1 += '<label for="' + this.id + '">' + this.label + '</label>';
+			if (this.label) {
+				r1 += '<label id="' + this.id + '-l" for="' + this.id + '"';
+				if (this._tooltip) {
+					r1 += ' title="' + this._tooltip + '"';
+				}
+				r1 += '>' + this.label + '</label>';
+			}
+			else {
+				if (this._tooltip) {
+					addAttributes += ' title="' + this._tooltip + '"';
+				}
+			}
 			if (r0) r1 += '</div>';
 			return r0 + this.build(this.rootTag, inner, addAttributes) + r1;
 		}
 
 		protected componentDidMount(): void {
-			if (this._tooltip) this.root.setAttribute('title', this._tooltip);
-			this._obs = new MutationObserver(() => {
-				this.props = !!this.root['checked'];
-				this.trigger('propschange', this.props);
-				this.trigger('statechange', this.props ? this.value : undefined);
-			});
+			if (this.id) {
+				// The component may be wrapped...
+				this.root = document.getElementById(this.id);
+			}
+			if(this.root) {
+				this.root.addEventListener("change", (e: Event) => {
+					this.props = !!this.root['checked'];
+					this.state = this.props ? this.value : undefined;
+				});
+			}
 		}
 	}
 	
@@ -855,7 +863,7 @@ namespace WUX {
 				if (!item) continue;
 				if (this._tooltip) item.setAttribute('title', this._tooltip);
 				let opt = this.options[i];
-				item.addEventListener('click', (e: PointerEvent) => {
+				item.addEventListener('change', (e: Event) => {
 					this.setState(opt);
 				});
 			}
@@ -863,15 +871,20 @@ namespace WUX {
 
 		protected componentDidUpdate(prevProps: any, prevState: any): void {
 			let idx = -1;
-			for (let i = 0; i < this.options.length; i++) {
-				if (match(this.state, this.options[i])) {
-					idx = i;
-					break;
+			if(this.state) {
+				for (let i = 0; i < this.options.length; i++) {
+					if (match(this.state, this.options[i])) {
+						idx = i;
+						break;
+					}
 				}
 			}
-			if (idx >= 0) {
+			else {
+				idx = 0;
+			}
+			if(idx >= 0) {
 				let item = document.getElementById(this.id + '-' + idx);
-				if (item) item.setAttribute('checked', 'true');
+				if (item) item['checked'] = true;
 			}
 		}
 	}
@@ -1599,13 +1612,14 @@ namespace WUX {
 			return this;
 		}
 
-		addBooleanField(fieldId: string, label: string, labelCheck?: string): this {
+		addBooleanField(fieldId: string, label: string, labelCheck?: string, tooltip?: string): this {
 			let id = this.subId(fieldId);
 			let co = new WCheck(id, '');
 			co.divClass = CSS.FORM_CHECK;
 			co.divStyle = CSS.CHECK_STYLE;
 			co.classStyle = CSS.FORM_CTRL;
 			co.label = labelCheck;
+			co.tooltip = tooltip;
 			this.currRow.push({ id: id, label: label, component: co, 'type': 'boolean'});
 			return this;
 		}

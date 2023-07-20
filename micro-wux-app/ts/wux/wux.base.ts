@@ -211,6 +211,22 @@ namespace WUX {
 		value?: number;
 	}
 
+	/** WAction interface */
+	export interface WAction {
+		/** Action name */
+		name: string; 
+		/** Reference */
+		ref?: string;
+		/** Reference number (index) */
+		idx?: number;
+		/** Reference object  */
+		obj?: any;
+		/** Tag element of action */
+		tag?: string;
+		/** Component */
+		comp?: WComponent;
+	}
+
 	/** WISelectable interface */
 	export interface WISelectable extends WComponent {
 		options: Array<string | WEntity>;
@@ -930,16 +946,6 @@ namespace WUX {
 		if (i == null) return typeof o == 'string' ? o == '' : !o.id;
 		if (typeof i == 'object') return typeof o == 'string' ? o == i.id : o.id == i.id;
 		return typeof o == 'string' ? o == i : o.id == i;
-	}
-
-	export function hashCode(a: any): number {
-		if (!a) return 0;
-		let s = '' + a;
-		let h = 0, l = s.length, i = 0;
-		if (l > 0)
-			while (i < l)
-				h = (h << 5) - h + s.charCodeAt(i++) | 0;
-		return h;
 	}
 
 	/**

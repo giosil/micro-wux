@@ -318,7 +318,61 @@
 		link.rel = 'noopener noreferrer';
 		link.title = fileName;
 		link.click();
-		// Rilascia l'URL del blob dopo che la scheda e' stata aperta
 		setTimeout(() => { URL.revokeObjectURL(url); }, 1000);
+	}
+	
+	export function getAction(ie: string | Event, c?: WUX.WComponent, tag?: string): WAction {
+		if(!ie) return null;
+		if(typeof ie == 'string') {
+			let s = WUX.lastSub(ie);
+			if(!s) return null;
+			let x = s.indexOf('_');
+			if(x <= 0) return null;
+			let n = s.substring(0, x);
+			let r = s.substring(x + 1).replace(/\$/g, '-');
+			if(tag) tag = tag.toLowerCase();
+			return {name: n, ref: r, idx: WUtil.toNumber(r, -1),tag: tag, comp: c};
+		}
+		else {
+			let t = ie.target as Element;
+			if(!t) return null;
+			let n = t.tagName;
+			if(!n) return null;
+			if(tag && tag.toLowerCase() != n.toLowerCase()) return null;
+			let i = WUX.getId(t);
+			if(i) {
+				let a = getAction(i, c, n);
+				if(a) return a;
+			}
+			let p = t["parentElement"] as Element;
+			if(p) {
+				n = p.tagName;
+				if(!n) return null;
+				if(tag && tag.toLowerCase() != n.toLowerCase()) return null;
+			}
+			i = WUX.getId(p);
+			return getAction(i, c, n);
+		}
+	}
+	
+	export function action(name: string, ref?: string | number, ele?: string, comp?: WUX.WComponent, inner?: string, cls?: string) : string {
+		if(typeof ref == 'string') ref = ref.replace(/\-/g, '$');
+		if(!ele) ele = 'a';
+		let id = comp ? comp.subId(name + '_' + ref) : name + '_' + ref;
+		if(ele.indexOf('-') > 0) {
+			// icon
+			return '<i id="' + id + '" class="fa ' + ele + '" style="cursor:pointer;width:100%;"></i>';
+		}
+		else {
+			// tag
+			if(!inner) inner = '';
+			if(cls) {
+				if(cls.indexOf(':') > 0) {
+					return '<' + ele + ' id="' + id + '" style="' + cls + '">' + inner + '</' + ele + '>';
+				}
+				return '<' + ele + ' id="' + id + '" class="' + cls + '">' + inner + '</' + ele + '>';
+			}
+			return '<' + ele + ' id="' + id + '" style="cursor:pointer;">' + inner + '</' + ele + '>';
+		}
 	}
 }

@@ -996,17 +996,6 @@ var WUX;
         return typeof o == 'string' ? o == i : o.id == i;
     }
     WUX.match = match;
-    function hashCode(a) {
-        if (!a)
-            return 0;
-        var s = '' + a;
-        var h = 0, l = s.length, i = 0;
-        if (l > 0)
-            while (i < l)
-                h = (h << 5) - h + s.charCodeAt(i++) | 0;
-        return h;
-    }
-    WUX.hashCode = hashCode;
     function divide(s) {
         if (!s)
             return ['', '', ''];
@@ -2481,6 +2470,72 @@ var WUX;
         setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
     }
     WUX.viewFile = viewFile;
+    function getAction(ie, c, tag) {
+        if (!ie)
+            return null;
+        if (typeof ie == 'string') {
+            var s = WUX.lastSub(ie);
+            if (!s)
+                return null;
+            var x = s.indexOf('_');
+            if (x <= 0)
+                return null;
+            var n = s.substring(0, x);
+            var r = s.substring(x + 1).replace(/\$/g, '-');
+            if (tag)
+                tag = tag.toLowerCase();
+            return { name: n, ref: r, idx: WUX.WUtil.toNumber(r, -1), tag: tag, comp: c };
+        }
+        else {
+            var t = ie.target;
+            if (!t)
+                return null;
+            var n = t.tagName;
+            if (!n)
+                return null;
+            if (tag && tag.toLowerCase() != n.toLowerCase())
+                return null;
+            var i = WUX.getId(t);
+            if (i) {
+                var a = getAction(i, c, n);
+                if (a)
+                    return a;
+            }
+            var p = t["parentElement"];
+            if (p) {
+                n = p.tagName;
+                if (!n)
+                    return null;
+                if (tag && tag.toLowerCase() != n.toLowerCase())
+                    return null;
+            }
+            i = WUX.getId(p);
+            return getAction(i, c, n);
+        }
+    }
+    WUX.getAction = getAction;
+    function action(name, ref, ele, comp, inner, cls) {
+        if (typeof ref == 'string')
+            ref = ref.replace(/\-/g, '$');
+        if (!ele)
+            ele = 'a';
+        var id = comp ? comp.subId(name + '_' + ref) : name + '_' + ref;
+        if (ele.indexOf('-') > 0) {
+            return '<i id="' + id + '" class="fa ' + ele + '" style="cursor:pointer;width:100%;"></i>';
+        }
+        else {
+            if (!inner)
+                inner = '';
+            if (cls) {
+                if (cls.indexOf(':') > 0) {
+                    return '<' + ele + ' id="' + id + '" style="' + cls + '">' + inner + '</' + ele + '>';
+                }
+                return '<' + ele + ' id="' + id + '" class="' + cls + '">' + inner + '</' + ele + '>';
+            }
+            return '<' + ele + ' id="' + id + '" style="cursor:pointer;">' + inner + '</' + ele + '>';
+        }
+    }
+    WUX.action = action;
 })(WUX || (WUX = {}));
 var WUX;
 (function (WUX) {
@@ -3205,19 +3260,9 @@ var WUX;
             _this.value = value ? value : '1';
             if (checked)
                 _this.updateState(value);
-            _this._text = text;
+            _this.text = text;
             return _this;
         }
-        Object.defineProperty(WCheck.prototype, "text", {
-            get: function () {
-                return this._text;
-            },
-            set: function (s) {
-                this._text = s;
-            },
-            enumerable: false,
-            configurable: true
-        });
         Object.defineProperty(WCheck.prototype, "checked", {
             get: function () {
                 if (this.root)
@@ -3231,6 +3276,20 @@ var WUX;
             enumerable: false,
             configurable: true
         });
+        Object.defineProperty(WCheck.prototype, "tooltip", {
+            set: function (s) {
+                this._tooltip = s;
+                var l = document.getElementById(this.id + '-l');
+                if (l) {
+                    l.setAttribute('title', this._tooltip);
+                }
+                else if (this.root) {
+                    this.root.setAttribute('title', this._tooltip);
+                }
+            },
+            enumerable: false,
+            configurable: true
+        });
         WCheck.prototype.getState = function () {
             if (this.root)
                 this.props = !!this.root['checked'];
@@ -3239,35 +3298,28 @@ var WUX;
         };
         WCheck.prototype.updateProps = function (nextProps) {
             _super.prototype.updateProps.call(this, nextProps);
+            if (this.props == null)
+                this.props = false;
             this.state = this.props ? this.value : undefined;
-            if (this.root) {
-                if (this.props) {
-                    this.root.setAttribute('checked', 'checked');
-                }
-                else {
-                    this.root.removeAttribute('checked');
-                }
-            }
+            if (this.root)
+                this.root['checked'] = this.props;
         };
         WCheck.prototype.updateState = function (nextState) {
-            if (typeof nextState == 'boolean') {
-                nextState = nextState ? this.value : undefined;
-            }
             _super.prototype.updateState.call(this, nextState);
-            this.props = this.state != undefined;
-            if (this.root) {
-                if (this.props) {
-                    this.root.setAttribute('checked', 'checked');
-                }
-                else {
-                    this.root.removeAttribute('checked');
-                }
+            if (typeof this.state == 'boolean') {
+                this.props = this.state;
+                this.state = this.props ? this.value : undefined;
             }
+            else {
+                this.props = !this.state && this.state == this.value;
+            }
+            if (this.root)
+                this.root['checked'] = this.props;
         };
         WCheck.prototype.render = function () {
             var addAttributes = 'name="' + this.id + '" type="checkbox"';
             addAttributes += this.props ? ' checked="checked"' : '';
-            var inner = this._text ? '&nbsp;' + this._text : '';
+            var inner = this.text ? '&nbsp;' + this.text : '';
             var r0 = '';
             var r1 = '';
             if (this.divClass || this.divStyle) {
@@ -3278,21 +3330,33 @@ var WUX;
                     r0 += ' style="' + this.divStyle + '"';
                 r0 += '>';
             }
-            if (this.label)
-                r1 += '<label for="' + this.id + '">' + this.label + '</label>';
+            if (this.label) {
+                r1 += '<label id="' + this.id + '-l" for="' + this.id + '"';
+                if (this._tooltip) {
+                    r1 += ' title="' + this._tooltip + '"';
+                }
+                r1 += '>' + this.label + '</label>';
+            }
+            else {
+                if (this._tooltip) {
+                    addAttributes += ' title="' + this._tooltip + '"';
+                }
+            }
             if (r0)
                 r1 += '</div>';
             return r0 + this.build(this.rootTag, inner, addAttributes) + r1;
         };
         WCheck.prototype.componentDidMount = function () {
             var _this = this;
-            if (this._tooltip)
-                this.root.setAttribute('title', this._tooltip);
-            this._obs = new MutationObserver(function () {
-                _this.props = !!_this.root['checked'];
-                _this.trigger('propschange', _this.props);
-                _this.trigger('statechange', _this.props ? _this.value : undefined);
-            });
+            if (this.id) {
+                this.root = document.getElementById(this.id);
+            }
+            if (this.root) {
+                this.root.addEventListener("change", function (e) {
+                    _this.props = !!_this.root['checked'];
+                    _this.state = _this.props ? _this.value : undefined;
+                });
+            }
         };
         return WCheck;
     }(WUX.WComponent));
@@ -3403,7 +3467,7 @@ var WUX;
                 if (this_1._tooltip)
                     item.setAttribute('title', this_1._tooltip);
                 var opt = this_1.options[i];
-                item.addEventListener('click', function (e) {
+                item.addEventListener('change', function (e) {
                     _this.setState(opt);
                 });
             };
@@ -3414,16 +3478,21 @@ var WUX;
         };
         WRadio.prototype.componentDidUpdate = function (prevProps, prevState) {
             var idx = -1;
-            for (var i = 0; i < this.options.length; i++) {
-                if (WUX.match(this.state, this.options[i])) {
-                    idx = i;
-                    break;
+            if (this.state) {
+                for (var i = 0; i < this.options.length; i++) {
+                    if (WUX.match(this.state, this.options[i])) {
+                        idx = i;
+                        break;
+                    }
                 }
+            }
+            else {
+                idx = 0;
             }
             if (idx >= 0) {
                 var item = document.getElementById(this.id + '-' + idx);
                 if (item)
-                    item.setAttribute('checked', 'true');
+                    item['checked'] = true;
             }
         };
         return WRadio;
@@ -4172,13 +4241,14 @@ var WUX;
             this.currRow.push({ id: id, label: label, component: co, readonly: readonly, type: 'select' });
             return this;
         };
-        WFormPanel.prototype.addBooleanField = function (fieldId, label, labelCheck) {
+        WFormPanel.prototype.addBooleanField = function (fieldId, label, labelCheck, tooltip) {
             var id = this.subId(fieldId);
             var co = new WCheck(id, '');
             co.divClass = WUX.CSS.FORM_CHECK;
             co.divStyle = WUX.CSS.CHECK_STYLE;
             co.classStyle = WUX.CSS.FORM_CTRL;
             co.label = labelCheck;
+            co.tooltip = tooltip;
             this.currRow.push({ id: id, label: label, component: co, 'type': 'boolean' });
             return this;
         };
