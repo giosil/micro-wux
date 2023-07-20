@@ -2541,8 +2541,11 @@ var WUX;
 (function (WUX) {
     var Wrapp = (function (_super) {
         __extends(Wrapp, _super);
-        function Wrapp(props) {
-            return _super.call(this, null, 'Wrapp', props) || this;
+        function Wrapp(props, tag, id, classStyle, style, attributes) {
+            var _this = _super.call(this, id, 'Wrapp', props, classStyle, style, attributes) || this;
+            if (tag)
+                _this.rootTag = tag;
+            return _this;
         }
         Wrapp.prototype.render = function () {
             this.isText = false;
@@ -4102,6 +4105,7 @@ var WUX;
             this.roww = [];
             this.currRow = null;
             this.footer = [];
+            this.captions = [];
             this.addRow();
             return this;
         };
@@ -4263,6 +4267,14 @@ var WUX;
             this.currRow.push({ id: this.subId(fieldId), value: value, type: 'internal' });
             return this;
         };
+        WFormPanel.prototype.addCaption = function (text, icon, classStyle, style) {
+            if (!text)
+                return this;
+            var co = new WLabel('', text, icon, classStyle, style);
+            this.currRow.push({ id: '', label: '', component: co, readonly: true, type: 'caption' });
+            this.captions.push(co);
+            return this;
+        };
         WFormPanel.prototype.addComponent = function (fieldId, label, component) {
             if (!component)
                 return this;
@@ -4308,16 +4320,12 @@ var WUX;
                     if (f.span && f.span > 0)
                         cs = cs * f.span;
                     this.main.addCol('' + cs);
-                    f.component.setState(f.value);
+                    if (f.type != 'caption')
+                        f.component.setState(f.value);
                     if (f.component instanceof WCheck) {
-                        if (!this.checkboxStyle) {
-                            var s = getComputedStyle(this.context).getPropertyValue('font-size');
-                            var ch = Math.round(0.8 * parseInt(s));
-                            if (isNaN(ch) || ch < 18)
-                                ch = 18;
-                            this.checkboxStyle = 'height:' + ch + 'px;';
+                        if (this.checkboxStyle) {
+                            f.component.style = this.checkboxStyle;
                         }
-                        f.component.style = this.checkboxStyle;
                     }
                     if (f.label && !f.labelComp) {
                         var l = new WLabel(f.id + '-l', f.label, '', f.classStyle);
@@ -4351,6 +4359,8 @@ var WUX;
                 var row = this.rows[i];
                 for (var j = 0; j < row.length; j++) {
                     var f = row[j];
+                    if (f.type == 'caption')
+                        continue;
                     if (f.component)
                         f.component.setState(null);
                     f.value = null;

@@ -2,8 +2,9 @@ namespace WUX {
 
 	export class Wrapp extends WComponent<WElement, any> {
 		isText: boolean;
-		constructor(props: WElement) {
-			super(null, 'Wrapp', props);
+		constructor(props: WElement, tag?: string, id?: string, classStyle?: string, style?: string | WStyle, attributes?: string | object) {
+			super(id, 'Wrapp', props, classStyle, style, attributes);
+			if(tag) this.rootTag = tag;
 		}
 
 		protected render() {
@@ -1432,16 +1433,17 @@ namespace WUX {
 	}
 
 	export class WFormPanel extends WComponent<WField[][], any> {
-		protected title: string;
-		protected rows: WField[][];
-		protected roww: WWrapper[];
-		protected currRow: WField[];
-		protected main: WContainer;
-		protected foot: WContainer;
-		protected checkboxStyle: string;
-		protected footer: WElement[];
-		protected footerClass: string;
-		protected footerStyle: string | WStyle;
+		title: string;
+		rows: WField[][];
+		roww: WWrapper[];
+		currRow: WField[];
+		main: WContainer;
+		foot: WContainer;
+		checkboxStyle: string;
+		footer: WElement[];
+		footerClass: string;
+		footerStyle: string | WStyle;
+		captions: WComponent[];
 
 		constructor(id?: string, title?: string, action?: string) {
 			// WComponent init
@@ -1471,6 +1473,7 @@ namespace WUX {
 			this.roww = [];
 			this.currRow = null;
 			this.footer = [];
+			this.captions = [];
 			this.addRow();
 			return this;
 		}
@@ -1620,7 +1623,7 @@ namespace WUX {
 			co.classStyle = CSS.FORM_CTRL;
 			co.label = labelCheck;
 			co.tooltip = tooltip;
-			this.currRow.push({ id: id, label: label, component: co, 'type': 'boolean'});
+			this.currRow.push({ id: id, label: label, component: co, 'type': 'boolean' });
 			return this;
 		}
 
@@ -1632,7 +1635,15 @@ namespace WUX {
 
 		addInternalField(fieldId: string, value?: any): this {
 			if (value === undefined) value = null;
-			this.currRow.push({ id: this.subId(fieldId), value: value, type: 'internal'});
+			this.currRow.push({ id: this.subId(fieldId), value: value, type: 'internal' });
+			return this;
+		}
+
+		addCaption(text: string, icon?: string, classStyle?: string, style?: string | WStyle): this {
+			if(!text) return this;
+			let co = new WLabel('', text, icon, classStyle, style);
+			this.currRow.push({ id: '', label: '', component: co, readonly: true, type: 'caption' });
+			this.captions.push(co);
 			return this;
 		}
 
@@ -1681,15 +1692,11 @@ namespace WUX {
 					if (f.span && f.span > 0) cs = cs * f.span;
 					this.main.addCol('' + cs);
 					
-					f.component.setState(f.value);
+					if(f.type != 'caption') f.component.setState(f.value);
 					if(f.component instanceof WCheck) {
-						if (!this.checkboxStyle) {
-							let s = getComputedStyle(this.context).getPropertyValue('font-size');
-							let ch = Math.round(0.8 * parseInt(s));
-							if(isNaN(ch) || ch < 18) ch = 18;
-							this.checkboxStyle = 'height:' + ch + 'px;';
+						if (this.checkboxStyle) {
+							f.component.style = this.checkboxStyle;
 						}
-						f.component.style = this.checkboxStyle;
 					}
 					
 					if(f.label && !f.labelComp) {
@@ -1725,6 +1732,7 @@ namespace WUX {
 				let row = this.rows[i];
 				for (let j = 0; j < row.length; j++) {
 					let f = row[j];
+					if(f.type == 'caption') continue;
 					if(f.component) f.component.setState(null);
 					f.value = null;
 				}

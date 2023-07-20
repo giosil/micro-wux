@@ -365,7 +365,7 @@ declare namespace WUX {
 declare namespace WUX {
     class Wrapp extends WComponent<WElement, any> {
         isText: boolean;
-        constructor(props: WElement);
+        constructor(props: WElement, tag?: string, id?: string, classStyle?: string, style?: string | WStyle, attributes?: string | object);
         protected render(): WElement;
         protected componentDidMount(): void;
     }
@@ -546,16 +546,17 @@ declare namespace WUX {
         onSort(h: (e: WEvent) => any): void;
     }
     class WFormPanel extends WComponent<WField[][], any> {
-        protected title: string;
-        protected rows: WField[][];
-        protected roww: WWrapper[];
-        protected currRow: WField[];
-        protected main: WContainer;
-        protected foot: WContainer;
-        protected checkboxStyle: string;
-        protected footer: WElement[];
-        protected footerClass: string;
-        protected footerStyle: string | WStyle;
+        title: string;
+        rows: WField[][];
+        roww: WWrapper[];
+        currRow: WField[];
+        main: WContainer;
+        foot: WContainer;
+        checkboxStyle: string;
+        footer: WElement[];
+        footerClass: string;
+        footerStyle: string | WStyle;
+        captions: WComponent[];
         constructor(id?: string, title?: string, action?: string);
         init(): this;
         focus(): this;
@@ -573,6 +574,7 @@ declare namespace WUX {
         addBooleanField(fieldId: string, label: string, labelCheck?: string, tooltip?: string): this;
         addBlankField(label?: string, classStyle?: string, style?: string | WStyle): this;
         addInternalField(fieldId: string, value?: any): this;
+        addCaption(text: string, icon?: string, classStyle?: string, style?: string | WStyle): this;
         addComponent(fieldId: string, label: string, component: WComponent): this;
         addToFooter(c: WElement): this;
         protected componentDidMount(): void;
