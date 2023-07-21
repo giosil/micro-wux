@@ -771,7 +771,7 @@ namespace WUX {
 		}
 	}
 	
-	export class WRadio extends WComponent implements WISelectable {
+	export class WRadio extends WComponent<string, any> implements WISelectable {
 		options: Array<string | WEntity>;
 		label: string;
 
@@ -819,6 +819,29 @@ namespace WUX {
 			return this;
 		}
 
+		getProps(): string {
+			if (!this.options || !this.options.length) return null;
+			for (let i = 0; i < this.options.length; i++) {
+				let rid = this.id + '-' + i;
+				let item = document.getElementById(rid);
+				if (!item) continue;
+				if (item['checked']) {
+					let lbl = document.getElementById(rid + '-l');
+					if(lbl) return lbl.innerText;
+				}
+			}
+			return WUtil.toString(this.state);
+		}
+
+		protected updateState(nextState: any) {
+			super.updateState(nextState);
+			if(typeof this.state == 'object') {
+				if("id" in this.state) {
+					this.state = this.state["id"];
+				}
+			}
+		}
+	
 		protected render() {
 			let r = '';
 			if (this.label) {
@@ -834,23 +857,24 @@ namespace WUX {
 			for (let i = 0; i < l; i++) {
 				r += '<div class="form-check form-check-inline">';
 				let opt = this.options[i];
+				let rid = this.id + '-' + i;
 				if (typeof opt == "string") {
 					if (match(this.state, opt)) {
-						r += '<input type="radio" value="' + opt + '" name="' + this.id + '" id="' + this.id + '-' + i + '" checked' + d + '>';
+						r += '<input type="radio" value="' + opt + '" name="' + this.id + '" id="' + rid + '" checked' + d + '>';
 					}
 					else {
-						r += '<input type="radio" value="' + opt + '" name="' + this.id + '" id="' + this.id + '-' + i + '"' + d + '>';
+						r += '<input type="radio" value="' + opt + '" name="' + this.id + '" id="' + rid + '"' + d + '>';
 					}
-					r += '<label for="' + this.id + '-' + i + '">' +  opt + '</label>';
+					r += '<label id="' + rid + '-l" for="' + rid + '">' +  opt + '</label>';
 				}
 				else {
 					if (match(this.state, opt)) {
-						r += '<input type="radio" value="' + opt.id + '" name="' + this.id + '" id="' + this.id + '-' + i + '" checked' + d + '>';
+						r += '<input type="radio" value="' + opt.id + '" name="' + this.id + '" id="' + rid + '" checked' + d + '>';
 					}
 					else {
-						r += '<input type="radio" value="' + opt.id + '" name="' + this.id + '" id="' + this.id + '-' + i + '"' + d + '>';
+						r += '<input type="radio" value="' + opt.id + '" name="' + this.id + '" id="' + rid + '"' + d + '>';
 					}
-					r += '<label for="' + this.id + '-' + i + '">' +  opt.text + '</label>';
+					r += '<label id="' + rid + '-l" for="' + rid + '">' +  opt.text + '</label>';
 				}
 				r += '</div>';
 			}
@@ -1439,7 +1463,6 @@ namespace WUX {
 		currRow: WField[];
 		main: WContainer;
 		foot: WContainer;
-		checkboxStyle: string;
 		footer: WElement[];
 		footerClass: string;
 		footerStyle: string | WStyle;
@@ -1693,12 +1716,6 @@ namespace WUX {
 					this.main.addCol('' + cs);
 					
 					if(f.type != 'caption') f.component.setState(f.value);
-					if(f.component instanceof WCheck) {
-						if (this.checkboxStyle) {
-							f.component.style = this.checkboxStyle;
-						}
-					}
-					
 					if(f.label && !f.labelComp) {
 						let l = new WLabel(f.id + '-l', f.label, '', f.classStyle);
 						f.labelComp = l.for(f.id);
@@ -1776,6 +1793,12 @@ namespace WUX {
 		getState() {
 			this.state = this.getValues();
 			return this.state;
+		}
+
+		onField(events: string, fid: string, handler: (e: WEvent) => any): this {
+			let f = this.getField(fid);
+			if(!f || !f.component) return this;
+			f.component.on(events, handler);
 		}
 
 		protected updateState(nextState: any): void {

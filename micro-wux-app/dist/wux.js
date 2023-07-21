@@ -3419,6 +3419,30 @@ var WUX;
             this.setState(this.options.length > i ? this.options[i] : null);
             return this;
         };
+        WRadio.prototype.getProps = function () {
+            if (!this.options || !this.options.length)
+                return null;
+            for (var i = 0; i < this.options.length; i++) {
+                var rid = this.id + '-' + i;
+                var item = document.getElementById(rid);
+                if (!item)
+                    continue;
+                if (item['checked']) {
+                    var lbl = document.getElementById(rid + '-l');
+                    if (lbl)
+                        return lbl.innerText;
+                }
+            }
+            return WUX.WUtil.toString(this.state);
+        };
+        WRadio.prototype.updateState = function (nextState) {
+            _super.prototype.updateState.call(this, nextState);
+            if (typeof this.state == 'object') {
+                if ("id" in this.state) {
+                    this.state = this.state["id"];
+                }
+            }
+        };
         WRadio.prototype.render = function () {
             var r = '';
             if (this.label) {
@@ -3437,23 +3461,24 @@ var WUX;
             for (var i = 0; i < l; i++) {
                 r += '<div class="form-check form-check-inline">';
                 var opt = this.options[i];
+                var rid = this.id + '-' + i;
                 if (typeof opt == "string") {
                     if (WUX.match(this.state, opt)) {
-                        r += '<input type="radio" value="' + opt + '" name="' + this.id + '" id="' + this.id + '-' + i + '" checked' + d + '>';
+                        r += '<input type="radio" value="' + opt + '" name="' + this.id + '" id="' + rid + '" checked' + d + '>';
                     }
                     else {
-                        r += '<input type="radio" value="' + opt + '" name="' + this.id + '" id="' + this.id + '-' + i + '"' + d + '>';
+                        r += '<input type="radio" value="' + opt + '" name="' + this.id + '" id="' + rid + '"' + d + '>';
                     }
-                    r += '<label for="' + this.id + '-' + i + '">' + opt + '</label>';
+                    r += '<label id="' + rid + '-l" for="' + rid + '">' + opt + '</label>';
                 }
                 else {
                     if (WUX.match(this.state, opt)) {
-                        r += '<input type="radio" value="' + opt.id + '" name="' + this.id + '" id="' + this.id + '-' + i + '" checked' + d + '>';
+                        r += '<input type="radio" value="' + opt.id + '" name="' + this.id + '" id="' + rid + '" checked' + d + '>';
                     }
                     else {
-                        r += '<input type="radio" value="' + opt.id + '" name="' + this.id + '" id="' + this.id + '-' + i + '"' + d + '>';
+                        r += '<input type="radio" value="' + opt.id + '" name="' + this.id + '" id="' + rid + '"' + d + '>';
                     }
-                    r += '<label for="' + this.id + '-' + i + '">' + opt.text + '</label>';
+                    r += '<label id="' + rid + '-l" for="' + rid + '">' + opt.text + '</label>';
                 }
                 r += '</div>';
             }
@@ -4322,11 +4347,6 @@ var WUX;
                     this.main.addCol('' + cs);
                     if (f.type != 'caption')
                         f.component.setState(f.value);
-                    if (f.component instanceof WCheck) {
-                        if (this.checkboxStyle) {
-                            f.component.style = this.checkboxStyle;
-                        }
-                    }
                     if (f.label && !f.labelComp) {
                         var l = new WLabel(f.id + '-l', f.label, '', f.classStyle);
                         f.labelComp = l.for(f.id);
@@ -4409,6 +4429,12 @@ var WUX;
         WFormPanel.prototype.getState = function () {
             this.state = this.getValues();
             return this.state;
+        };
+        WFormPanel.prototype.onField = function (events, fid, handler) {
+            var f = this.getField(fid);
+            if (!f || !f.component)
+                return this;
+            f.component.on(events, handler);
         };
         WFormPanel.prototype.updateState = function (nextState) {
             _super.prototype.updateState.call(this, nextState);

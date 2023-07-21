@@ -470,7 +470,7 @@ declare namespace WUX {
         protected render(): string;
         protected componentDidMount(): void;
     }
-    class WRadio extends WComponent implements WISelectable {
+    class WRadio extends WComponent<string, any> implements WISelectable {
         options: Array<string | WEntity>;
         label: string;
         constructor(id?: string, options?: Array<string | WEntity>, classStyle?: string, style?: string | WStyle, attributes?: string | object, props?: any);
@@ -478,6 +478,8 @@ declare namespace WUX {
         set enabled(b: boolean);
         set tooltip(s: string);
         select(i: number): this;
+        getProps(): string;
+        protected updateState(nextState: any): void;
         protected render(): string;
         protected componentDidMount(): void;
         protected componentDidUpdate(prevProps: any, prevState: any): void;
@@ -552,7 +554,6 @@ declare namespace WUX {
         currRow: WField[];
         main: WContainer;
         foot: WContainer;
-        checkboxStyle: string;
         footer: WElement[];
         footerClass: string;
         footerStyle: string | WStyle;
@@ -584,6 +585,7 @@ declare namespace WUX {
         getValue(fid: string | WField): any;
         getValues(): any;
         getState(): any;
+        onField(events: string, fid: string, handler: (e: WEvent) => any): this;
         protected updateState(nextState: any): void;
         protected updateView(): void;
     }
