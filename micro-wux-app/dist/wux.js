@@ -4196,6 +4196,26 @@ var WUX;
             }
             return;
         };
+        WFormPanel.prototype.getComponent = function (fid, def) {
+            var f = this.getField(fid);
+            if (!f) {
+                console.error('[' + WUX.str(this) + '] Field ' + fid + ' not found.');
+                return def;
+            }
+            var c = f.component;
+            if (!c) {
+                console.error('[' + WUX.str(this) + '] Field ' + fid + ' has no components.');
+                return def;
+            }
+            return c;
+        };
+        WFormPanel.prototype.onField = function (fid, events, handler) {
+            var c = this.getComponent(fid);
+            if (!c)
+                return;
+            c.on(events, handler);
+            return this;
+        };
         WFormPanel.prototype.addRow = function (classStyle, style, id, attributes, type) {
             if (type === void 0) { type = 'row'; }
             if (this.currRow && !this.currRow.length) {
@@ -4429,12 +4449,6 @@ var WUX;
         WFormPanel.prototype.getState = function () {
             this.state = this.getValues();
             return this.state;
-        };
-        WFormPanel.prototype.onField = function (events, fid, handler) {
-            var f = this.getField(fid);
-            if (!f || !f.component)
-                return this;
-            f.component.on(events, handler);
         };
         WFormPanel.prototype.updateState = function (nextState) {
             _super.prototype.updateState.call(this, nextState);

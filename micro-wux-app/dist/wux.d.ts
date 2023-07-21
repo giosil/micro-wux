@@ -564,6 +564,10 @@ declare namespace WUX {
         first(enabled?: boolean): WField;
         focusOn(fieldId: string): this;
         getField(fid: string): WField;
+        getComponent(fid: string, def?: WComponent): WComponent;
+        onField(fid: string, events: 'mount' | 'unmount' | 'statechange' | 'propschange', handler: (e: WEvent) => any): this;
+        onField(fid: string, events: 'click' | 'dblclick' | 'mouseenter' | 'mouseleave' | 'keypress' | 'keydown' | 'keyup' | 'submit' | 'change' | 'focus' | 'blur' | 'resize', handler: (e: Event) => any): this;
+        onField(fid: string, events: string, handler: (e: any) => any): this;
         addRow(classStyle?: string, style?: string | WStyle, id?: string, attributes?: string | object, type?: string): this;
         addTextField(fieldId: string, label: string, readonly?: boolean): this;
         addNoteField(fieldId: string, label: string, rows: number, readonly?: boolean): this;
@@ -585,7 +589,6 @@ declare namespace WUX {
         getValue(fid: string | WField): any;
         getValues(): any;
         getState(): any;
-        onField(events: string, fid: string, handler: (e: WEvent) => any): this;
         protected updateState(nextState: any): void;
         protected updateView(): void;
     }

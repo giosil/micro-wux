@@ -1558,6 +1558,30 @@ namespace WUX {
 			return;
 		}
 
+		getComponent(fid: string, def?: WComponent): WComponent {
+			let f = this.getField(fid);
+			if(!f) {
+				console.error('[' + str(this) + '] Field ' + fid + ' not found.');
+				return def;
+			}
+			let c = f.component;
+			if(!c) {
+				console.error('[' + str(this) + '] Field ' + fid + ' has no components.');
+				return def;
+			}
+			return c;
+		}
+
+		onField(fid: string, events: 'mount' | 'unmount' | 'statechange' | 'propschange', handler: (e: WEvent) => any): this;
+		onField(fid: string, events: 'click' | 'dblclick' | 'mouseenter' | 'mouseleave' | 'keypress' | 'keydown' | 'keyup' | 'submit' | 'change' | 'focus' | 'blur' | 'resize', handler: (e: Event) => any): this;
+		onField(fid: string, events: string, handler: (e: any) => any): this;
+		onField(fid: string, events: string, handler: (e: any) => any): this {
+			let c = this.getComponent(fid);
+			if(!c) return;
+			c.on(events, handler);
+			return this;
+		}
+
 		addRow(classStyle?: string, style?: string | WStyle, id?: string, attributes?: string | object, type: string = 'row'): this {
 			if (this.currRow && !this.currRow.length) {
 				this.roww[this.roww.length - 1] = {
@@ -1793,12 +1817,6 @@ namespace WUX {
 		getState() {
 			this.state = this.getValues();
 			return this.state;
-		}
-
-		onField(events: string, fid: string, handler: (e: WEvent) => any): this {
-			let f = this.getField(fid);
-			if(!f || !f.component) return this;
-			f.component.on(events, handler);
 		}
 
 		protected updateState(nextState: any): void {

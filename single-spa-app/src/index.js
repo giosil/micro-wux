@@ -598,7 +598,11 @@ if(!t)return s
 if((null==s.enabled||s.enabled)&&(null==s.readonly||!s.readonly))return s}return null},n.prototype.focusOn=function(t){if(!this.mounted)return this
 var e=this.getField(t)
 return e?(e.component?e.component.focus():e.element instanceof HTMLElement&&e.element.focus(),this):this},n.prototype.getField=function(t){if(t)for(var e=0==t.indexOf(this.id+"-")?t:this.subId(t),i=0;i<this.rows.length;i++)for(var n=this.rows[i],r=0;r<n.length;r++){var o=n[r]
-if(o.id==e)return o}},n.prototype.addRow=function(e,i,n,r,o){return void 0===o&&(o="row"),this.currRow&&!this.currRow.length?(this.roww[this.roww.length-1]={classStyle:e,style:i,id:n,attributes:t.attributes(r),type:o},this):(this.currRow=[],this.rows.push(this.currRow),this.roww.push({classStyle:e,style:i,id:n,attributes:t.attributes(r),type:o}),this)},n.prototype.addTextField=function(e,i,n){var r=this.subId(e),s=new o(r,"text",0,t.CSS.FORM_CTRL)
+if(o.id==e)return o}},n.prototype.getComponent=function(e,i){var n=this.getField(e)
+if(!n)return console.error("["+t.str(this)+"] Field "+e+" not found."),i
+var r=n.component
+return r||(console.error("["+t.str(this)+"] Field "+e+" has no components."),i)},n.prototype.onField=function(t,e,i){var n=this.getComponent(t)
+if(n)return n.on(e,i),this},n.prototype.addRow=function(e,i,n,r,o){return void 0===o&&(o="row"),this.currRow&&!this.currRow.length?(this.roww[this.roww.length-1]={classStyle:e,style:i,id:n,attributes:t.attributes(r),type:o},this):(this.currRow=[],this.rows.push(this.currRow),this.roww.push({classStyle:e,style:i,id:n,attributes:t.attributes(r),type:o}),this)},n.prototype.addTextField=function(e,i,n){var r=this.subId(e),s=new o(r,"text",0,t.CSS.FORM_CTRL)
 return s.readonly=n,this.currRow.push({id:r,label:i,component:s,readonly:n,type:"text"}),this},n.prototype.addNoteField=function(e,i,n,r){n||(n=3)
 var o=this.subId(e),a=new s(o,n,t.CSS.FORM_CTRL)
 return a.readonly=r,this.currRow.push({id:o,label:i,component:a,readonly:r,type:"note"}),this},n.prototype.addDateField=function(e,i,n){var r=this.subId(e),s=new o(r,"date",0,t.CSS.FORM_CTRL)
@@ -624,9 +628,7 @@ this.foot.addRow().addCol("12").add(h,"push")}this.main.addRow().addCol("12").ad
 var r=this.getField(e)
 return r?("date"==r.type&&(i=t.isoDate(i)),"time"==r.type&&(i=t.formatTime(i,!1)),r.component&&r.component.setState(i),r.value=i,n&&(this.state||(this.state={}),this.state[e]=i),this):this},n.prototype.getValue=function(t){var e="string"==typeof t?this.getField(t):t
 return e?e.component?e.component.getState():e.value:null},n.prototype.getValues=function(){for(var t={},e=0;e<this.rows.length;e++)for(var i=this.rows[e],n=0;n<i.length;n++){var r=i[n]
-t[this.ripId(r.id)]=r.component?r.component.getState():r.value}return t},n.prototype.getState=function(){return this.state=this.getValues(),this.state},n.prototype.onField=function(t,e,i){var n=this.getField(e)
-if(!n||!n.component)return this
-n.component.on(t,i)},n.prototype.updateState=function(i){e.prototype.updateState.call(this,i),!i||t.WUtil.isEmpty(i)?this.clear():this.updateView()},n.prototype.updateView=function(){if(!this.state)return void this.clear()
+t[this.ripId(r.id)]=r.component?r.component.getState():r.value}return t},n.prototype.getState=function(){return this.state=this.getValues(),this.state},n.prototype.updateState=function(i){e.prototype.updateState.call(this,i),!i||t.WUtil.isEmpty(i)?this.clear():this.updateView()},n.prototype.updateView=function(){if(!this.state)return void this.clear()
 for(var t in this.state)this.setValue(t,this.state[t],!1)},n}(t.WComponent)
 t.WFormPanel=c}(WUX||(WUX={}))
 var WUX
