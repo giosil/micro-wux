@@ -1,26 +1,8 @@
 ﻿/** 
 	Micro WRAPPED USER EXPERIENCE - WUX
 */
-let wuxRegistry: { [id: string]: WUX.WComponent } = {};
-function wuxRegister(node: WUX.WNode, c?: WUX.WComponent | 'delete'): WUX.WComponent {
-	if (!node) return;
-	let id: string;
-	if (typeof node == 'string') {
-		id = node.indexOf('#') == 0 ? node.substring(1) : node;
-	}
-	else {
-		id = node.id;
-	}
-	if (!c) return wuxRegistry[id];
-	if (typeof c == 'string') {
-		let r = wuxRegistry[id];
-		if (r) delete wuxRegistry[id];
-		return r;
-	}
-	wuxRegistry[id] = c;
-	return c;
-}
 class WuxDOM {
+	public static components: { [id: string]: WUX.WComponent } = {};
 	private static onRenderHandlers: ((e: WUX.WEvent) => any)[] = [];
 	static onRender(handler: (e: WUX.WEvent) => any) {
 		WuxDOM.onRenderHandlers.push(handler);
@@ -31,6 +13,24 @@ class WuxDOM {
 	}
 	private static lastCtx: Element;
 
+	static register(node: WUX.WNode, c?: WUX.WComponent | 'delete'): WUX.WComponent {
+		if (!node) return;
+		let id: string;
+		if (typeof node == 'string') {
+			id = node.indexOf('#') == 0 ? node.substring(1) : node;
+		}
+		else {
+			id = node.id;
+		}
+		if (!c) return WuxDOM.components[id];
+		if (typeof c == 'string') {
+			let r = WuxDOM.components[id];
+			if (r) delete WuxDOM.components[id];
+			return r;
+		}
+		WuxDOM.components[id] = c;
+		return c;
+	}
 	static render(component: WUX.WElement, node?: WUX.WNode, before?: (n?: WUX.WNode) => any, after?: (n?: WUX.WNode) => any): void {
 		if (WUX.debug) console.log('WuxDOM.render ' + WUX.str(component) + ' on ' + WUX.str(node) + '...');
 		WUX.global.init(() => {
@@ -62,7 +62,7 @@ class WuxDOM {
 		WuxDOM.lastCtx = ctx;
 		if (e instanceof WUX.WComponent) {
 			e.mount(ctx);
-			wuxRegister(ctx, e);
+			WuxDOM.register(ctx, e);
 		}
 		else if (e instanceof Element) {
 			ctx.append(e);
@@ -83,7 +83,7 @@ class WuxDOM {
 			console.error('WuxDOM.unmount ' + WUX.str(node) + ' -> node unavailable');
 			return;
 		}
-		let wcomp = wuxRegister(ctx, 'delete');
+		let wcomp = WuxDOM.register(ctx, 'delete');
 		if (wcomp) wcomp.unmount();
 		ctx.remove();
 		if (WUX.debug) console.log('WuxDOM.unmount ' + WUX.str(node) + ' completed.');
@@ -539,7 +539,7 @@ namespace WUX {
 				if (idx >= 0) registry.splice(idx, 1);
 			}
 			this.mounted = false;
-			wuxRegister(this.id, 'delete');
+			WuxDOM.register(this.id, 'delete');
 			this.trigger('unmount');
 			return this;
 		}
@@ -635,7 +635,7 @@ namespace WUX {
 						}
 					}
 				}
-				wuxRegister(this.root, this)
+				WuxDOM.register(this.root, this)
 				this.mounted = true;
 				if (this.id) {
 					if (!this.internal || this.internal.id != this.id) {
@@ -873,7 +873,7 @@ namespace WUX {
 
 	export function getComponent(id: string): WUX.WComponent {
 		if (!id) return;
-		return wuxRegistry[id];
+		return WuxDOM.components[id];
 	}
 
 	export function getRootComponent(c: WUX.WComponent): WUX.WComponent {
@@ -884,7 +884,7 @@ namespace WUX {
 
 	export function setProps(id: string, p: any): WUX.WComponent {
 		if (!id) return;
-		let c = wuxRegistry[id];
+		let c = WuxDOM.components[id];
 		if (!c) return;
 		c.setProps(p);
 		return c;
@@ -892,7 +892,7 @@ namespace WUX {
 
 	export function getProps(id: string, d?: any): any {
 		if (!id) return d;
-		let c = wuxRegistry[id];
+		let c = WuxDOM.components[id];
 		if (!c) return d;
 		let p = c.getProps();
 		if (p == null) return d;
@@ -901,7 +901,7 @@ namespace WUX {
 
 	export function setState(id: string, s: any): WUX.WComponent {
 		if (!id) return;
-		let c = wuxRegistry[id];
+		let c = WuxDOM.components[id];
 		if (!c) return;
 		c.setState(s);
 		return c;
@@ -909,7 +909,7 @@ namespace WUX {
 
 	export function getState(id: string, d?: any): any {
 		if (!id) return d;
-		let c = wuxRegistry[id];
+		let c = WuxDOM.components[id];
 		if (!c) return d;
 		let s = c.getState();
 		if (s == null) return d;

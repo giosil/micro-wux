@@ -33,28 +33,6 @@ var __extends = (this && this.__extends) || (function () {
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     };
 })();
-var wuxRegistry = {};
-function wuxRegister(node, c) {
-    if (!node)
-        return;
-    var id;
-    if (typeof node == 'string') {
-        id = node.indexOf('#') == 0 ? node.substring(1) : node;
-    }
-    else {
-        id = node.id;
-    }
-    if (!c)
-        return wuxRegistry[id];
-    if (typeof c == 'string') {
-        var r = wuxRegistry[id];
-        if (r)
-            delete wuxRegistry[id];
-        return r;
-    }
-    wuxRegistry[id] = c;
-    return c;
-}
 var WuxDOM = (function () {
     function WuxDOM() {
     }
@@ -63,6 +41,27 @@ var WuxDOM = (function () {
     };
     WuxDOM.onUnmount = function (handler) {
         WuxDOM.onUnmountHandlers.push(handler);
+    };
+    WuxDOM.register = function (node, c) {
+        if (!node)
+            return;
+        var id;
+        if (typeof node == 'string') {
+            id = node.indexOf('#') == 0 ? node.substring(1) : node;
+        }
+        else {
+            id = node.id;
+        }
+        if (!c)
+            return WuxDOM.components[id];
+        if (typeof c == 'string') {
+            var r = WuxDOM.components[id];
+            if (r)
+                delete WuxDOM.components[id];
+            return r;
+        }
+        WuxDOM.components[id] = c;
+        return c;
     };
     WuxDOM.render = function (component, node, before, after) {
         if (WUX.debug)
@@ -104,7 +103,7 @@ var WuxDOM = (function () {
         WuxDOM.lastCtx = ctx;
         if (e instanceof WUX.WComponent) {
             e.mount(ctx);
-            wuxRegister(ctx, e);
+            WuxDOM.register(ctx, e);
         }
         else if (e instanceof Element) {
             ctx.append(e);
@@ -129,7 +128,7 @@ var WuxDOM = (function () {
             console.error('WuxDOM.unmount ' + WUX.str(node) + ' -> node unavailable');
             return;
         }
-        var wcomp = wuxRegister(ctx, 'delete');
+        var wcomp = WuxDOM.register(ctx, 'delete');
         if (wcomp)
             wcomp.unmount();
         ctx.remove();
@@ -178,6 +177,7 @@ var WuxDOM = (function () {
         }
         return WuxDOM.mount(e, node);
     };
+    WuxDOM.components = {};
     WuxDOM.onRenderHandlers = [];
     WuxDOM.onUnmountHandlers = [];
     return WuxDOM;
@@ -528,7 +528,7 @@ var WUX;
                     WUX.registry.splice(idx, 1);
             }
             this.mounted = false;
-            wuxRegister(this.id, 'delete');
+            WuxDOM.register(this.id, 'delete');
             this.trigger('unmount');
             return this;
         };
@@ -640,7 +640,7 @@ var WUX;
                         }
                     }
                 }
-                wuxRegister(this.root, this);
+                WuxDOM.register(this.root, this);
                 this.mounted = true;
                 if (this.id) {
                     if (!this.internal || this.internal.id != this.id) {
@@ -902,7 +902,7 @@ var WUX;
     function getComponent(id) {
         if (!id)
             return;
-        return wuxRegistry[id];
+        return WuxDOM.components[id];
     }
     WUX.getComponent = getComponent;
     function getRootComponent(c) {
@@ -916,7 +916,7 @@ var WUX;
     function setProps(id, p) {
         if (!id)
             return;
-        var c = wuxRegistry[id];
+        var c = WuxDOM.components[id];
         if (!c)
             return;
         c.setProps(p);
@@ -926,7 +926,7 @@ var WUX;
     function getProps(id, d) {
         if (!id)
             return d;
-        var c = wuxRegistry[id];
+        var c = WuxDOM.components[id];
         if (!c)
             return d;
         var p = c.getProps();
@@ -938,7 +938,7 @@ var WUX;
     function setState(id, s) {
         if (!id)
             return;
-        var c = wuxRegistry[id];
+        var c = WuxDOM.components[id];
         if (!c)
             return;
         c.setState(s);
@@ -948,7 +948,7 @@ var WUX;
     function getState(id, d) {
         if (!id)
             return d;
-        var c = wuxRegistry[id];
+        var c = WuxDOM.components[id];
         if (!c)
             return d;
         var s = c.getState();

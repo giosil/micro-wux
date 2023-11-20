@@ -1,13 +1,13 @@
-declare let wuxRegistry: {
-    [id: string]: WUX.WComponent;
-};
-declare function wuxRegister(node: WUX.WNode, c?: WUX.WComponent | 'delete'): WUX.WComponent;
 declare class WuxDOM {
+    static components: {
+        [id: string]: WUX.WComponent;
+    };
     private static onRenderHandlers;
     static onRender(handler: (e: WUX.WEvent) => any): void;
     private static onUnmountHandlers;
     static onUnmount(handler: (e: WUX.WEvent) => any): void;
     private static lastCtx;
+    static register(node: WUX.WNode, c?: WUX.WComponent | 'delete'): WUX.WComponent;
     static render(component: WUX.WElement, node?: WUX.WNode, before?: (n?: WUX.WNode) => any, after?: (n?: WUX.WNode) => any): void;
     static mount(e: WUX.WElement, node?: WUX.WNode): Element;
     static unmount(node?: WUX.WNode): Element;
