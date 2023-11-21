@@ -3,15 +3,20 @@
 */
 class WuxDOM {
 	public static components: { [id: string]: WUX.WComponent } = {};
-	private static onRenderHandlers: ((e: WUX.WEvent) => any)[] = [];
-	static onRender(handler: (e: WUX.WEvent) => any) {
-		WuxDOM.onRenderHandlers.push(handler);
-	}
-	private static onUnmountHandlers: ((e: WUX.WEvent) => any)[] = [];
-	static onUnmount(handler: (e: WUX.WEvent) => any) {
-		WuxDOM.onUnmountHandlers.push(handler);
-	}
+
+	private static renderHandlers: ((e: WUX.WEvent) => any)[] = [];
+	private static unmountHandlers: ((e: WUX.WEvent) => any)[] = [];
 	private static lastCtx: Element;
+
+	static onRender(handler: (e: WUX.WEvent) => any) {
+		WuxDOM.renderHandlers.push(handler);
+	}
+	static onUnmount(handler: (e: WUX.WEvent) => any) {
+		WuxDOM.unmountHandlers.push(handler);
+	}
+	static getLastContext(): Element {
+		return WuxDOM.lastCtx;
+	}
 
 	static register(node: WUX.WNode, c?: WUX.WComponent | 'delete'): WUX.WComponent {
 		if (!node) return;
@@ -39,11 +44,11 @@ class WuxDOM {
 			let context = WuxDOM.mount(component, node);
 			WuxDOM.lastCtx = context;
 			if (after) after(node);
-			if (WuxDOM.onRenderHandlers.length > 0) {
+			if (WuxDOM.renderHandlers.length > 0) {
 				let c: WUX.WComponent = component instanceof WUX.WComponent ? component : null;
 				let e: WUX.WEvent = { component: c, element: context, target: context.firstChild, type: 'render' };
-				for (let handler of WuxDOM.onRenderHandlers) handler(e);
-				WuxDOM.onRenderHandlers = [];
+				for (let handler of WuxDOM.renderHandlers) handler(e);
+				WuxDOM.renderHandlers = [];
 			}
 		})
 	}
@@ -87,10 +92,10 @@ class WuxDOM {
 		if (wcomp) wcomp.unmount();
 		ctx.remove();
 		if (WUX.debug) console.log('WuxDOM.unmount ' + WUX.str(node) + ' completed.');
-		if (WuxDOM.onUnmountHandlers.length > 0) {
+		if (WuxDOM.unmountHandlers.length > 0) {
 			let e: WUX.WEvent = { component: wcomp, element: ctx, target: ctx.firstChild, type: 'unmount' };
-			for (let handler of WuxDOM.onUnmountHandlers) handler(e);
-			WuxDOM.onUnmountHandlers = [];
+			for (let handler of WuxDOM.unmountHandlers) handler(e);
+			WuxDOM.unmountHandlers = [];
 		}
 		return ctx;
 	}

@@ -37,10 +37,13 @@ var WuxDOM = (function () {
     function WuxDOM() {
     }
     WuxDOM.onRender = function (handler) {
-        WuxDOM.onRenderHandlers.push(handler);
+        WuxDOM.renderHandlers.push(handler);
     };
     WuxDOM.onUnmount = function (handler) {
-        WuxDOM.onUnmountHandlers.push(handler);
+        WuxDOM.unmountHandlers.push(handler);
+    };
+    WuxDOM.getLastContext = function () {
+        return WuxDOM.lastCtx;
     };
     WuxDOM.register = function (node, c) {
         if (!node)
@@ -75,14 +78,14 @@ var WuxDOM = (function () {
             WuxDOM.lastCtx = context;
             if (after)
                 after(node);
-            if (WuxDOM.onRenderHandlers.length > 0) {
+            if (WuxDOM.renderHandlers.length > 0) {
                 var c = component instanceof WUX.WComponent ? component : null;
                 var e = { component: c, element: context, target: context.firstChild, type: 'render' };
-                for (var _i = 0, _a = WuxDOM.onRenderHandlers; _i < _a.length; _i++) {
+                for (var _i = 0, _a = WuxDOM.renderHandlers; _i < _a.length; _i++) {
                     var handler = _a[_i];
                     handler(e);
                 }
-                WuxDOM.onRenderHandlers = [];
+                WuxDOM.renderHandlers = [];
             }
         });
     };
@@ -134,13 +137,13 @@ var WuxDOM = (function () {
         ctx.remove();
         if (WUX.debug)
             console.log('WuxDOM.unmount ' + WUX.str(node) + ' completed.');
-        if (WuxDOM.onUnmountHandlers.length > 0) {
+        if (WuxDOM.unmountHandlers.length > 0) {
             var e = { component: wcomp, element: ctx, target: ctx.firstChild, type: 'unmount' };
-            for (var _i = 0, _a = WuxDOM.onUnmountHandlers; _i < _a.length; _i++) {
+            for (var _i = 0, _a = WuxDOM.unmountHandlers; _i < _a.length; _i++) {
                 var handler = _a[_i];
                 handler(e);
             }
-            WuxDOM.onUnmountHandlers = [];
+            WuxDOM.unmountHandlers = [];
         }
         return ctx;
     };
@@ -178,8 +181,8 @@ var WuxDOM = (function () {
         return WuxDOM.mount(e, node);
     };
     WuxDOM.components = {};
-    WuxDOM.onRenderHandlers = [];
-    WuxDOM.onUnmountHandlers = [];
+    WuxDOM.renderHandlers = [];
+    WuxDOM.unmountHandlers = [];
     return WuxDOM;
 }());
 var WUX;

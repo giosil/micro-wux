@@ -2,11 +2,12 @@ declare class WuxDOM {
     static components: {
         [id: string]: WUX.WComponent;
     };
-    private static onRenderHandlers;
-    static onRender(handler: (e: WUX.WEvent) => any): void;
-    private static onUnmountHandlers;
-    static onUnmount(handler: (e: WUX.WEvent) => any): void;
+    private static renderHandlers;
+    private static unmountHandlers;
     private static lastCtx;
+    static onRender(handler: (e: WUX.WEvent) => any): void;
+    static onUnmount(handler: (e: WUX.WEvent) => any): void;
+    static getLastContext(): Element;
     static register(node: WUX.WNode, c?: WUX.WComponent | 'delete'): WUX.WComponent;
     static render(component: WUX.WElement, node?: WUX.WNode, before?: (n?: WUX.WNode) => any, after?: (n?: WUX.WNode) => any): void;
     static mount(e: WUX.WElement, node?: WUX.WNode): Element;
