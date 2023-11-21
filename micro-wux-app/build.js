@@ -17,7 +17,7 @@ let files = ["wux.js", "app.js"];
 files.forEach((filename) => {
     let filepath = dist + '/' + filename;
     if(!fs.existsSync(filepath)) {
-        console.error(filepath + " not exists.");
+        console.error(filepath + " does not exist.");
         return;
     }
     console.log("Read " + filepath + "...");
