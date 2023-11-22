@@ -1,4 +1,6 @@
-import * as fs from 'fs';
+// const fs   = require("fs");
+// const path = require("path");
+import * as fs   from 'fs';
 import * as path from 'path';
 
 const action = process.argv[2];
