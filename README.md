@@ -22,14 +22,14 @@ The single-spa root config has been created with `npx create-single-spa`.
 - `.\build.cmd`  or `./build.sh`  - compile micro-wux application
 - `.\deploy.cmd` or `./deploy.sh` - generate index.js in micro-wux-app/src folder
 
-## Build and deploy micro-wux App as microfrontend single-spa with nodejs
+## Build and deploy micro-wux App as microfrontend single-spa with npm
 
 - `cd micro-wux-app`
-- `node run build`  - compile micro-wux application
-- `node run deploy` - generate index.js in micro-wux-app/src folder
-- `node link` - link this package
+- `npm run build`  - compile micro-wux application
+- `npm run deploy` - generate index.js in micro-wux-app/src folder
+- `npm link` - link this package
 - `cd ..\single-spa-app`
-- `node link micro-wux-app` - link `micro-wux-app` in `single-spa-app`
+- `npm link micro-wux-app` - link `micro-wux-app` in `single-spa-app`
 
 ## Run
 
