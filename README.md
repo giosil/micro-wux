@@ -33,13 +33,13 @@ The single-spa root config has been created with `npx create-single-spa`.
 
 ## Run
 
-Start `single-spa-app`
+Start **single-spa-app**:
 
 - `cd single-spa-app`
 - `npm install`
 - `npm start` - to serve single-spa applications at http://localhost:8080/index.js
 
-Start `single-spa-root`
+Start **single-spa-root**:
 
 - `cd single-spa-root`
 - `npm install`
