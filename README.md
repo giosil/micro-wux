@@ -95,8 +95,9 @@ export const unmount = async (props) => {
   await htmlLifecycles.unmount(props);
   WuxDOM.unmount('view-root');
 };
+
 /* micro-wux app */
-...
+/* Code appended by micro-wux-app/deploy[.cmd|.sh] */
 ```
 
 ## Contributors
