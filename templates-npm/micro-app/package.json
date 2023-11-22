@@ -1,0 +1,27 @@
+{
+  "name": "micro-app",
+  "version": "1.0.0",
+  "description": "micro-app application",
+  "main": "dist/index.js",
+  "files": [
+    "dist/**/*"
+  ],
+  "type": "module",
+  "types": "dist/*.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "postbuild": "node ./src/post_build.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "giorgio.silvestris@gmail.com",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/bootstrap": "^5.2.9",
+    "@types/jquery": "^3.5.27",
+    "typescript": "^4.0.0"
+  },
+  "dependencies": {
+    "micro-wux": "file:../micro-wux"
+  }
+}

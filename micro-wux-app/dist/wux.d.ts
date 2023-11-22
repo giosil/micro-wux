@@ -1,3 +1,6 @@
+/**
+    Micro WRAPPED USER EXPERIENCE - WUX
+*/
 declare class WuxDOM {
     static components: {
         [id: string]: WUX.WComponent;
@@ -20,13 +23,18 @@ declare namespace WUX {
     let debug: boolean;
     let registry: string[];
     const version = "1.0.0";
+    /** Global settings */
     interface WGlobal {
+        /** Locale setting */
         locale: string;
+        /** Global init function */
         init(callback: () => any): void;
+        /** Shared data */
         setData(key: string, data: any, dontTrigger?: boolean): void;
         getData(key: string, def?: any): any;
         onDataChanged(key: string, callback: (data: any) => any): void;
     }
+    /** Event interface */
     interface WEvent {
         component: WComponent;
         element: Element;
@@ -34,6 +42,7 @@ declare namespace WUX {
         type: string;
         data?: any;
     }
+    /** WWrapper interface */
     interface WWrapper {
         id?: string;
         type?: string;
@@ -46,6 +55,7 @@ declare namespace WUX {
         title?: string;
         element?: Element;
     }
+    /** WField interface */
     interface WField {
         id: string;
         label?: string;
@@ -63,6 +73,7 @@ declare namespace WUX {
         enabled?: boolean;
         visible?: boolean;
     }
+    /** WEntity interface */
     interface WEntity {
         id: any;
         text?: string;
@@ -79,18 +90,29 @@ declare namespace WUX {
         color?: string;
         value?: number;
     }
+    /** WAction interface */
     interface WAction {
+        /** Action name */
         name: string;
+        /** Reference */
         ref?: string;
+        /** Reference number (index) */
         idx?: number;
+        /** Reference object  */
         obj?: any;
+        /** Tag element of action */
         tag?: string;
+        /** Component */
         comp?: WComponent;
     }
+    /** WISelectable interface */
     interface WISelectable extends WComponent {
         options: Array<string | WEntity>;
         select(i: number): this;
     }
+    /**
+     * Base class of a WUX component.
+     */
     class WComponent<P = any, S = any> {
         id: string;
         name: string;
@@ -189,65 +211,132 @@ declare namespace WUX {
     function newInstance(n: string): WUX.WComponent;
     function same(e1: WElement, e2: WElement): boolean;
     function match(i: any, o: string | WEntity): boolean;
+    /**
+     * Split content "before<>content<>after" -> ["before", "content", "after"]
+     * As well " content " -> ["&nbsp;", "content", "&nbsp;"]
+     *
+     * @param s content
+     */
     function divide(s: string): [string, string, string];
+    /**
+     * Convert to string for log trace.
+     *
+     * @param a any
+     */
     function str(a: any): string;
     function getTagName(c: any): string;
     interface WStyle {
+        /** border */
         b?: string;
+        /** border-collapse */
         bc?: 'separate' | 'collapse' | 'initial' | 'inherit' | 'unset';
+        /** border-spacing */
         bsp?: string | number;
+        /** border-radius */
         br?: string | number;
+        /** box-shadow */
         bs?: string;
+        /** box-sizing */
         bz?: 'content-box' | 'border-box';
+        /** margin */
         m?: string | number;
+        /** margin-top */
         mt?: string | number;
+        /** margin-right */
         mr?: string | number;
+        /** margin-bottom */
         mb?: string | number;
+        /** margin-left */
         ml?: string | number;
+        /** padding */
         p?: string | number;
+        /** padding-top */
         pt?: string | number;
+        /** padding-right */
         pr?: string | number;
+        /** padding-bottom */
         pb?: string | number;
+        /** padding-left */
         pl?: string | number;
+        /** text-align */
         a?: 'left' | 'right' | 'center' | 'justify' | 'inherit';
+        /** vertical-align */
         v?: string;
+        /** display */
         d?: 'inline' | 'block' | 'flex' | 'inline-block' | 'inline-flex' | 'inline-table' | 'list-item' | 'run-in' | 'table' | 'table-caption' | 'table-column-group' | 'table-header-group' | 'table-footer-group' | 'table-row-group' | 'table-cell' | 'table-column' | 'table-row' | 'none' | 'initial' | 'inherit';
+        /** z-index */
         z?: string | number;
+        /** color */
         c?: string;
+        /** background(-color) */
         bg?: string;
+        /** background-image */
         bgi?: string;
+        /** background-repeat */
         bgr?: 'repeat' | 'space' | 'round' | 'repeat-x' | 'repeat-y' | 'no-repeat' | 'initial' | 'inherit' | 'unset';
+        /** background-position */
         bgp?: string;
+        /** cursor */
         cr?: string;
+        /** content */
         cn?: string;
+        /** font(-size) */
         f?: string | number;
+        /** font-style */
         fs?: 'normal' | 'italic' | 'oblique' | 'inherit';
+        /** font-weight */
         fw?: 'normal' | 'bold' | 'bolder' | 'lighter' | '100' | '200' | '300' | '400' | '500' | '600' | '700' | '800' | '900' | 'inherit';
+        /** text-transform */
         tt?: 'capitalize' | 'uppercase' | 'lowercase' | 'none' | 'initial' | 'inherit';
+        /** transform */
         tr?: string;
+        /** float */
         fl?: 'left' | 'right' | 'none' | 'initial' | 'inherit';
+        /** clear */
         cl?: 'left' | 'right' | 'both' | 'none' | 'initial' | 'inherit';
+        /** overflow */
         o?: 'visible' | 'hidden' | 'scroll' | 'auto' | 'initial' | 'inherit';
+        /** overflow-x */
         ox?: 'visible' | 'hidden' | 'scroll' | 'auto' | 'initial' | 'inherit';
+        /** overflow-y */
         oy?: 'visible' | 'hidden' | 'scroll' | 'auto' | 'initial' | 'inherit';
+        /** opacity */
         op?: number;
+        /** outline */
         ol?: number;
+        /** text(-decoration) */
         text?: string;
+        /** -webkit -moz -o -ms */
         k?: string;
+        /** line-height */
         lh?: string;
+        /** position */
         ps?: 'absolute' | 'fixed' | 'inherit' | 'initial' | 'relative' | 'static' | 'sticky' | 'unset';
+        /** left */
         l?: string | number;
+        /** right */
         r?: string | number;
+        /** top */
         t?: string | number;
+        /** bottom */
         bt?: string | number;
+        /** width */
         w?: string | number;
+        /** height */
         h?: string | number;
+        /** min-width */
         minw?: string | number;
+        /** max-width */
         maxw?: string | number;
+        /** min-height */
         minh?: string | number;
+        /** max-height */
         maxh?: string | number;
+        /** white-space */
         ws?: 'normal' | 'nowrap' | 'pre' | 'pre-line' | 'pre-wrap' | 'initial' | 'inherit';
+        /** style */
         s?: string;
+        /** class name */
         n?: string;
     }
     function style(ws: string | WStyle): string;
@@ -265,6 +354,9 @@ declare namespace WUX {
     function setCss(e: WComponent | Element, ...a: (string | WStyle)[]): WComponent | Element;
     function buildIcon(icon: string, before?: string, after?: string, size?: number, cls?: string, title?: string): string;
     function build(tagName: string, inner?: string, css?: string | WStyle, attributes?: string | object, id?: string, classStyle?: string): string;
+    /**
+     * Utilities
+     */
     class WUtil {
         static toArray(a: any): any[];
         static toArrayNumber(a: any, nz?: boolean): number[];
@@ -350,9 +442,21 @@ declare namespace WUX {
     function isoDate(a: any): string;
     function formatDateTime(a: any, withSec?: boolean, withDay?: boolean, e?: boolean): string;
     function formatTime(a: any, withSec?: boolean): string;
+    /**
+     * Formatta numero alla 2a cifra decimale SENZA separatore migliaia.
+     */
     function formatNum2(a: any, nz?: string, z?: string, neg?: string): string;
+    /**
+     * Formatta numero di default SENZA separatore migliaia. Specificare 'l' per la rappresentazione locale.
+     */
     function formatNum(a: any, nz?: string, z?: string, neg?: string): string;
+    /**
+     * Formatta numero alla 2a cifra decimale CON separatore migliaia e riportando SEMPRE le cifre decimali.
+     */
     function formatCurr(a: any, nz?: string, z?: string, neg?: string): string;
+    /**
+     * Formatta numero alla 5a cifra decimale CON separatore migliaia e riportando SEMPRE le cifre decimali (massimo 2).
+     */
     function formatCurr5(a: any, nz?: string, z?: string, neg?: string): string;
     function formatBoolean(a: any): string;
     function format(a: any): string;
@@ -511,7 +615,9 @@ declare namespace WUX {
         rowStyle: string | WStyle;
         headStyle: string | WStyle;
         footerStyle: string | WStyle;
+        /** First col style */
         col0Style: string | WStyle;
+        /** Last col style */
         colLStyle: string | WStyle;
         sortable: number[];
         soId: string[];
@@ -705,6 +811,11 @@ declare namespace WUX {
         protected body(): string;
         protected componentDidMount(): void;
     }
+    /**
+        Chart Component.
+        P: string - Chart type (bar, line)
+        S: WChartData - Chart data
+    */
     class WChart extends WUX.WComponent<string, WChartData> {
         fontName: string;
         fontSize: number;

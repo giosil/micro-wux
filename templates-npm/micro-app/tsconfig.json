@@ -1,0 +1,15 @@
+{
+	"compilerOptions": {
+		"module": "none",
+		"target": "es5",
+		"moduleResolution": "node",
+		"declaration": true,
+		"outDir": "dist",
+		"outFile": "dist/index.js",
+		"types": ["jquery","bootstrap"]
+	},
+	"include": [
+		"src/*.ts",
+		"node_modules/micro-wux/dist/*.d.ts"
+	]
+}

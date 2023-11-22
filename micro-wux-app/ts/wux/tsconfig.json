@@ -1,11 +1,8 @@
 {
 	"compilerOptions": {
-		"module": "system",
+		"module": "none",
 		"target": "es5",
-		"removeComments": true,
-		"preserveConstEnums": true,
-		"outFile": "../../dist/wux.js",
-		"sourceMap": true
+		"outFile": "../../dist/wux.js"
 	},
 	"include": [
 		"../types/**/*",

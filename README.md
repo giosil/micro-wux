@@ -22,7 +22,16 @@ The single-spa root config has been created with `npx create-single-spa`.
 - `.\build.cmd`  or `./build.sh`  - compile micro-wux application
 - `.\deploy.cmd` or `./deploy.sh` - generate index.js in micro-wux-app/src folder
 
-## Run 
+## Build and deploy micro-wux App as microfrontend single-spa with nodejs
+
+- `cd micro-wux-app`
+- `node run build`  - compile micro-wux application
+- `node run deploy` - generate index.js in micro-wux-app/src folder
+- `node link` - link this package
+- `cd ..\single-spa-app`
+- `node link micro-wux-app` - link `micro-wux-app` in `single-spa-app`
+
+## Run
 
 - `cd single-spa-app`
 - `npm install`
@@ -72,6 +81,9 @@ namespace APP {
 ```javascript
 import singleSpaHtml from "single-spa-html";
 
+// uncomment if you linked the application with npm
+// import APP, {WuxDOM, WUX} from "micro-wux-app";
+
 const htmlLifecycles = singleSpaHtml({
   template: '<div id="view-root"></div>'
 });
@@ -87,6 +99,7 @@ export const unmount = async (props) => {
 /* micro-wux app */
 ...
 ```
+
 ## Contributors
 
 * [Giorgio Silvestris](https://github.com/giosil)

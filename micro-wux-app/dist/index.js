@@ -1,3 +1,4 @@
+// Build at 22/11/2023, 11:19:37
 var __assign = (this && this.__assign) || function () {
     __assign = Object.assign || function(t) {
         for (var s, i = 1, n = arguments.length; i < n; i++) {
@@ -5531,3 +5532,21 @@ var WUX;
     }(WUX.WComponent));
     WUX.WChart = WChart;
 })(WUX || (WUX = {}));
+
+var APP;
+(function (APP) {
+    var Main = /** @class */ (function (_super) {
+        __extends(Main, _super);
+        function Main() {
+            return _super !== null && _super.apply(this, arguments) || this;
+        }
+        Main.prototype.render = function () {
+            return '<div>Hello World!</div>';
+        };
+        return Main;
+    }(WUX.WComponent));
+    APP.Main = Main;
+})(APP || (APP = {}));
+
+export {WuxDOM, WUX};
+export default APP;
