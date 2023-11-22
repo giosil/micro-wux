@@ -80,7 +80,7 @@ namespace APP {
 ```javascript
 import singleSpaHtml from "single-spa-html";
 
-// uncomment if you linked the application with npm
+// Uncomment if "micro-wux-app" are linked with npm.
 // import APP, {WuxDOM, WUX} from "micro-wux-app";
 
 const htmlLifecycles = singleSpaHtml({
@@ -98,6 +98,7 @@ export const unmount = async (props) => {
 
 /* micro-wux app */
 /* Code appended by micro-wux-app/deploy[.cmd|.sh] */
+/* Empty, if imported from "micro-wux-app" */
 ```
 
 ## Contributors
