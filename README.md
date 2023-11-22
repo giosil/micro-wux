@@ -67,10 +67,9 @@ namespace APP {
     <div id="view-root"></div>
 
     <script src="dist/wux.min.js"></script>
-
     <script src="dist/app.min.js"></script>
     <script type="text/javascript">
-        WuxDOM.render(new APP.Main(), 'view-root');
+      WuxDOM.render(new APP.Main(), 'view-root');
     </script>
   </body>
 </html>
@@ -89,12 +88,12 @@ const htmlLifecycles = singleSpaHtml({
 });
 export const bootstrap = htmlLifecycles.bootstrap;
 export const mount = async (props) => {
-	await htmlLifecycles.mount(props);
-	WuxDOM.render(new APP.Main(), 'view-root');
+  await htmlLifecycles.mount(props);
+  WuxDOM.render(new APP.Main(), 'view-root');
 };
 export const unmount = async (props) => {
-	await htmlLifecycles.unmount(props);
-	WuxDOM.unmount('view-root');
+  await htmlLifecycles.unmount(props);
+  WuxDOM.unmount('view-root');
 };
 /* micro-wux app */
 ...
