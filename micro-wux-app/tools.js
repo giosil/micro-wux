@@ -2,19 +2,19 @@
 // const path = require("path");
 import * as fs   from 'fs';
 import * as path from 'path';
+import * as os   from 'os';
 
 const action = process.argv[2];
 if(!action) action = 'build';
-console.log(action + '...');
+console.log(action + ' on ' + os.platform() + '...');
 
 switch (action) {
     case 'build':
         _concat({
+            "from":   "dist",
+            "files":  [ 'wux.js', 'app.js' ],
             "folder": "dist",
             "output": "index.js",
-            "files":  [
-                'wux.js', 'app.js'
-            ],
             "header": [
                 '// Build at ' + new Date().toLocaleString()
             ],
@@ -27,10 +27,17 @@ switch (action) {
         break;
     case 'deploy':
         _copy({
+            "from":   "dist",
+            "source": "index.js",
+            "folder": "../single-spa-app/src",
+            "output": "micro-wux-app.js",
+            "backup": true
+        });
+        _copy({
+            "from":   "spa",
+            "source": "index_imp.js",
             "folder": "../single-spa-app/src",
             "output": "index.js",
-            "from": "spa",
-            "source": "index_with_import.js",
             "backup": true
         });
         break;
@@ -42,10 +49,13 @@ switch (action) {
 function _copy(options) {
     if(!options) options = {};
 
-    let folder = options["folder"];
-    let output = options["output"];
+    // From folder / file
     let fromfl = options["from"];
     let source = options["source"];
+    // To folder / file
+    let folder = options["folder"];
+    let output = options["output"];
+    // Backup flag
     let backup = options["backup"];
 
     if(!folder) folder = 'dist';
@@ -86,16 +96,23 @@ function _copy(options) {
 function _concat(options) {
     if(!options) options = {};
 
+    // From 
+    let fromfl = options["from"];
+    let files  = _getArray(options, "files");
+    // To
     let folder = options["folder"];
     let output = options["output"];
-    let files  = _getArray(options, "files");
+    // Header and footer
     let header = _getArray(options, "header");
     let footer = _getArray(options, "footer");
+    // Backup flag
     let backup = options["backup"];
 
+    if(!fromfl) fromfl = 'dist'
     if(!folder) folder = 'dist';
     if(!output) output = 'index.js';
 
+    let frmf = path.resolve(process.cwd(), fromfl);
     let dest = path.resolve(process.cwd(), folder);
     let fout = dest + '/' + output;
 
@@ -126,13 +143,13 @@ function _concat(options) {
 
     // Append files
     files.forEach((filename) => {
-        let filepath = dest + '/' + filename;
+        let filepath = frmf + '/' + filename;
         if(!fs.existsSync(filepath)) {
             console.error(filepath + " does not exist");
             return;
         }
         console.log("Read " + filepath + "...");
-        let content = fs.readFileSync(dest + '/' + filename);
+        let content = fs.readFileSync(filepath);
         if(content) {
             fs.appendFileSync(fout, content);
             fs.appendFileSync(fout, '\n');

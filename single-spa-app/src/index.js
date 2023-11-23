@@ -1,6 +1,6 @@
 import singleSpaHtml from "single-spa-html";
 
-import APP, {WuxDOM, WUX} from "micro-wux-app";
+import APP, {WuxDOM, WUX} from "./micro-wux-app.js";
 
 const htmlLifecycles = singleSpaHtml({
   template: '<div id="view-root"></div>'
