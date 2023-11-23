@@ -64,10 +64,10 @@ function _copy(options) {
     if(!source) source = 'index.js';
 
     let dest = path.resolve(process.cwd(), folder);
-    let fout = dest + '/' + output;
+    let fout = path.join(dest, output);
 
     let frmf = path.resolve(process.cwd(), fromfl);
-    let fsrc = frmf + '/' + source;
+    let fsrc = path.join(frmf, source);
 
     // Move output file to .bak
     if(backup) {
@@ -114,7 +114,7 @@ function _concat(options) {
 
     let frmf = path.resolve(process.cwd(), fromfl);
     let dest = path.resolve(process.cwd(), folder);
-    let fout = dest + '/' + output;
+    let fout = path.join(dest, output);
 
     // Move output file to .bak
     if(backup) {
@@ -143,7 +143,7 @@ function _concat(options) {
 
     // Append files
     files.forEach((filename) => {
-        let filepath = frmf + '/' + filename;
+        let filepath = path.join(frmf, filename);
         if(!fs.existsSync(filepath)) {
             console.error(filepath + " does not exist");
             return;
