@@ -6,8 +6,8 @@
   "type": "module",
   "scripts": {
     "prebuild": "tsc --declaration --project ./ts/wux/tsconfig.json && tsc --noEmitHelpers --declaration --project ./ts/app/tsconfig.json",
-    "build": "node tools.js build",
-    "deploy": "node tools.js deploy",
+    "build": "node scripts.js build",
+    "deploy": "node scripts.js deploy",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
