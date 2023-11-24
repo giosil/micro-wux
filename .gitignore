@@ -1,5 +1,11 @@
+/micro-wux-app/node_modules/
+/micro-wux-app/package-lock.json
 /single-spa-app/node_modules/
 /single-spa-app/package-lock.json
 /single-spa-app/src/index.js.bak
 /single-spa-root/node_modules/
 /single-spa-root/package-lock.json
+/templates-npm/micro-app/node_modules/
+/templates-npm/micro-app/package-lock.json
+/templates-npm/micro-wux/node_modules/
+/templates-npm/micro-wux/package-lock.json
