@@ -16,7 +16,7 @@ Edit `package.json`:
 
 ```json
 {
-
+  ...
   "main": "dist/index.js",
   "files": [
     "dist/**/*"
@@ -27,7 +27,7 @@ Edit `package.json`:
     "build": "tsc",
     "postbuild": "node ./src/post_build.js",
   },
-
+  ...
 }
 ```
 
@@ -35,13 +35,13 @@ Edit `tsconfig.json` create by `tsc --init`:
 
 ```json
 {
-
+  ...
   "module": "none",
   "moduleResolution": "node",
   "outDir": "dist",
   "outFile": "dist/index.js",
   "types": ["jquery","bootstrap"]
-
+  ...
 }
 ```
 
@@ -65,13 +65,13 @@ The project was created with the following command:
 
 Add `micro-wux` dependency:
 
-- `npm link micro-wux --save-dev`
+- `npm link micro-wux --save`
 
 Edit `package.json`:
 
 ```json
 {
-
+  ...
   "main": "dist/index.js",
   "files": [
     "dist/**/*"
@@ -82,7 +82,7 @@ Edit `package.json`:
     "build": "tsc",
     "postbuild": "node ./src/post_build.js",
   },
-
+  ...
 }
 ```
 
@@ -90,13 +90,13 @@ Edit `tsconfig.json` create by `tsc --init`:
 
 ```json
 {
-
+  ...
   "module": "none",
   "moduleResolution": "node",
   "outDir": "dist",
   "outFile": "dist/index.js",
   "types": ["jquery","bootstrap"]
-
+  ...
 }
 ```
 
@@ -107,6 +107,37 @@ Build:
 Link:
 
 - `npm link`
+
+## single-spa-app
+
+Add `micro-wux` and `micro-app` dependencies:
+
+- `cd ../single-spa-app`
+- `npm link micro-wux --save`
+- `npm link micro-app --save`
+
+Edit `src/index.js`
+
+```javascript
+import singleSpaHtml from "single-spa-html";
+
+import {WuxDOM, WUX} from "micro-wux";
+
+import APP from "micro-app";
+
+const htmlLifecycles = singleSpaHtml({
+  template: '<div id="view-root"></div>'
+});
+export const bootstrap = htmlLifecycles.bootstrap;
+export const mount = async (props) => {
+  await htmlLifecycles.mount(props);
+  WuxDOM.render(new APP.Main(), 'view-root');
+};
+export const unmount = async (props) => {
+  await htmlLifecycles.unmount(props);
+  WuxDOM.unmount('view-root');
+};
+```
 
 ## Contributors
 
