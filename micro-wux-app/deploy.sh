@@ -1,7 +1,7 @@
 #!/bin/bash
 
-if [ ! -f "./spa/index.js" ]; then
-  echo "spa/index.js does not exist"
+if [ ! -f "./spa/single-spa-app.js" ]; then
+  echo "spa/single-spa-app.js does not exist"
   exit 1
 fi
 
@@ -15,7 +15,7 @@ if [ ! -f "./dist/app.min.js" ]; then
   exit 1
 fi
 
-cat ./spa/index.js ./dist/wux.min.js ./dist/app.min.js > index.js
+cat ./spa/single-spa-app.js ./dist/wux.min.js ./dist/app.min.js > index.js
 
 rm -f ../single-spa-app/src/index.js.bak
 

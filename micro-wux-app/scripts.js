@@ -35,7 +35,7 @@ switch (action) {
         });
         _copy({
             "from":   "spa",
-            "source": "index_imp.js",
+            "source": "index.js",
             "folder": "../single-spa-app/src",
             "output": "index.js",
             "backup": true

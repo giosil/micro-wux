@@ -76,25 +76,37 @@ namespace APP {
 </html>
 ```
 
-## Single-spa application using single-spa-html
+## Single-spa application
 
 ```javascript
-import singleSpaHtml from "single-spa-html";
-
 import APP, {WuxDOM, WUX} from "./micro-wux-app.js";
 
-const htmlLifecycles = singleSpaHtml({
-  template: '<div id="view-root"></div>'
-});
-export const bootstrap = htmlLifecycles.bootstrap;
-export const mount = async (props) => {
-  await htmlLifecycles.mount(props);
-  WuxDOM.render(new APP.Main(), 'view-root');
-};
-export const unmount = async (props) => {
-  await htmlLifecycles.unmount(props);
-  WuxDOM.unmount('view-root');
-};
+export function bootstrap(props) {
+  return Promise.resolve().then(() => {
+    // One-time initialization code goes here
+    console.log('[' + props.name + '] bootstrap...');
+  });
+}
+export function mount(props) {
+  return Promise.resolve().then(() => {
+    // Do framework UI rendering here
+    console.log('[' + props.name + '] mount...');
+    WuxDOM.render(new APP.Main(), 'single-spa-application:' + props.name);
+  });
+}
+export function unmount(props) {
+  return Promise.resolve().then(() => {
+    // Do framework UI unrendering here
+    console.log('[' + props.name + '] unmount...');
+    WuxDOM.unmount('single-spa-application:' + props.name);
+  });
+}
+export function unload(props) {
+  return Promise.resolve().then(() => {
+    // Hot-reloading implementation goes here
+    console.log('[' + props.name + '] unload...');
+  });
+}
 ```
 
 ## License

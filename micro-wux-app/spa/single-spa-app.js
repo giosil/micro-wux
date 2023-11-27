@@ -1,5 +1,3 @@
-import APP, {WuxDOM, WUX} from "./micro-wux-app.js";
-
 export function bootstrap(props) {
   return Promise.resolve().then(() => {
     // One-time initialization code goes here
