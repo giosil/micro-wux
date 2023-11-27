@@ -109,6 +109,52 @@ export function unload(props) {
 }
 ```
 
+## Minimal single-spa application
+
+```javascript
+System.register([], function(_export, _context) {
+  // Inject the application here:
+  // var WuxDOM;
+  // ...
+  // var WUX;
+  // ...
+  // var APP;
+  // ...
+  return {
+    execute: function() {
+      _export({
+        bootstrap: (props) => {
+          return Promise.resolve().then(() => {
+            // One-time initialization code goes here
+            console.log('[' + props.name + '] bootstrap...');
+          });
+        },
+        mount: (props) => {
+          return Promise.resolve().then(() => {
+            // Do framework UI rendering here
+            console.log('[' + props.name + '] mount...');
+            document.getElementById("single-spa-application:" + props.name).innerHTML = 'Hello world!';
+          });
+        },
+        unmount: (props) => {
+          return Promise.resolve().then(() => {
+            // Do framework UI unrendering here
+            console.log('[' + props.name + '] unmount...');
+            document.getElementById("single-spa-application:" + props.name).innerHTML = '';
+          });
+        },
+        unload: (props) => {
+          return Promise.resolve().then(() => {
+            // Hot-reloading implementation goes here
+            console.log('[' + props.name + '] unload...');
+          });
+        }
+      });
+    }
+  }
+});
+```
+
 ## License
 
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
