@@ -1,0 +1,16 @@
+{
+  "name": "micro-wux-single-spa-app",
+  "version": "1.0.0",
+  "description": "An example of single-spa application based on micro-wux library",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "start": "webpack serve",
+    "build": "webpack --mode=production"
+  },
+  "devDependencies": {
+    "webpack": "^5.16.0",
+    "webpack-cli": "^4.4.0",
+    "webpack-dev-server": "^4.7.4"
+  }
+}

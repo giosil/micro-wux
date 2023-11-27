@@ -109,7 +109,15 @@ export function unload(props) {
 }
 ```
 
-## Minimal single-spa application
+## The most minimal single-spa application
+
+Start **minimal-spa-app**:
+
+- `cd minimal-spa-app`
+- `npm install`
+- `npm start` - to serve single-spa applications at http://localhost:8080/index.js
+
+Here is the **public/index.js**:
 
 ```javascript
 System.register([], function(_export, _context) {
