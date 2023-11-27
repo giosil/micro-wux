@@ -114,11 +114,7 @@ export function unload(props) {
 ```javascript
 System.register([], function(_export, _context) {
   // Inject the application here:
-  // var WuxDOM;
-  // ...
-  // var WUX;
-  // ...
-  // var APP;
+  // var WuxDOM,WUX,APP;
   // ...
   return {
     execute: function() {
@@ -133,6 +129,8 @@ System.register([], function(_export, _context) {
           return Promise.resolve().then(() => {
             // Do framework UI rendering here
             console.log('[' + props.name + '] mount...');
+            // Use micro-wux application here:
+            // WuxDOM.render(new APP.Main(), 'single-spa-application:' + props.name);
             document.getElementById("single-spa-application:" + props.name).innerHTML = 'Hello world!';
           });
         },
@@ -140,6 +138,8 @@ System.register([], function(_export, _context) {
           return Promise.resolve().then(() => {
             // Do framework UI unrendering here
             console.log('[' + props.name + '] unmount...');
+            // Use micro-wux application here:
+            // WuxDOM.unmount('single-spa-application:' + props.name);
             document.getElementById("single-spa-application:" + props.name).innerHTML = '';
           });
         },
