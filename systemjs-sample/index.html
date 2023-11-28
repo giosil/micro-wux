@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Test SystemJS</title>
+  </head>
+  <body>
+    <p>Import main.js:</p>
+    <div id="result"></div>
+
+    <script src="system.min.js"></script>
+
+    <script type="systemjs-importmap">
+      {
+        "imports": {
+          "module_c": "./module_c.js"
+        }
+      }
+    </script>
+    <script type="systemjs-module" src="./main.js"></script>
+<!--
+    <script>
+      System.import('./main.js').catch(console.error);
+    </script>
+-->
+  </body>
+</html>
