@@ -39,24 +39,30 @@ function getContentType(filePath) {
   if(sep < 0) return 'text/javascript';
   let ext = filePath.substring(sep + 1).toLowerCase();
   switch(ext) {
-    case 'js': return 'text/javascript';
-    case 'mjs': return 'text/javascript';
-    case 'html': return 'text/html';
-    case 'htm': return 'text/html';
-    case 'css': return 'text/css';
-    case 'json': return 'application/json';
-    case 'xml': return 'application/xml';
-    case 'txt': return 'text/plain';
-    case 'png': return 'image/png';
-    case 'gif': return 'image/gif';
-    case 'jpeg': return 'image/jpeg';
-    case 'jpg': return 'image/jpeg';
-    case 'webp': return 'image/webp';
-    case 'ico': return 'image/vnd.microsoft.icon';
-    case 'pdf': return 'application/pdf';
-    case 'ttf': return 'font/ttf';
-    case 'woff': return 'font/woff';
+    case 'js':    return 'text/javascript';
+    case 'mjs':   return 'text/javascript';
+    case 'html':  return 'text/html';
+    case 'htm':   return 'text/html';
+    case 'css':   return 'text/css';
+    case 'json':  return 'application/json';
+    case 'xml':   return 'application/xml';
+    case 'txt':   return 'text/plain';
+    case 'csv':   return 'text/csv';
+    case 'png':   return 'image/png';
+    case 'gif':   return 'image/gif';
+    case 'jpeg':  return 'image/jpeg';
+    case 'jpg':   return 'image/jpeg';
+    case 'svg':   return 'image/svg+xml';
+    case 'webp':  return 'image/webp';
+    case 'ico':   return 'image/vnd.microsoft.icon';
+    case 'map':   return 'application/json';
+    case 'pdf':   return 'application/pdf';
+    case 'eot':   return 'application/vnd.ms-fontobject';
+    case 'otf':   return 'font/otf';
+    case 'ttf':   return 'font/ttf';
+    case 'woff':  return 'font/woff';
     case 'woff2': return 'font/woff2';
+    case 'zip':   return 'application/zip';
   }
   return 'text/javascript';
 }
