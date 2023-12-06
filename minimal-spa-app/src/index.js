@@ -1,7 +1,4 @@
 System.register([], function(_export, _context) {
-  // Inject the application here:
-  // var WuxDOM,WUX,APP;
-  // ...
   return {
     execute: function() {
       _export({
@@ -15,8 +12,7 @@ System.register([], function(_export, _context) {
           return Promise.resolve().then(() => {
             // Do framework UI rendering here
             console.log('[' + props.name + '] mount...');
-            // Use micro-wux application here:
-            // WuxDOM.render(new APP.Main(), 'single-spa-application:' + props.name);
+            // Application
             document.getElementById("single-spa-application:" + props.name).innerHTML = 'Hello world!';
           });
         },
@@ -24,8 +20,7 @@ System.register([], function(_export, _context) {
           return Promise.resolve().then(() => {
             // Do framework UI unrendering here
             console.log('[' + props.name + '] unmount...');
-            // Use micro-wux application here:
-            // WuxDOM.unmount('single-spa-application:' + props.name);
+            // Unmount
             document.getElementById("single-spa-application:" + props.name).innerHTML = '';
           });
         },

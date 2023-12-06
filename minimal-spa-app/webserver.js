@@ -1,9 +1,20 @@
 const http = require("http");
 const path = require("path");
-const fs   = require('fs').promises;
+const fs   = require("fs").promises;
 
-const host = 'localhost';
-const port = 8080;
+// Configuration
+
+var argPort = parseInt(process.argv[2], 10);
+var argFold = process.argv[3];
+
+if(isNaN(argPort) || argPort < 80) argPort = 8080;
+if(argFold == null || argFold == '') argFold = 'src';
+
+var host = 'localhost';
+var port = argPort;
+var fold = argFold;
+
+// Listener
 
 const requestListener = function (req, res) {
   let filePath = getFilePath(req.url);
@@ -23,14 +34,20 @@ const requestListener = function (req, res) {
     });
 };
 
+// Create server
+
 const server = http.createServer(requestListener);
 server.listen(port, host, () => {
-  console.log(`Server is running on http://${host}:${port}`);
+  let folderPath = path.join(__dirname, fold);
+  console.log(`Server is running on http://${host}:${port}.`);
+  console.log(`${folderPath} is served.`);
 });
 
+// Utilities
+
 function getFilePath(pathname) {
-  if(!pathname || pathname == '/') return path.join(__dirname, 'index.js');
-  return path.join(__dirname, pathname.substring(1).replace(/\//g, path.sep));
+  if(!pathname || pathname == '/') return path.join(__dirname, fold, 'index.html');
+  return path.join(__dirname, fold, pathname.substring(1).replace(/\//g, path.sep));
 }
 
 function getContentType(filePath) {
@@ -54,6 +71,7 @@ function getContentType(filePath) {
     case 'jpg':   return 'image/jpeg';
     case 'svg':   return 'image/svg+xml';
     case 'webp':  return 'image/webp';
+    case 'bmp':   return 'image/bmp';
     case 'ico':   return 'image/vnd.microsoft.icon';
     case 'map':   return 'application/json';
     case 'pdf':   return 'application/pdf';
@@ -63,6 +81,9 @@ function getContentType(filePath) {
     case 'woff':  return 'font/woff';
     case 'woff2': return 'font/woff2';
     case 'zip':   return 'application/zip';
+    case 'mp4':   return 'video/mp4';
+    case 'mpeg':  return 'video/mpeg';
+    case 'webm':  return 'video/webm';
   }
-  return 'text/javascript';
+  return 'application/octet-stream';
 }
