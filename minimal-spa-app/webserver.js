@@ -89,6 +89,8 @@ function getContentType(filePath) {
     case 'mp4':   return 'video/mp4';
     case 'mpeg':  return 'video/mpeg';
     case 'webm':  return 'video/webm';
+    case 'yaml':  return 'text/yaml';
+    case 'yml':   return 'text/yaml';
   }
   return 'application/octet-stream';
 }
