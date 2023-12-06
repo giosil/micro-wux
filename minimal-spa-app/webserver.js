@@ -3,14 +3,19 @@ const path = require("path");
 const fs   = require("fs").promises;
 
 // Configuration
+// 
+// [0]  [1]          [2]  [3]    [4]
+// node webserver.js port folder host
 
 var argPort = parseInt(process.argv[2], 10);
 var argFold = process.argv[3];
+var argHost = process.argv[4];
 
 if(isNaN(argPort) || argPort < 80) argPort = 8080;
 if(argFold == null || argFold == '') argFold = 'src';
+if(argHost == null || argHost == '') argHost = 'localhost';
 
-var host = 'localhost';
+var host = argHost;
 var port = argPort;
 var fold = argFold;
 
