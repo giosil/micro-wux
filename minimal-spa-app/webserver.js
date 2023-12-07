@@ -4,20 +4,26 @@ const fs   = require("fs");
 
 // Configuration
 // 
-// [0]  [1]          [2]  [3]    [4]
-// node webserver.js port folder host
+// [0]  [1]          [2]  [3]    [4]  [5]
+// node webserver.js port folder host root
+// 
+// Defaults:
+// node webserver.js 8080 src localhost index.html
 
 var argPort = parseInt(process.argv[2], 10);
 var argFold = process.argv[3];
 var argHost = process.argv[4];
+var argRoot = process.argv[5];
 
 if(isNaN(argPort) || argPort < 80) argPort = 8080;
-if(argFold == null || argFold == '') argFold = 'src';
-if(argHost == null || argHost == '') argHost = 'localhost';
+if(!argFold) argFold = 'src';
+if(!argHost) argHost = 'localhost';
+if(!argRoot) argRoot = 'index.html';
 
 var host = argHost;
 var port = argPort;
 var fold = argFold;
+var root = argRoot;
 
 // Listener
 
@@ -30,7 +36,7 @@ const requestListener = function (req, res) {
       if(err) {
         res.writeHead(404); // Not Found
         res.end();
-        console.log(new Date().toLocaleString() + ' ' + req.method + ' ' + req.url + ' -> 404');
+        console.log(new Date().toLocaleString() + ' ' + req.method + ' ' + req.url + ' 404');
       }
       else {
         res.setHeader("Content-Type", contType);
@@ -38,7 +44,7 @@ const requestListener = function (req, res) {
         res.setHeader("Access-Control-Allow-Headers", "*");
         res.writeHead(204); // No Content
         res.end();
-        console.log(new Date().toLocaleString() + ' ' + req.method + ' ' + req.url + ' -> 204');
+        console.log(new Date().toLocaleString() + ' ' + req.method + ' ' + req.url + ' 204');
       }
     });
   }
@@ -47,7 +53,7 @@ const requestListener = function (req, res) {
       if(err) {
         res.writeHead(404); // Not Found
         res.end();
-        console.log(new Date().toLocaleString() + ' ' + req.method + ' ' + req.url + ' -> 404');
+        console.log(new Date().toLocaleString() + ' ' + req.method + ' ' + req.url + ' 404');
       }
       else {
         res.setHeader("Content-Type", contType);
@@ -55,7 +61,7 @@ const requestListener = function (req, res) {
         res.setHeader("Access-Control-Allow-Headers", "*");
         res.writeHead(200); // OK
         res.end(data);
-        console.log(new Date().toLocaleString() + ' ' + req.method + ' ' + req.url + ' -> 200');
+        console.log(new Date().toLocaleString() + ' ' + req.method + ' ' + req.url + ' 200');
       }
     });
   }
@@ -73,7 +79,7 @@ server.listen(port, host, () => {
 // Utilities
 
 function getFilePath(pathname) {
-  if(!pathname || pathname == '/') return path.join(__dirname, fold, 'index.html');
+  if(!pathname || pathname == '/') return path.join(__dirname, fold, root);
   return path.join(__dirname, fold, pathname.substring(1).replace(/\//g, path.sep));
 }
 
