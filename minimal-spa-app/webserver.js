@@ -38,7 +38,7 @@ const requestListener = function (req, res) {
         res.setHeader("Access-Control-Allow-Headers", "*");
         res.writeHead(204); // No Content
         res.end();
-        console.log(new Date().toLocaleString() + ' ' + req.method + ' ' + req.url + ' -> 200');
+        console.log(new Date().toLocaleString() + ' ' + req.method + ' ' + req.url + ' -> 204');
       }
     });
   }
