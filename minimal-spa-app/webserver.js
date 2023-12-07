@@ -25,17 +25,18 @@ const requestListener = function (req, res) {
   let filePath = getFilePath(req.url);
   let contType = getContentType(filePath);
 
-  if(req.method == 'HEAD') {
+  if(req.method == 'HEAD' || req.method == 'OPTIONS') {
     fs.access(filePath, fs.constants.F_OK, (err) => {
       if(err) {
-        res.writeHead(404);
+        res.writeHead(404); // Not Found
         res.end();
         console.log(new Date().toLocaleString() + ' ' + req.method + ' ' + req.url + ' -> 404');
       }
       else {
         res.setHeader("Content-Type", contType);
-        res.setHeader("Access-Control-Allow-Origin", "*");
-        res.writeHead(200);
+        res.setHeader("Access-Control-Allow-Origin",  "*");
+        res.setHeader("Access-Control-Allow-Headers", "*");
+        res.writeHead(204); // No Content
         res.end();
         console.log(new Date().toLocaleString() + ' ' + req.method + ' ' + req.url + ' -> 200');
       }
@@ -44,14 +45,15 @@ const requestListener = function (req, res) {
   else {
     fs.readFile(filePath, (err, data) => {
       if(err) {
-        res.writeHead(404);
+        res.writeHead(404); // Not Found
         res.end();
         console.log(new Date().toLocaleString() + ' ' + req.method + ' ' + req.url + ' -> 404');
       }
       else {
         res.setHeader("Content-Type", contType);
-        res.setHeader("Access-Control-Allow-Origin", "*");
-        res.writeHead(200);
+        res.setHeader("Access-Control-Allow-Origin",  "*");
+        res.setHeader("Access-Control-Allow-Headers", "*");
+        res.writeHead(200); // OK
         res.end(data);
         console.log(new Date().toLocaleString() + ' ' + req.method + ' ' + req.url + ' -> 200');
       }
@@ -76,9 +78,9 @@ function getFilePath(pathname) {
 }
 
 function getContentType(filePath) {
-  if(!filePath) return 'text/javascript';
+  if(!filePath) return 'application/json';
   let sep = filePath.lastIndexOf('.');
-  if(sep < 0) return 'text/javascript';
+  if(sep < 0) return 'application/json';
   let ext = filePath.substring(sep + 1).toLowerCase();
   switch(ext) {
     case 'js':    return 'text/javascript';
