@@ -1,6 +1,6 @@
 const http = require("http");
 const path = require("path");
-const fs   = require("fs").promises;
+const fs   = require("fs");
 
 // Configuration
 // 
@@ -24,19 +24,39 @@ var fold = argFold;
 const requestListener = function (req, res) {
   let filePath = getFilePath(req.url);
   let contType = getContentType(filePath);
-  console.log('[http] ' + req.method + ' ' + req.url + ' -> ' + filePath);
 
-  fs.readFile(filePath)
-    .then(contents => {
-      res.setHeader("Content-Type", contType);
-      res.setHeader("Access-Control-Allow-Origin", "*");
-      res.writeHead(200);
-      res.end(contents);
-    })
-    .catch(err => {
-      res.writeHead(404);
-      res.end();
+  if(req.method == 'HEAD') {
+    fs.access(filePath, fs.constants.F_OK, (err) => {
+      if(err) {
+        res.writeHead(404);
+        res.end();
+        console.log(new Date().toLocaleString() + ' ' + req.method + ' ' + req.url + ' -> 404');
+      }
+      else {
+        res.setHeader("Content-Type", contType);
+        res.setHeader("Access-Control-Allow-Origin", "*");
+        res.writeHead(200);
+        res.end();
+        console.log(new Date().toLocaleString() + ' ' + req.method + ' ' + req.url + ' -> 200');
+      }
     });
+  }
+  else {
+    fs.readFile(filePath, (err, data) => {
+      if(err) {
+        res.writeHead(404);
+        res.end();
+        console.log(new Date().toLocaleString() + ' ' + req.method + ' ' + req.url + ' -> 404');
+      }
+      else {
+        res.setHeader("Content-Type", contType);
+        res.setHeader("Access-Control-Allow-Origin", "*");
+        res.writeHead(200);
+        res.end(data);
+        console.log(new Date().toLocaleString() + ' ' + req.method + ' ' + req.url + ' -> 200');
+      }
+    });
+  }
 };
 
 // Create server
