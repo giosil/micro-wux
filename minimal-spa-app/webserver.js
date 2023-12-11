@@ -10,20 +10,15 @@ const fs   = require("fs");
 // Defaults:
 // node webserver.js 8080 src localhost index.html
 
-var argPort = parseInt(process.argv[2], 10);
-var argFold = process.argv[3];
-var argHost = process.argv[4];
-var argRoot = process.argv[5];
+var port = parseInt(process.argv[2], 10);
+var fold = process.argv[3];
+var host = process.argv[4];
+var root = process.argv[5];
 
-if(isNaN(argPort) || argPort < 80) argPort = 8080;
-if(!argFold) argFold = 'src';
-if(!argHost) argHost = 'localhost';
-if(!argRoot) argRoot = 'index.html';
-
-var host = argHost;
-var port = argPort;
-var fold = argFold;
-var root = argRoot;
+if(isNaN(port) || port < 80) port = 8080;
+if(!fold) fold = 'src';
+if(!host) host = 'localhost';
+if(!root) root = 'index.html';
 
 // Listener
 
@@ -57,6 +52,7 @@ const requestListener = function (req, res) {
       }
       else {
         res.setHeader("Content-Type", contType);
+        res.setHeader("Content-Length", data.length);
         res.setHeader("Access-Control-Allow-Origin",  "*");
         res.setHeader("Access-Control-Allow-Headers", "*");
         res.writeHead(200); // OK
@@ -89,36 +85,56 @@ function getContentType(filePath) {
   if(sep < 0) return 'application/json';
   let ext = filePath.substring(sep + 1).toLowerCase();
   switch(ext) {
+// code
     case 'js':    return 'text/javascript';
     case 'mjs':   return 'text/javascript';
     case 'html':  return 'text/html';
     case 'htm':   return 'text/html';
     case 'css':   return 'text/css';
+    case 'map':   return 'application/json';
+    case 'md':    return 'text/markdown';
+// data
     case 'json':  return 'application/json';
-    case 'xml':   return 'application/xml';
     case 'txt':   return 'text/plain';
     case 'csv':   return 'text/csv';
+    case 'yaml':  return 'text/yaml';
+    case 'yml':   return 'text/yaml';
+// xml
+    case 'xml':   return 'application/xml';
+    case 'xsd':   return 'application/xml';
+    case 'xsl':   return 'application/xslt+xml';
+// images
     case 'png':   return 'image/png';
     case 'gif':   return 'image/gif';
-    case 'jpeg':  return 'image/jpeg';
     case 'jpg':   return 'image/jpeg';
+    case 'jpeg':  return 'image/jpeg';
     case 'svg':   return 'image/svg+xml';
     case 'webp':  return 'image/webp';
     case 'bmp':   return 'image/bmp';
+    case 'tif':   return 'image/tiff';
+    case 'tiff':  return 'image/tiff';
     case 'ico':   return 'image/vnd.microsoft.icon';
-    case 'map':   return 'application/json';
-    case 'pdf':   return 'application/pdf';
+// font
     case 'eot':   return 'application/vnd.ms-fontobject';
     case 'otf':   return 'font/otf';
     case 'ttf':   return 'font/ttf';
     case 'woff':  return 'font/woff';
     case 'woff2': return 'font/woff2';
+// applications
+    case 'pdf':   return 'application/pdf';
     case 'zip':   return 'application/zip';
+    case 'gz':    return 'application/gzip';
+    case 'gzip':  return 'application/gzip';
+    case 'tar':   return 'application/x-tar';
+// video
     case 'mp4':   return 'video/mp4';
     case 'mpeg':  return 'video/mpeg';
     case 'webm':  return 'video/webm';
-    case 'yaml':  return 'text/yaml';
-    case 'yml':   return 'text/yaml';
+// audio
+    case 'mp3':   return 'audio/mpeg';
+    case 'oga':   return 'audio/ogg';
+    case 'ogg':   return 'audio/ogg';
+    case 'weba':  return 'audio/webm';
   }
   return 'application/octet-stream';
 }
