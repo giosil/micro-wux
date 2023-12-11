@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Root Config</title>
+    <meta name="importmap-type" content="systemjs-importmap" />
+    <script type="systemjs-importmap">
+      {
+        "imports": {
+          "single-spa":         "https://cdn.jsdelivr.net/npm/single-spa@5.9.0/lib/system/single-spa.min.js",
+          "@dew/root-config":   "//localhost:8080/root-config.js",
+          "@dew/micro-wux-app": "//localhost:8080/index.js"
+        }
+      }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/systemjs@6.8.3/dist/system.js"></script>
+  </head>
+  <body>
+    <div id="single-spa-application:@dew/micro-wux-app"></div>
+    <script>
+      System.import('@dew/root-config');
+    </script>
+  </body>
+</html>
