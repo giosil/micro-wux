@@ -5,7 +5,7 @@ System.register([], function(_export, _context) {
         bootstrap: (props) => {
           return Promise.resolve().then(() => {
             // One-time initialization code goes here
-            console.log('[' + props.name + '] bootstrap...');
+            console.log('[' + props.name + '] bootstrap...', props);
           });
         },
         mount: (props) => {
