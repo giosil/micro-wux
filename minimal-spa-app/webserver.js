@@ -92,7 +92,7 @@ function getContentType(filePath) {
     case 'htm':   return 'text/html';
     case 'css':   return 'text/css';
     case 'map':   return 'application/json';
-    case 'md':    return 'text/markdown';
+    case 'wasm':  return 'application/wasm';
 // data
     case 'json':  return 'application/json';
     case 'txt':   return 'text/plain';

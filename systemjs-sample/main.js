@@ -1,5 +1,5 @@
-System.register(['./module_a.js', './module_b.js', 'module_c'], function(_export, _context) {
-  var moduleA, moduleB, moduleC;
+System.register(['./module_a.js', './module_b.js', 'module_c', './module_d.js'], function(_export, _context) {
+  var moduleA, moduleB, moduleC, moduleD;
   return {
     setters: [
       function (m) {
@@ -10,6 +10,9 @@ System.register(['./module_a.js', './module_b.js', 'module_c'], function(_export
       },
       function (m) {
         moduleC = m;
+      },
+      function (m) {
+        moduleD = m.default;
       }
     ],
     execute: function () {
@@ -17,6 +20,7 @@ System.register(['./module_a.js', './module_b.js', 'module_c'], function(_export
       moduleA.hello();
       moduleB.hello();
       moduleC.hello();
+      moduleD.hello();
     }
   };
 });
