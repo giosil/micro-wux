@@ -7,15 +7,16 @@ const isAnyOf = (value, list) => list.includes(value);
 
 module.exports = (env, argv) => {
   let prodMode = argv?.p || argv?.mode === "production";
-
+  
   return {
     mode: prodMode ? "production" : "development",
     output: {
+//    filename: `${package.name.split('/')[1] || package.name}-${package.version}.js`,
       filename: `index.js`,
       libraryTarget: "system",
       path: path.resolve(process.cwd(), "dist"),
       uniqueName: packageJson.name,
-      publicPath: "",
+      publicPath: path.resolve(process.cwd(), "public"),
     },
     plugins: [
       // These plugins enable standalone mode for local development
