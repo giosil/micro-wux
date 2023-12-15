@@ -175,8 +175,8 @@ System.register([], function(_export, _context) {
 
 <table>
   <tr>
-    <td style="background-color:#dddddd;"><img src="micro-wux-black.svg" width="300" height="300"></td>
-    <td style="background-color:#dddddd;"><img src="micro-wux-white.svg" width="300" height="300"></td>
+    <td><img src="micro-wux-black.svg" width="300" height="300"></td>
+    <td><img src="micro-wux-white.svg" width="300" height="300"></td>
   </tr>
 </table>
 
