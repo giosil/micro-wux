@@ -165,7 +165,7 @@ System.register([], function(_export, _context) {
 
 ## Logo
 
-![micro-wux](micro-wux.png)
+![micro-wux](micro-wux.svg)
 
 ## License
 
