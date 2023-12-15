@@ -163,9 +163,17 @@ System.register([], function(_export, _context) {
 });
 ```
 
-## Logo
+## SVG Logo
 
-![micro-wux](micro-wux.svg)
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<svg viewBox="0 0 82 72" xmlns="http://www.w3.org/2000/svg">
+  <text style="fill: rgb(0, 0, 0); font-family: Consolas; font-size: 50px;" x="0" y="40">{&#x00B5;}</text>
+  <text style="fill: rgb(0, 0, 0); font-family: Consolas; font-size: 14px;" x="7" y="65">micro-wux</text>
+</svg>
+```
+
+<img src="micro-wux.svg" width="300" height="300">
 
 ## License
 
