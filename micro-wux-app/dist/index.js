@@ -1,4 +1,4 @@
-// Build at 18/12/2023, 10:15:30
+// Build at 18/12/2023, 12:35:40
 var __assign = (this && this.__assign) || function () {
     __assign = Object.assign || function(t) {
         for (var s, i = 1, n = arguments.length; i < n; i++) {
@@ -63,13 +63,13 @@ var WuxDOM = /** @class */ (function () {
                 node = WuxDOM.lastCtx ? WuxDOM.lastCtx : document.getElementById('view-root');
             if (before)
                 before(node);
-            var context = WuxDOM.mount(component, node);
-            WuxDOM.lastCtx = context;
+            var ctx = WuxDOM.mount(component, node);
+            WuxDOM.lastCtx = ctx;
             if (after)
                 after(node);
             if (WuxDOM.renderHandlers.length > 0) {
                 var c = component instanceof WUX.WComponent ? component : null;
-                var e = { component: c, element: context, target: context.firstChild, type: 'render' };
+                var e = { component: c, element: ctx, target: ctx.firstChild, type: 'render' };
                 for (var _i = 0, _a = WuxDOM.renderHandlers; _i < _a.length; _i++) {
                     var handler = _a[_i];
                     handler(e);
@@ -87,7 +87,15 @@ var WuxDOM = /** @class */ (function () {
             console.error('WuxDOM.mount ' + WUX.str(e) + ' on ' + WUX.str(node) + ' -> invalid component');
             return;
         }
-        var ctx = typeof node == 'string' ? (node.indexOf('#') == 0) ? document.getElementById(node.substring(1)) : document.getElementById(node) : node;
+        var ctx;
+        if (typeof node == 'string') {
+            ctx = document.getElementById(node);
+            if (!ctx)
+                ctx = document.querySelector(node);
+        }
+        else {
+            ctx = node;
+        }
         if (!ctx) {
             console.error('WuxDOM.mount ' + WUX.str(e) + ' on ' + WUX.str(node) + ' -> context unavailable');
             return;
@@ -115,7 +123,15 @@ var WuxDOM = /** @class */ (function () {
             node = WuxDOM.lastCtx ? WuxDOM.lastCtx : document.getElementById('view-root');
         if (WUX.debug)
             console.log('WuxDOM.unmount ' + WUX.str(node) + '...');
-        var ctx = typeof node == 'string' ? (node.indexOf('#') == 0) ? document.getElementById(node.substring(1)) : document.getElementById(node) : node;
+        var ctx;
+        if (typeof node == 'string') {
+            ctx = document.getElementById(node);
+            if (!ctx)
+                ctx = document.querySelector(node);
+        }
+        else {
+            ctx = node;
+        }
         if (!ctx) {
             console.error('WuxDOM.unmount ' + WUX.str(node) + ' -> node unavailable');
             return;
@@ -169,7 +185,7 @@ var WuxDOM = /** @class */ (function () {
         }
         return WuxDOM.mount(e, node);
     };
-    WuxDOM.create = function (node, tag, id, cs, st, qs) {
+    WuxDOM.create = function (node, tag, id, cs, st, inner) {
         if (!tag)
             tag = 'div';
         if (id) {
@@ -177,15 +193,18 @@ var WuxDOM = /** @class */ (function () {
             if (c)
                 return c;
         }
-        var n = typeof node == 'string' ? (node.indexOf('#') == 0) ? document.getElementById(node.substring(1)) : document.getElementById(node) : node;
+        var n;
+        if (typeof node == 'string') {
+            n = document.getElementById(node);
+            if (!n)
+                n = document.querySelector(node);
+        }
+        else {
+            n = node;
+        }
         if (!n) {
-            if (qs) {
-                n = document.querySelector(qs);
-            }
-            if (!n) {
-                console.error('WuxDOM.create ' + tag + ' with id=' + id + ' on ' + WUX.str(node) + ' -> node unavailable');
-                return null;
-            }
+            console.error('WuxDOM.create ' + tag + ' with id=' + id + ' on ' + WUX.str(node) + ' -> node unavailable');
+            return null;
         }
         var e = document.createElement(tag);
         if (id)
@@ -194,6 +213,14 @@ var WuxDOM = /** @class */ (function () {
             e.setAttribute('class', cs);
         if (st)
             e.setAttribute('style', st);
+        if (inner) {
+            if (typeof inner == 'string') {
+                e.innerHTML = inner;
+            }
+            else {
+                e.append(inner);
+            }
+        }
         n.append(e);
         return e;
     };
