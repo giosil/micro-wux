@@ -130,6 +130,29 @@ class WuxDOM {
 		}
 		return WuxDOM.mount(e, node);
 	}
+	static create(node: WUX.WNode, tag?: string, id?: string, cs?: string, st?: string, qs?: string): Element {
+		if (!tag) tag = 'div';
+		if (id) {
+			let c = document.getElementById(id);
+			if(c) return c;
+		} 
+		let n = typeof node == 'string' ? (node.indexOf('#') == 0) ? document.getElementById(node.substring(1)) : document.getElementById(node) : node;
+		if (!n) {
+			if(qs) {
+				n = document.querySelector(qs);
+			}
+			if(!n) {
+				console.error('WuxDOM.create ' + tag + ' with id=' + id + ' on ' + WUX.str(node) + ' -> node unavailable');
+				return null;
+			}
+		}
+		let e = document.createElement(tag);
+		if (id) e.setAttribute('id', id);
+		if (cs) e.setAttribute('class', cs);
+		if (st) e.setAttribute('style', st);
+		n.append(e);
+		return e;
+	}
 }
 // WUX Base
 namespace WUX {

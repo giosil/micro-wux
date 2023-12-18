@@ -1,4 +1,4 @@
-// Build at 27/11/2023, 13:03:04
+// Build at 18/12/2023, 10:15:30
 var __assign = (this && this.__assign) || function () {
     __assign = Object.assign || function(t) {
         for (var s, i = 1, n = arguments.length; i < n; i++) {
@@ -168,6 +168,34 @@ var WuxDOM = /** @class */ (function () {
             return;
         }
         return WuxDOM.mount(e, node);
+    };
+    WuxDOM.create = function (node, tag, id, cs, st, qs) {
+        if (!tag)
+            tag = 'div';
+        if (id) {
+            var c = document.getElementById(id);
+            if (c)
+                return c;
+        }
+        var n = typeof node == 'string' ? (node.indexOf('#') == 0) ? document.getElementById(node.substring(1)) : document.getElementById(node) : node;
+        if (!n) {
+            if (qs) {
+                n = document.querySelector(qs);
+            }
+            if (!n) {
+                console.error('WuxDOM.create ' + tag + ' with id=' + id + ' on ' + WUX.str(node) + ' -> node unavailable');
+                return null;
+            }
+        }
+        var e = document.createElement(tag);
+        if (id)
+            e.setAttribute('id', id);
+        if (cs)
+            e.setAttribute('class', cs);
+        if (st)
+            e.setAttribute('style', st);
+        n.append(e);
+        return e;
     };
     WuxDOM.components = {};
     WuxDOM.renderHandlers = [];

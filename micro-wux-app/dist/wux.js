@@ -168,6 +168,34 @@ var WuxDOM = /** @class */ (function () {
         }
         return WuxDOM.mount(e, node);
     };
+    WuxDOM.create = function (node, tag, id, cs, st, qs) {
+        if (!tag)
+            tag = 'div';
+        if (id) {
+            var c = document.getElementById(id);
+            if (c)
+                return c;
+        }
+        var n = typeof node == 'string' ? (node.indexOf('#') == 0) ? document.getElementById(node.substring(1)) : document.getElementById(node) : node;
+        if (!n) {
+            if (qs) {
+                n = document.querySelector(qs);
+            }
+            if (!n) {
+                console.error('WuxDOM.create ' + tag + ' with id=' + id + ' on ' + WUX.str(node) + ' -> node unavailable');
+                return null;
+            }
+        }
+        var e = document.createElement(tag);
+        if (id)
+            e.setAttribute('id', id);
+        if (cs)
+            e.setAttribute('class', cs);
+        if (st)
+            e.setAttribute('style', st);
+        n.append(e);
+        return e;
+    };
     WuxDOM.components = {};
     WuxDOM.renderHandlers = [];
     WuxDOM.unmountHandlers = [];
