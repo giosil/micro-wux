@@ -41,12 +41,12 @@ class WuxDOM {
 		WUX.global.init(() => {
 			if (!node) node = WuxDOM.lastCtx ? WuxDOM.lastCtx : document.getElementById('view-root');
 			if (before) before(node);
-			let context = WuxDOM.mount(component, node);
-			WuxDOM.lastCtx = context;
+			let ctx = WuxDOM.mount(component, node);
+			WuxDOM.lastCtx = ctx;
 			if (after) after(node);
 			if (WuxDOM.renderHandlers.length > 0) {
 				let c: WUX.WComponent = component instanceof WUX.WComponent ? component : null;
-				let e: WUX.WEvent = { component: c, element: context, target: context.firstChild, type: 'render' };
+				let e: WUX.WEvent = { component: c, element: ctx, target: ctx.firstChild, type: 'render' };
 				for (let handler of WuxDOM.renderHandlers) handler(e);
 				WuxDOM.renderHandlers = [];
 			}
@@ -59,7 +59,14 @@ class WuxDOM {
 			console.error('WuxDOM.mount ' + WUX.str(e) + ' on ' + WUX.str(node) + ' -> invalid component');
 			return;
 		}
-		let ctx = typeof node == 'string' ? (node.indexOf('#') == 0) ? document.getElementById(node.substring(1)) : document.getElementById(node) : node;
+		let ctx: Element;
+		if (typeof node == 'string') {
+			ctx = document.getElementById(node);
+			if(!ctx) ctx = document.querySelector(node);
+		}
+		else {
+			ctx = node;
+		}
 		if (!ctx) {
 			console.error('WuxDOM.mount ' + WUX.str(e) + ' on ' + WUX.str(node) + ' -> context unavailable');
 			return;
@@ -83,7 +90,14 @@ class WuxDOM {
 	static unmount(node?: WUX.WNode): Element {
 		if (!node) node = WuxDOM.lastCtx ? WuxDOM.lastCtx : document.getElementById('view-root');
 		if (WUX.debug) console.log('WuxDOM.unmount ' + WUX.str(node) + '...');
-		let ctx = typeof node == 'string' ? (node.indexOf('#') == 0) ? document.getElementById(node.substring(1)) : document.getElementById(node) : node;
+		let ctx: Element;
+		if (typeof node == 'string') {
+			ctx = document.getElementById(node);
+			if(!ctx) ctx = document.querySelector(node);
+		}
+		else {
+			ctx = node;
+		}
 		if (!ctx) {
 			console.error('WuxDOM.unmount ' + WUX.str(node) + ' -> node unavailable');
 			return;
@@ -129,6 +143,39 @@ class WuxDOM {
 			return;
 		}
 		return WuxDOM.mount(e, node);
+	}
+	static create(node: WUX.WNode, tag?: string, id?: string, cs?: string, st?: string, inner?: WUX.WNode): Element {
+		if (!tag) tag = 'div';
+		if (id) {
+			let c = document.getElementById(id);
+			if(c) return c;
+		}
+		let n: Element;
+		if (typeof node == 'string') {
+			n = document.getElementById(node);
+			if (!n) n = document.querySelector(node);
+		}
+		else {
+			n = node;
+		}
+		if (!n) {
+			console.error('WuxDOM.create ' + tag + ' with id=' + id + ' on ' + WUX.str(node) + ' -> node unavailable');
+			return null;
+		}
+		let e = document.createElement(tag);
+		if (id) e.setAttribute('id', id);
+		if (cs) e.setAttribute('class', cs);
+		if (st) e.setAttribute('style', st);
+		if (inner) {
+			if(typeof inner == 'string') {
+				e.innerHTML = inner;
+			}
+			else {
+				e.append(inner);
+			}
+		}
+		n.append(e);
+		return e;
 	}
 }
 // WUX Base

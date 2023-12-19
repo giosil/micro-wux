@@ -16,6 +16,7 @@ declare class WuxDOM {
     static mount(e: WUX.WElement, node?: WUX.WNode): Element;
     static unmount(node?: WUX.WNode): Element;
     static replace(o: WUX.WElement, e?: WUX.WElement): Element;
+    static create(node: WUX.WNode, tag?: string, id?: string, cs?: string, st?: string, inner?: WUX.WNode): Element;
 }
 declare namespace WUX {
     type WElement = string | Element | WComponent;
