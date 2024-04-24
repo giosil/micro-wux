@@ -553,9 +553,7 @@ var WUX;
             else if (this.root) {
                 if (this.debug)
                     console.log('[' + str(this) + '] trigger ' + eventType + ' on root=' + str(this.root));
-                var he = new Event(eventType);
-                he = __assign(__assign({}, he), extParams);
-                this.root.dispatchEvent(he);
+                this.root.dispatchEvent(new Event(eventType, ep0));
             }
             if (this.internal) {
                 if (this.debug)

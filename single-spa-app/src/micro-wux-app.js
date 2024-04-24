@@ -1,4 +1,4 @@
-// Build at 18/12/2023, 12:35:40
+// Build at 24/4/2024, 12:16:13
 var __assign = (this && this.__assign) || function () {
     __assign = Object.assign || function(t) {
         for (var s, i = 1, n = arguments.length; i < n; i++) {
@@ -554,9 +554,7 @@ var WUX;
             else if (this.root) {
                 if (this.debug)
                     console.log('[' + str(this) + '] trigger ' + eventType + ' on root=' + str(this.root));
-                var he = new Event(eventType);
-                he = __assign(__assign({}, he), extParams);
-                this.root.dispatchEvent(he);
+                this.root.dispatchEvent(new Event(eventType, ep0));
             }
             if (this.internal) {
                 if (this.debug)

@@ -493,9 +493,7 @@ namespace WUX {
 			}
 			else if (this.root) {
 				if (this.debug) console.log('[' + str(this) + '] trigger ' + eventType + ' on root=' + str(this.root));
-				let he = new Event(eventType);
-				he = { ...he, ...extParams };
-				this.root.dispatchEvent(he);
+				this.root.dispatchEvent(new Event(eventType, ep0));
 			}
 			if (this.internal) {
 				if (this.debug) console.log('[' + str(this) + '] trigger ' + eventType + ' on internal=' + str(this.internal));
