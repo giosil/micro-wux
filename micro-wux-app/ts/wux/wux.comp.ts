@@ -833,6 +833,26 @@ namespace WUX {
 			return WUtil.toString(this.state);
 		}
 
+		setOptions(options: Array<string | WEntity>, prevVal?: boolean): this {
+			this.options = options;
+			if (!this.mounted) return this;
+			let pv = this.root["value"]
+			let o = this.buildOptions();
+			this.root.innerHTML = o;
+			if (prevVal) {
+				this.root["value"] = pv;
+			}
+			else if (options && options.length) {
+				if (typeof options[0] == 'string') {
+					this.trigger('statechange', options[0]);
+				}
+				else {
+					this.trigger('statechange', WUtil.getString(options[0], 'id'));
+				}
+			}
+			return this;
+		}
+
 		protected updateState(nextState: any) {
 			super.updateState(nextState);
 			if(typeof this.state == 'object') {
@@ -843,6 +863,43 @@ namespace WUX {
 		}
 	
 		protected render() {
+			let r = this.buildOptions();
+			return WUX.build('div', r, this._style, this._attributes, this.id, this._classStyle);
+		}
+
+		protected componentDidMount(): void {
+			if (!this.options || !this.options.length) return;
+			for (let i = 0; i < this.options.length; i++) {
+				let item = document.getElementById(this.id + '-' + i);
+				if (!item) continue;
+				if (this._tooltip) item.setAttribute('title', this._tooltip);
+				let opt = this.options[i];
+				item.addEventListener('change', (e: Event) => {
+					this.setState(opt);
+				});
+			}
+		}
+
+		protected componentDidUpdate(prevProps: any, prevState: any): void {
+			let idx = -1;
+			if(this.state) {
+				for (let i = 0; i < this.options.length; i++) {
+					if (match(this.state, this.options[i])) {
+						idx = i;
+						break;
+					}
+				}
+			}
+			else {
+				idx = 0;
+			}
+			if(idx >= 0) {
+				let item = document.getElementById(this.id + '-' + idx);
+				if (item) item['checked'] = true;
+			}
+		}
+		
+		protected buildOptions(): string {
 			let r = '';
 			if (this.label) {
 				r += this.id ? '<label for="' + this.id + '">' : '<label>'
@@ -878,39 +935,7 @@ namespace WUX {
 				}
 				r += '</div>';
 			}
-			return WUX.build('div', r, this._style, this._attributes, this.id, this._classStyle);
-		}
-
-		protected componentDidMount(): void {
-			if (!this.options || !this.options.length) return;
-			for (let i = 0; i < this.options.length; i++) {
-				let item = document.getElementById(this.id + '-' + i);
-				if (!item) continue;
-				if (this._tooltip) item.setAttribute('title', this._tooltip);
-				let opt = this.options[i];
-				item.addEventListener('change', (e: Event) => {
-					this.setState(opt);
-				});
-			}
-		}
-
-		protected componentDidUpdate(prevProps: any, prevState: any): void {
-			let idx = -1;
-			if(this.state) {
-				for (let i = 0; i < this.options.length; i++) {
-					if (match(this.state, this.options[i])) {
-						idx = i;
-						break;
-					}
-				}
-			}
-			else {
-				idx = 0;
-			}
-			if(idx >= 0) {
-				let item = document.getElementById(this.id + '-' + idx);
-				if (item) item['checked'] = true;
-			}
+			return r;
 		}
 	}
 	
@@ -1800,6 +1825,19 @@ namespace WUX {
 			if(!f) return null;
 			if(f.component) return f.component.getState();
 			return f.value;
+		}
+
+		setOptions(fid: string, options: Array<string | WEntity>, prevVal?: boolean): this {
+			let f = this.getField(fid);
+			if(!f) return this;
+			let c = f.component;
+			if(c instanceof WUX.WSelect) {
+				c.setOptions(options, prevVal);
+			}
+			else if(c instanceof WUX.WRadio) {
+				c.setOptions(options, prevVal);
+			}
+			return this;
 		}
 
 		getValues(): any {

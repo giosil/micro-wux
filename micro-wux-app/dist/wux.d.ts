@@ -585,10 +585,12 @@ declare namespace WUX {
         set tooltip(s: string);
         select(i: number): this;
         getProps(): string;
+        setOptions(options: Array<string | WEntity>, prevVal?: boolean): this;
         protected updateState(nextState: any): void;
         protected render(): string;
         protected componentDidMount(): void;
         protected componentDidUpdate(prevProps: any, prevState: any): void;
+        protected buildOptions(): string;
     }
     class WSelect extends WComponent implements WISelectable {
         options: Array<string | WEntity>;
@@ -695,6 +697,7 @@ declare namespace WUX {
         clear(): this;
         setValue(fid: string, v: any, updState?: boolean): this;
         getValue(fid: string | WField): any;
+        setOptions(fid: string, options: Array<string | WEntity>, prevVal?: boolean): this;
         getValues(): any;
         getState(): any;
         protected updateState(nextState: any): void;

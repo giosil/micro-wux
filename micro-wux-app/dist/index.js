@@ -1,4 +1,4 @@
-// Build at 24/4/2024, 12:16:13
+// Build at 17/5/2024, 17:42:24
 var __assign = (this && this.__assign) || function () {
     __assign = Object.assign || function(t) {
         for (var s, i = 1, n = arguments.length; i < n; i++) {
@@ -3574,6 +3574,26 @@ var WUX;
             }
             return WUX.WUtil.toString(this.state);
         };
+        WRadio.prototype.setOptions = function (options, prevVal) {
+            this.options = options;
+            if (!this.mounted)
+                return this;
+            var pv = this.root["value"];
+            var o = this.buildOptions();
+            this.root.innerHTML = o;
+            if (prevVal) {
+                this.root["value"] = pv;
+            }
+            else if (options && options.length) {
+                if (typeof options[0] == 'string') {
+                    this.trigger('statechange', options[0]);
+                }
+                else {
+                    this.trigger('statechange', WUX.WUtil.getString(options[0], 'id'));
+                }
+            }
+            return this;
+        };
         WRadio.prototype.updateState = function (nextState) {
             _super.prototype.updateState.call(this, nextState);
             if (typeof this.state == 'object') {
@@ -3583,44 +3603,7 @@ var WUX;
             }
         };
         WRadio.prototype.render = function () {
-            var r = '';
-            if (this.label) {
-                r += this.id ? '<label for="' + this.id + '">' : '<label>';
-                r += this.label.replace('<', '&lt;').replace('>', '&gt;');
-                r += '</label> ';
-            }
-            var d = '';
-            if (this._enabled != null && !this._enabled)
-                d = ' disabled';
-            if (!this.options)
-                this.options = [];
-            var l = this.options.length;
-            if (this.state === undefined && l)
-                this.state = this.options[0];
-            for (var i = 0; i < l; i++) {
-                r += '<div class="form-check form-check-inline">';
-                var opt = this.options[i];
-                var rid = this.id + '-' + i;
-                if (typeof opt == "string") {
-                    if (WUX.match(this.state, opt)) {
-                        r += '<input type="radio" value="' + opt + '" name="' + this.id + '" id="' + rid + '" checked' + d + '>';
-                    }
-                    else {
-                        r += '<input type="radio" value="' + opt + '" name="' + this.id + '" id="' + rid + '"' + d + '>';
-                    }
-                    r += '<label id="' + rid + '-l" for="' + rid + '">' + opt + '</label>';
-                }
-                else {
-                    if (WUX.match(this.state, opt)) {
-                        r += '<input type="radio" value="' + opt.id + '" name="' + this.id + '" id="' + rid + '" checked' + d + '>';
-                    }
-                    else {
-                        r += '<input type="radio" value="' + opt.id + '" name="' + this.id + '" id="' + rid + '"' + d + '>';
-                    }
-                    r += '<label id="' + rid + '-l" for="' + rid + '">' + opt.text + '</label>';
-                }
-                r += '</div>';
-            }
+            var r = this.buildOptions();
             return WUX.build('div', r, this._style, this._attributes, this.id, this._classStyle);
         };
         WRadio.prototype.componentDidMount = function () {
@@ -3661,6 +3644,47 @@ var WUX;
                 if (item)
                     item['checked'] = true;
             }
+        };
+        WRadio.prototype.buildOptions = function () {
+            var r = '';
+            if (this.label) {
+                r += this.id ? '<label for="' + this.id + '">' : '<label>';
+                r += this.label.replace('<', '&lt;').replace('>', '&gt;');
+                r += '</label> ';
+            }
+            var d = '';
+            if (this._enabled != null && !this._enabled)
+                d = ' disabled';
+            if (!this.options)
+                this.options = [];
+            var l = this.options.length;
+            if (this.state === undefined && l)
+                this.state = this.options[0];
+            for (var i = 0; i < l; i++) {
+                r += '<div class="form-check form-check-inline">';
+                var opt = this.options[i];
+                var rid = this.id + '-' + i;
+                if (typeof opt == "string") {
+                    if (WUX.match(this.state, opt)) {
+                        r += '<input type="radio" value="' + opt + '" name="' + this.id + '" id="' + rid + '" checked' + d + '>';
+                    }
+                    else {
+                        r += '<input type="radio" value="' + opt + '" name="' + this.id + '" id="' + rid + '"' + d + '>';
+                    }
+                    r += '<label id="' + rid + '-l" for="' + rid + '">' + opt + '</label>';
+                }
+                else {
+                    if (WUX.match(this.state, opt)) {
+                        r += '<input type="radio" value="' + opt.id + '" name="' + this.id + '" id="' + rid + '" checked' + d + '>';
+                    }
+                    else {
+                        r += '<input type="radio" value="' + opt.id + '" name="' + this.id + '" id="' + rid + '"' + d + '>';
+                    }
+                    r += '<label id="' + rid + '-l" for="' + rid + '">' + opt.text + '</label>';
+                }
+                r += '</div>';
+            }
+            return r;
         };
         return WRadio;
     }(WUX.WComponent));
@@ -4581,6 +4605,19 @@ var WUX;
             if (f.component)
                 return f.component.getState();
             return f.value;
+        };
+        WFormPanel.prototype.setOptions = function (fid, options, prevVal) {
+            var f = this.getField(fid);
+            if (!f)
+                return this;
+            var c = f.component;
+            if (c instanceof WUX.WSelect) {
+                c.setOptions(options, prevVal);
+            }
+            else if (c instanceof WUX.WRadio) {
+                c.setOptions(options, prevVal);
+            }
+            return this;
         };
         WFormPanel.prototype.getValues = function () {
             var r = {};
