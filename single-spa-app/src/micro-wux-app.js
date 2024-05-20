@@ -1,4 +1,4 @@
-// Build at 17/5/2024, 17:42:24
+// Build at 20/5/2024, 10:47:53
 var __assign = (this && this.__assign) || function () {
     __assign = Object.assign || function(t) {
         for (var s, i = 1, n = arguments.length; i < n; i++) {
@@ -3508,6 +3508,7 @@ var WUX;
             _super.call(this, id ? id : '*', 'WRadio', props, classStyle, style, attributes) || this;
             // WRadio init 
             _this.options = options;
+            _this.classDiv = 'form-check form-check-inline';
             return _this;
         }
         Object.defineProperty(WRadio.prototype, "enabled", {
@@ -3578,24 +3579,25 @@ var WUX;
             this.options = options;
             if (!this.mounted)
                 return this;
-            var pv = this.root["value"];
+            var p = this.getState();
             var o = this.buildOptions();
             this.root.innerHTML = o;
             if (prevVal) {
-                this.root["value"] = pv;
+                this.setState(p);
             }
             else if (options && options.length) {
-                if (typeof options[0] == 'string') {
-                    this.trigger('statechange', options[0]);
-                }
-                else {
-                    this.trigger('statechange', WUX.WUtil.getString(options[0], 'id'));
-                }
+                this.setState(options[0]);
             }
+            this.componentDidMount();
             return this;
         };
         WRadio.prototype.updateState = function (nextState) {
             _super.prototype.updateState.call(this, nextState);
+            if (!this.state) {
+                if (this.options && this.options.length) {
+                    this.state = this.options[0];
+                }
+            }
             if (typeof this.state == 'object') {
                 if ("id" in this.state) {
                     this.state = this.state["id"];
@@ -3617,6 +3619,7 @@ var WUX;
                 if (this_1._tooltip)
                     item.setAttribute('title', this_1._tooltip);
                 var opt = this_1.options[i];
+                // Dispatched only by user action
                 item.addEventListener('change', function (e) {
                     _this.setState(opt);
                 });
@@ -3641,6 +3644,7 @@ var WUX;
             }
             if (idx >= 0) {
                 var item = document.getElementById(this.id + '-' + idx);
+                // This don't dispatch the event 'change'
                 if (item)
                     item['checked'] = true;
             }
@@ -3661,7 +3665,12 @@ var WUX;
             if (this.state === undefined && l)
                 this.state = this.options[0];
             for (var i = 0; i < l; i++) {
-                r += '<div class="form-check form-check-inline">';
+                r += '<div';
+                if (this.classDiv)
+                    r += ' class="' + this.classDiv + '"';
+                if (this.styleDiv)
+                    r += ' style="' + this.styleDiv + '"';
+                r += '>';
                 var opt = this.options[i];
                 var rid = this.id + '-' + i;
                 if (typeof opt == "string") {

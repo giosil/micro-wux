@@ -774,14 +774,17 @@ namespace WUX {
 	export class WRadio extends WComponent<string, any> implements WISelectable {
 		options: Array<string | WEntity>;
 		label: string;
+		classDiv: string;
+		styleDiv: string;
 
 		constructor(id?: string, options?: Array<string | WEntity>, classStyle?: string, style?: string | WStyle, attributes?: string | object, props?: any) {
 			// WComponent init
 			super(id ? id : '*', 'WRadio', props, classStyle, style, attributes);
 			// WRadio init 
 			this.options = options;
+			this.classDiv = 'form-check form-check-inline';
 		}
-		
+
 		get enabled(): boolean {
 			return this._enabled;
 		}
@@ -836,32 +839,33 @@ namespace WUX {
 		setOptions(options: Array<string | WEntity>, prevVal?: boolean): this {
 			this.options = options;
 			if (!this.mounted) return this;
-			let pv = this.root["value"]
+			let p = this.getState();
 			let o = this.buildOptions();
 			this.root.innerHTML = o;
 			if (prevVal) {
-				this.root["value"] = pv;
+				this.setState(p);
 			}
 			else if (options && options.length) {
-				if (typeof options[0] == 'string') {
-					this.trigger('statechange', options[0]);
-				}
-				else {
-					this.trigger('statechange', WUtil.getString(options[0], 'id'));
-				}
+				this.setState(options[0]);
 			}
+			this.componentDidMount();
 			return this;
 		}
 
 		protected updateState(nextState: any) {
 			super.updateState(nextState);
+			if(!this.state) {
+				if(this.options && this.options.length) {
+					this.state = this.options[0];
+				}
+			}
 			if(typeof this.state == 'object') {
 				if("id" in this.state) {
 					this.state = this.state["id"];
 				}
 			}
 		}
-	
+
 		protected render() {
 			let r = this.buildOptions();
 			return WUX.build('div', r, this._style, this._attributes, this.id, this._classStyle);
@@ -874,6 +878,7 @@ namespace WUX {
 				if (!item) continue;
 				if (this._tooltip) item.setAttribute('title', this._tooltip);
 				let opt = this.options[i];
+				// Dispatched only by user action
 				item.addEventListener('change', (e: Event) => {
 					this.setState(opt);
 				});
@@ -895,10 +900,11 @@ namespace WUX {
 			}
 			if(idx >= 0) {
 				let item = document.getElementById(this.id + '-' + idx);
+				// This don't dispatch the event 'change'
 				if (item) item['checked'] = true;
 			}
 		}
-		
+
 		protected buildOptions(): string {
 			let r = '';
 			if (this.label) {
@@ -912,7 +918,10 @@ namespace WUX {
 			let l = this.options.length;
 			if (this.state === undefined && l) this.state = this.options[0];
 			for (let i = 0; i < l; i++) {
-				r += '<div class="form-check form-check-inline">';
+				r += '<div';
+				if(this.classDiv) r += ' class="' + this.classDiv + '"';
+				if(this.styleDiv) r += ' style="' + this.styleDiv + '"';
+				r += '>';
 				let opt = this.options[i];
 				let rid = this.id + '-' + i;
 				if (typeof opt == "string") {
@@ -938,7 +947,7 @@ namespace WUX {
 			return r;
 		}
 	}
-	
+
 	export class WSelect extends WComponent implements WISelectable {
 		options: Array<string | WEntity>;
 		multiple: boolean;
@@ -1093,7 +1102,7 @@ namespace WUX {
 			return r;
 		}
 	}
-	
+
 	export class WTable extends WComponent<any, any[]> {
 		header: string[];
 		keys: any[];

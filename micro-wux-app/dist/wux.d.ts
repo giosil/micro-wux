@@ -579,6 +579,8 @@ declare namespace WUX {
     class WRadio extends WComponent<string, any> implements WISelectable {
         options: Array<string | WEntity>;
         label: string;
+        classDiv: string;
+        styleDiv: string;
         constructor(id?: string, options?: Array<string | WEntity>, classStyle?: string, style?: string | WStyle, attributes?: string | object, props?: any);
         get enabled(): boolean;
         set enabled(b: boolean);
