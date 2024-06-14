@@ -10,8 +10,8 @@ System.register(["single-spa"], function(_export, _context) {
       console.log('[@dew/root-config] execute...');
       
       singleSpa.registerApplication({
-        name: '@dew/micro-wux-app',
-        app: () => System.import('@dew/micro-wux-app'),
+        name: '@dew/micro-app',
+        app: () => System.import('@dew/micro-app'),
         activeWhen: ['/', (location) => location.pathname.startsWith('/index')],
         customProps: (name, location) => {
           return {
