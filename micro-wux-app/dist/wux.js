@@ -3197,6 +3197,24 @@ var WUX;
             enumerable: false,
             configurable: true
         });
+        Object.defineProperty(WInput.prototype, "autofocus", {
+            get: function () {
+                return this._af;
+            },
+            set: function (v) {
+                this._af = v;
+                if (this.mounted) {
+                    if (v) {
+                        this.root.setAttribute('autofocus', '');
+                    }
+                    else {
+                        this.root.removeAttribute('autofocus');
+                    }
+                }
+            },
+            enumerable: false,
+            configurable: true
+        });
         WInput.prototype.updateState = function (nextState) {
             if (!nextState)
                 nextState = '';
@@ -3238,6 +3256,8 @@ var WUX;
                     addAttributes += ' placeholder="' + this.placeHolder + '"';
                 if (this._ro)
                     addAttributes += ' readonly';
+                if (this._af)
+                    addAttributes += ' autofocus';
                 return l + this.build(this.rootTag, '', addAttributes);
             }
         };
@@ -3267,6 +3287,24 @@ var WUX;
                     }
                     else {
                         this.root.removeAttribute('readonly');
+                    }
+                }
+            },
+            enumerable: false,
+            configurable: true
+        });
+        Object.defineProperty(WTextArea.prototype, "autofocus", {
+            get: function () {
+                return this._af;
+            },
+            set: function (v) {
+                this._af = v;
+                if (this.mounted) {
+                    if (v) {
+                        this.root.setAttribute('autofocus', '');
+                    }
+                    else {
+                        this.root.removeAttribute('autofocus');
                     }
                 }
             },
@@ -3309,13 +3347,16 @@ var WUX;
                 if (!this._attributes) {
                     this._attributes = 'readonly';
                 }
-                else if (this._attributes.indexOf('readonly') < 0) {
+                else {
                     this._attributes += ' readonly';
                 }
             }
-            else {
-                if (this._attributes && this._attributes.indexOf('readonly') >= 0) {
-                    this._attributes.replace('readonly', '');
+            if (this._af) {
+                if (!this._attributes) {
+                    this._attributes = 'autofocus';
+                }
+                else {
+                    this._attributes += ' autofocus';
                 }
             }
             return WUX.build('textarea', '', this._style, this._attributes, this.id, this._classStyle);
@@ -3865,6 +3906,8 @@ var WUX;
         __extends(WTable, _super);
         function WTable(id, header, keys, classStyle, style, attributes, props) {
             var _this = _super.call(this, id ? id : '*', 'WTable', props, classStyle, style, attributes) || this;
+            _this.reqSort = -1;
+            _this.prvSort = -1;
             _this.selectedRow = -1;
             _this.rootTag = 'table';
             _this.header = header;
@@ -4083,6 +4126,7 @@ var WUX;
                                 return;
                             var c = WUX.WUtil.toNumber(i.substring(x + 1), -1);
                             if (c >= 0 && _this.header && _this.header.length > c) {
+                                _this.reqSort = c;
                                 // Default sort?
                                 var hs = _this.handlers['_sort'];
                                 var ds = !(hs && hs.length) && _this.keys && _this.keys.length > c;
@@ -4113,6 +4157,8 @@ var WUX;
                                         hr(_this.createEvent('_sort', _this.sortBy));
                                     }
                                 }
+                                _this.reqSort = -1;
+                                _this.prvSort = c;
                             }
                         });
                     }
@@ -4160,6 +4206,22 @@ var WUX;
         };
         WTable.prototype.componentDidUpdate = function (prevProps, prevState) {
             this.buildBody();
+            this.updSort();
+        };
+        WTable.prototype.updSort = function () {
+            if (this.prvSort == -1 || this.reqSort == this.prvSort)
+                return;
+            var v = this.sortBy[this.prvSort];
+            if (!v)
+                return;
+            var aid = this.subId('sort_' + this.prvSort);
+            var a = document.getElementById(aid);
+            if (!a)
+                return;
+            var h = this.header[this.prvSort];
+            if (h)
+                a.innerHTML = h + ' &nbsp;<i class="fa fa-unsorted"></i>';
+            this.sortBy[this.prvSort] = 0;
         };
         WTable.prototype.getType = function (i) {
             if (!this.types)
@@ -4417,40 +4479,45 @@ var WUX;
             });
             return this;
         };
-        WFormPanel.prototype.addTextField = function (fieldId, label, readonly) {
+        WFormPanel.prototype.addTextField = function (fieldId, label, readonly, autofocus) {
             var id = this.subId(fieldId);
             var co = new WInput(id, 'text', 0, WUX.CSS.FORM_CTRL);
             co.readonly = readonly;
+            co.autofocus = autofocus;
             this.currRow.push({ id: id, label: label, component: co, readonly: readonly, type: 'text' });
             return this;
         };
-        WFormPanel.prototype.addNoteField = function (fieldId, label, rows, readonly) {
+        WFormPanel.prototype.addNoteField = function (fieldId, label, rows, readonly, autofocus) {
             if (!rows)
                 rows = 3;
             var id = this.subId(fieldId);
             var co = new WTextArea(id, rows, WUX.CSS.FORM_CTRL);
             co.readonly = readonly;
+            co.autofocus = autofocus;
             this.currRow.push({ id: id, label: label, component: co, readonly: readonly, type: 'note' });
             return this;
         };
-        WFormPanel.prototype.addDateField = function (fieldId, label, readonly) {
+        WFormPanel.prototype.addDateField = function (fieldId, label, readonly, autofocus) {
             var id = this.subId(fieldId);
             var co = new WInput(id, 'date', 0, WUX.CSS.FORM_CTRL);
             co.readonly = readonly;
+            co.autofocus = autofocus;
             this.currRow.push({ id: id, label: label, component: co, readonly: readonly, type: 'date' });
             return this;
         };
-        WFormPanel.prototype.addTimeField = function (fieldId, label, readonly) {
+        WFormPanel.prototype.addTimeField = function (fieldId, label, readonly, autofocus) {
             var id = this.subId(fieldId);
             var co = new WInput(id, 'time', 0, WUX.CSS.FORM_CTRL);
             co.readonly = readonly;
+            co.autofocus = autofocus;
             this.currRow.push({ id: id, label: label, component: co, readonly: readonly, type: 'time' });
             return this;
         };
-        WFormPanel.prototype.addEmailField = function (fieldId, label, readonly) {
+        WFormPanel.prototype.addEmailField = function (fieldId, label, readonly, autofocus) {
             var id = this.subId(fieldId);
             var co = new WInput(id, 'email', 0, WUX.CSS.FORM_CTRL);
             co.readonly = readonly;
+            co.autofocus = autofocus;
             this.currRow.push({ id: id, label: label, component: co, readonly: readonly, type: 'email' });
             return this;
         };

@@ -533,18 +533,24 @@ declare namespace WUX {
         label: string;
         placeHolder: string;
         _ro: boolean;
+        _af: boolean;
         constructor(id?: string, type?: string, size?: number, classStyle?: string, style?: string | WStyle, attributes?: string | object);
         get readonly(): boolean;
         set readonly(v: boolean);
+        get autofocus(): boolean;
+        set autofocus(v: boolean);
         protected updateState(nextState: string): void;
         getState(): string;
         protected render(): string;
     }
     class WTextArea extends WComponent<number, string> {
         _ro: boolean;
+        _af: boolean;
         constructor(id?: string, rows?: number, classStyle?: string, style?: string | WStyle, attributes?: string | object);
         get readonly(): boolean;
         set readonly(v: boolean);
+        get autofocus(): boolean;
+        set autofocus(v: boolean);
         protected updateState(nextState: string): void;
         getState(): string;
         protected render(): string;
@@ -627,6 +633,8 @@ declare namespace WUX {
         sortable: number[];
         soId: string[];
         sortBy: number[];
+        reqSort: number;
+        prvSort: number;
         selClass: string;
         selectionMode: 'single' | 'multiple' | 'none';
         selectedRow: number;
@@ -655,6 +663,7 @@ declare namespace WUX {
         protected render(): string;
         protected componentDidMount(): void;
         protected componentDidUpdate(prevProps: any, prevState: any): void;
+        protected updSort(): void;
         protected getType(i: number): string;
         protected buildBody(): void;
         onSort(h: (e: WEvent) => any): void;
@@ -681,11 +690,11 @@ declare namespace WUX {
         onField(fid: string, events: 'click' | 'dblclick' | 'mouseenter' | 'mouseleave' | 'keypress' | 'keydown' | 'keyup' | 'submit' | 'change' | 'focus' | 'blur' | 'resize', handler: (e: Event) => any): this;
         onField(fid: string, events: string, handler: (e: any) => any): this;
         addRow(classStyle?: string, style?: string | WStyle, id?: string, attributes?: string | object, type?: string): this;
-        addTextField(fieldId: string, label: string, readonly?: boolean): this;
-        addNoteField(fieldId: string, label: string, rows: number, readonly?: boolean): this;
-        addDateField(fieldId: string, label: string, readonly?: boolean): this;
-        addTimeField(fieldId: string, label: string, readonly?: boolean): this;
-        addEmailField(fieldId: string, label: string, readonly?: boolean): this;
+        addTextField(fieldId: string, label: string, readonly?: boolean, autofocus?: boolean): this;
+        addNoteField(fieldId: string, label: string, rows: number, readonly?: boolean, autofocus?: boolean): this;
+        addDateField(fieldId: string, label: string, readonly?: boolean, autofocus?: boolean): this;
+        addTimeField(fieldId: string, label: string, readonly?: boolean, autofocus?: boolean): this;
+        addEmailField(fieldId: string, label: string, readonly?: boolean, autofocus?: boolean): this;
         addOptionsField(fieldId: string, label: string, options?: (string | WEntity)[], attributes?: string | object, readonly?: boolean): this;
         addRadioField(fieldId: string, label: string, options?: (string | WEntity)[], attributes?: string | object, readonly?: boolean): this;
         addBooleanField(fieldId: string, label: string, labelCheck?: string, tooltip?: string): this;

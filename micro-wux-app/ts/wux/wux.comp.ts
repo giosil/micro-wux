@@ -470,6 +470,7 @@ namespace WUX {
 		label: string;
 		placeHolder: string;
 		_ro: boolean;
+		_af: boolean;
 
 		constructor(id?: string, type?: string, size?: number, classStyle?: string, style?: string | WStyle, attributes?: string | object) {
 			// WComponent init
@@ -478,7 +479,7 @@ namespace WUX {
 			// WInput init
 			this.size = size;
 		}
-		
+
 		get readonly(): boolean {
 			return this._ro;
 		}
@@ -490,6 +491,21 @@ namespace WUX {
 				}
 				else {
 					this.root.removeAttribute('readonly');
+				}
+			}
+		}
+
+		get autofocus(): boolean {
+			return this._af;
+		}
+		set autofocus(v: boolean) {
+			this._af = v;
+			if(this.mounted) {
+				if(v) {
+					this.root.setAttribute('autofocus', '');
+				}
+				else {
+					this.root.removeAttribute('autofocus');
 				}
 			}
 		}
@@ -531,6 +547,7 @@ namespace WUX {
 				if (this.state) addAttributes += ' value="' + this.state + '"';
 				if (this.placeHolder) addAttributes += ' placeholder="' + this.placeHolder + '"';
 				if (this._ro) addAttributes += ' readonly';
+				if (this._af) addAttributes += ' autofocus';
 				return l + this.build(this.rootTag, '', addAttributes);
 			}
 		}
@@ -538,6 +555,7 @@ namespace WUX {
 
 	export class WTextArea extends WComponent<number, string> {
 		_ro: boolean;
+		_af: boolean;
 
 		constructor(id?: string, rows?: number, classStyle?: string, style?: string | WStyle, attributes?: string | object) {
 			// WComponent init
@@ -557,6 +575,21 @@ namespace WUX {
 				}
 				else {
 					this.root.removeAttribute('readonly');
+				}
+			}
+		}
+
+		get autofocus(): boolean {
+			return this._af;
+		}
+		set autofocus(v: boolean) {
+			this._af = v;
+			if(this.mounted) {
+				if(v) {
+					this.root.setAttribute('autofocus', '');
+				}
+				else {
+					this.root.removeAttribute('autofocus');
 				}
 			}
 		}
@@ -596,13 +629,16 @@ namespace WUX {
 				if(!this._attributes) {
 					this._attributes = 'readonly';
 				}
-				else if(this._attributes.indexOf('readonly') < 0) {
+				else {
 					this._attributes += ' readonly';
 				}
 			}
-			else {
-				if(this._attributes && this._attributes.indexOf('readonly') >= 0) {
-					this._attributes.replace('readonly', '');
+			if(this._af) {
+				if(!this._attributes) {
+					this._attributes = 'autofocus';
+				}
+				else {
+					this._attributes += ' autofocus';
 				}
 			}
 			return WUX.build('textarea', '', this._style, this._attributes, this.id, this._classStyle);
@@ -1124,6 +1160,8 @@ namespace WUX {
 		sortable: number[];
 		soId: string[];
 		sortBy: number[];
+		reqSort: number = -1;
+		prvSort: number = -1;
 
 		selClass: string;
 		selectionMode: 'single' | 'multiple' | 'none';
@@ -1327,6 +1365,7 @@ namespace WUX {
 							if(x <= 0) return;
 							let c = WUtil.toNumber(i.substring(x + 1), -1);
 							if(c >= 0 && this.header && this.header.length > c) {
+								this.reqSort = c;
 								// Default sort?
 								let hs = this.handlers['_sort'];
 								let ds = !(hs && hs.length) && this.keys && this.keys.length > c;
@@ -1349,6 +1388,8 @@ namespace WUX {
 								if(hs) {
 									for (let hr of hs) hr(this.createEvent('_sort', this.sortBy));
 								}
+								this.reqSort = -1;
+								this.prvSort = c;
 							}
 						});
 					}
@@ -1384,6 +1425,19 @@ namespace WUX {
 
 		protected componentDidUpdate(prevProps: any, prevState: any): void {
 			this.buildBody();
+			this.updSort();
+		}
+
+		protected updSort(): void {
+			if(this.prvSort == -1 || this.reqSort == this.prvSort) return;
+			let v = this.sortBy[this.prvSort];
+			if(!v) return;
+			let aid = this.subId('sort_' + this.prvSort);
+			let a = document.getElementById(aid);
+			if(!a) return;
+			let h = this.header[this.prvSort];
+			if(h) a.innerHTML = h + ' &nbsp;<i class="fa fa-unsorted"></i>';
+			this.sortBy[this.prvSort] = 0;
 		}
 
 		protected getType(i: number): string {
@@ -1639,43 +1693,48 @@ namespace WUX {
 			return this;
 		}
 
-		addTextField(fieldId: string, label: string, readonly?: boolean): this {
+		addTextField(fieldId: string, label: string, readonly?: boolean, autofocus?: boolean): this {
 			let id = this.subId(fieldId);
 			let co = new WInput(id, 'text', 0, CSS.FORM_CTRL);
 			co.readonly = readonly;
+			co.autofocus = autofocus;
 			this.currRow.push({ id: id, label: label, component: co, readonly: readonly, type: 'text' });
 			return this;
 		}
 
-		addNoteField(fieldId: string, label: string, rows: number, readonly?: boolean): this {
+		addNoteField(fieldId: string, label: string, rows: number, readonly?: boolean, autofocus?: boolean): this {
 			if (!rows) rows = 3;
 			let id = this.subId(fieldId);
 			let co = new WTextArea(id, rows, CSS.FORM_CTRL);
 			co.readonly = readonly;
+			co.autofocus = autofocus;
 			this.currRow.push({ id: id, label: label, component: co, readonly: readonly, type: 'note' });
 			return this;
 		}
 
-		addDateField(fieldId: string, label: string, readonly?: boolean): this {
+		addDateField(fieldId: string, label: string, readonly?: boolean, autofocus?: boolean): this {
 			let id = this.subId(fieldId);
 			let co = new WInput(id, 'date', 0, CSS.FORM_CTRL);
 			co.readonly = readonly;
+			co.autofocus = autofocus;
 			this.currRow.push({ id: id, label: label, component: co, readonly: readonly, type: 'date' });
 			return this;
 		}
 
-		addTimeField(fieldId: string, label: string, readonly?: boolean): this {
+		addTimeField(fieldId: string, label: string, readonly?: boolean, autofocus?: boolean): this {
 			let id = this.subId(fieldId);
 			let co = new WInput(id, 'time', 0, CSS.FORM_CTRL);
 			co.readonly = readonly;
+			co.autofocus = autofocus;
 			this.currRow.push({ id: id, label: label, component: co, readonly: readonly, type: 'time' });
 			return this;
 		}
 
-		addEmailField(fieldId: string, label: string, readonly?: boolean): this {
+		addEmailField(fieldId: string, label: string, readonly?: boolean, autofocus?: boolean): this {
 			let id = this.subId(fieldId);
 			let co = new WInput(id, 'email', 0, CSS.FORM_CTRL);
 			co.readonly = readonly;
+			co.autofocus = autofocus;
 			this.currRow.push({ id: id, label: label, component: co, readonly: readonly, type: 'email' });
 			return this;
 		}
