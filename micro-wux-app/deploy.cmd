@@ -21,6 +21,15 @@ IF EXIST ..\single-spa-app\src\index.js.bak (
 	del ..\single-spa-app\src\index.js.bak
 )
 
-copy ..\single-spa-app\src\index.js ..\single-spa-app\src\index.js.bak
+echo Mantenere copia versione precedente? (S/N)
+choice /M "Conferma"
+if errorlevel 2 (
+    echo Operazione annullata.
+    goto deploy
+) else (
+    echo Copia backup...
+    copy ..\single-spa-app\src\index.js ..\single-spa-app\src\index.js.bak
+)
 
+:deploy
 move /Y index.js ..\single-spa-app\src\index.js
