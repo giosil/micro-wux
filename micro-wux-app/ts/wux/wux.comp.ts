@@ -1167,6 +1167,11 @@ namespace WUX {
 		selectionMode: 'single' | 'multiple' | 'none';
 		selectedRow: number = -1;
 
+		paging: boolean = false;
+		plen: number = 1;
+		page: number = 10;
+		rows: number = 0;
+
 		constructor(id: string, header: string[], keys?: any[], classStyle?: string, style?: string | WStyle, attributes?: string | object, props?: any) {
 			super(id ? id : '*', 'WTable', props, classStyle, style, attributes);
 			this.rootTag = 'table';
@@ -1457,11 +1462,20 @@ namespace WUX {
 				tbody.innerHTML = '';
 				return;
 			}
+			if(this.page < 1) this.page = 1;
+			if(this.plen < 1) this.plen = 10;
+			let s = (this.page - 1) * this.plen;
+			let m = s + this.plen;
 			let sr = this.selectionMode && this.selectionMode != 'none' ? ' style="cursor:pointer;"' : '';
 			let b = '';
-			let i = -1;
-			for (let row of this.state) {
-				i++;
+			let l = this.state ? this.state.length : 0;
+			this.rows = 0;
+			for (let i = 0; i < l; i++) {
+				if(this.paging) {
+					if(i < s || i >= m) continue;
+				}
+				this.rows++;
+				let row = this.state[i];
 				let r: string = '';
 				if (i == this.state.length - 1) {
 					if (this.footerStyle) {
@@ -1834,12 +1848,17 @@ namespace WUX {
 					
 					if(f.type != 'caption') f.component.setState(f.value);
 					if(f.label && !f.labelComp) {
-						let l = new WLabel(f.id + '-l', f.label, '', f.classStyle);
+						let l = new WLabel(f.id + '-l', f.label, '', f.classStyle ? f.classStyle : CSS.LBL_CLASS);
 						f.labelComp = l.for(f.id);
 					}
 					
 					if(g) {
-						this.main.addGroup({classStyle: CSS.FORM_GROUP}, f.labelComp, f.component);
+						if(f.type == 'select') {
+							this.main.addGroup({classStyle: CSS.SEL_WRAPPER}, f.labelComp, f.component);
+						}
+						else {
+							this.main.addGroup({classStyle: CSS.FORM_GROUP}, f.labelComp, f.component);
+						}
 					}
 					else {
 						this.main.add(f.labelComp);

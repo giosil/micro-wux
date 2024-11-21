@@ -7,7 +7,7 @@ namespace WUX {
 		styles?: string[];
 		type?: string;
 	}
-		
+	
 	export function JQ(e: any): JQuery {
 		let jq = window['jQuery'] ? window['jQuery'] as JQueryStatic : null;
 		if(!jq) {
@@ -21,7 +21,22 @@ namespace WUX {
 		}
 		return r;
 	}
-
+	
+	export function setJQCss(e: WComponent | JQuery, ...a: (string | WStyle)[]): WComponent | JQuery {
+		if (!e || !a || !a.length) return e;
+		if (e instanceof WComponent) {
+			e.css(...a);
+		}
+		else if (e instanceof jQuery) {
+			if (!e.length) return e;
+			let s = css(...a);
+			let c = cls(...a);
+			if (c) e.addClass(c);
+			if (s) e.attr('style',s);
+		}
+		return e;
+	}
+	
 	// Bootstrap / JQuery
 	export class WDialog<P = any, S = any> extends WUX.WComponent<P, S> {
 		cntRoot: WUX.WContainer;
@@ -49,8 +64,6 @@ namespace WUX {
 		sh: (e?: JQueryEventObject) => any;
 		// hidden handler
 		hh: (e?: JQueryEventObject) => any;
-		// JQ(this.root) -> $(this.root)
-		$r: JQuery;
 
 		constructor(id: string, name: string = 'WDialog', btnOk = true, btnClose = true, classStyle?: string, style?: string | WUX.WStyle, attributes?: string | object) {
 			super(id, name, undefined, classStyle, style, attributes);
@@ -216,11 +229,7 @@ namespace WUX {
 		}
 
 		protected componentDidMount(): void {
-			if(!this.root) return;
-
-			this.$r = JQ(this.root);
 			if(!this.$r) return;
-
 			this.$r.on('shown.bs.modal', (e: JQueryEventObject) => {
 				this.isShown = true;
 				this.onShown();
@@ -289,20 +298,20 @@ namespace WUX {
 			for (let i = 0; i < this.tabs.length; i++) {
 				let tab = this.tabs[i];
 				if (i == this.state) {
-					r += '<li class="nav-item"><a class="nav-link active" data-toggle="tab" href="#' + this.id + '-' + i + '"> ' + tab.name + '</a></li>';
+					r += '<li class="nav-item" role="presentation"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#' + this.id + '-' + i + '" role="tab"> ' + tab.name + '</button></li>';
 				}
 				else {
-					r += '<li class="nav-item"><a class="nav-link" data-toggle="tab" href="#' + this.id + '-' + i + '"> ' + tab.name + '</a></li>';
+					r += '<li class="nav-item" role="presentation"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#' + this.id + '-' + i + '" role="tab"> ' + tab.name + '</button></li>';
 				}
 			}
 			r += '</ul>';
 			r += '<div class="tab-content">';
 			for (let i = 0; i < this.tabs.length; i++) {
 				if (i == this.state) {
-					r += '<div id="' + this.id + '-' + i + '" class="tab-pane active"></div>';
+					r += '<div id="' + this.id + '-' + i + '" class="tab-pane show active" role="tabpanel"></div>';
 				}
 				else {
-					r += '<div id="' + this.id + '-' + i + '" class="tab-pane"></div>';
+					r += '<div id="' + this.id + '-' + i + '" class="tab-pane" role="tabpanel"></div>';
 				}
 			}
 			r += '</div></div>';
@@ -310,7 +319,7 @@ namespace WUX {
 		}
 
 		protected componentDidUpdate(prevProps: any, prevState: any): void {
-			let $t = JQ('.nav-tabs a[href="#' + this.id + '-' + this.state + '"]');
+			let $t = JQ('.nav-tabs button[data-bs-target="#' + this.id + '-' + this.state + '"]');
 			if(!$t) return;
 			$t.tab('show');
 		}
@@ -323,17 +332,15 @@ namespace WUX {
 				if (!tabPane) continue;
 				container.mount(tabPane);
 			}
-			let $r = JQ(this.root);
-			if(!$r) return;
-			$r.find('a[data-toggle="tab"]').on('shown.bs.tab', (e?: JQueryEventObject) => {
+			this.$r.find('button[data-bs-toggle="tab"]').on('shown.bs.tab', (e?: JQueryEventObject) => {
 				let t = e.target;
-				let href = '';
+				let b = '';
 				if(t instanceof Element) {
-					href = t.getAttribute('href');
+					b = t.getAttribute('data-bs-target');
 				}
-				if(!href) return;
-				let sep = href.lastIndexOf('-');
-				if (sep >= 0) this.setState(parseInt(href.substring(sep + 1)));
+				if(!b) return;
+				let sep = b.lastIndexOf('-');
+				if (sep >= 0) this.setState(parseInt(b.substring(sep + 1)));
 			});
 		}
 

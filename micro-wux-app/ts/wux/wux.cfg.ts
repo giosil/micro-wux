@@ -4,14 +4,27 @@
 	let _data: { [key: string]: any } = {};
 	/** DataChanged callbacks */
 	let _dccb: { [key: string]: ((e?: any) => any)[] } = {};
-
+	
+	export let initList: (() => any)[] = [];
+	
 	export let global: WGlobal = {
 		locale: 'it',
 
 		init: function _init(callback: () => any) {
-			if (WUX.debug) console.log('[WUX] global.init...');
+			if (debug) console.log('[WUX] global.init...');
 			// Initialization code
-			if (WUX.debug) console.log('[WUX] global.init completed');
+			if(initList && initList.length) {
+				for(let i = 0; i < initList.length; i++) {
+					let initf = initList[i];
+					if(!initf) continue;
+					try {
+						initf();
+					} catch (error) {
+						console.error('[WUX] global.init [' + i + ']', error);
+					}
+				}
+			}
+			if (debug) console.log('[WUX] global.init completed');
 			if (callback) callback();
 		},
 
@@ -40,6 +53,8 @@
 	export class CSS {
 		static FORM = 'padding-top:16px;';
 		static FORM_GROUP = 'form-group';
+		static LBL_CLASS = 'active';
+		static SEL_WRAPPER = 'select-wrapper';
 		static FORM_CTRL = 'form-control';
 		static FORM_CHECK = 'form-check form-check-inline';
 		static CHECK_STYLE = 'padding-top:1.5rem;';
@@ -59,7 +74,7 @@
 		static OK = 'OK';
 		static CLOSE = 'Chiudi';
 		static CANCEL = 'Annulla';
-	}	
+	}
 	
 	// Data format utilities
 

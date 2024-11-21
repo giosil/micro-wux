@@ -573,6 +573,7 @@ var WUX;
                 this.root.remove();
             }
             this.root = undefined;
+            this.$r = undefined;
             if (this.id) {
                 var idx = WUX.registry.indexOf(this.id);
                 if (idx >= 0)
@@ -678,6 +679,9 @@ var WUX;
                 }
                 if (this.debug)
                     console.log('[' + str(this) + '] componentDidMount ctx=' + str(context) + ' root=' + str(this.root));
+                var jq = window['jQuery'] ? window['jQuery'] : null;
+                if (jq)
+                    this.$r = jq(this.root);
                 this.componentDidMount();
                 if (this.root) {
                     for (var event_4 in this.handlers) {
@@ -2183,12 +2187,26 @@ var WUX;
     var _data = {};
     /** DataChanged callbacks */
     var _dccb = {};
+    WUX.initList = [];
     WUX.global = {
         locale: 'it',
         init: function _init(callback) {
             if (WUX.debug)
                 console.log('[WUX] global.init...');
             // Initialization code
+            if (WUX.initList && WUX.initList.length) {
+                for (var i = 0; i < WUX.initList.length; i++) {
+                    var initf = WUX.initList[i];
+                    if (!initf)
+                        continue;
+                    try {
+                        initf();
+                    }
+                    catch (error) {
+                        console.error('[WUX] global.init [' + i + ']', error);
+                    }
+                }
+            }
             if (WUX.debug)
                 console.log('[WUX] global.init completed');
             if (callback)
@@ -2229,6 +2247,8 @@ var WUX;
         }
         CSS.FORM = 'padding-top:16px;';
         CSS.FORM_GROUP = 'form-group';
+        CSS.LBL_CLASS = 'active';
+        CSS.SEL_WRAPPER = 'select-wrapper';
         CSS.FORM_CTRL = 'form-control';
         CSS.FORM_CHECK = 'form-check form-check-inline';
         CSS.CHECK_STYLE = 'padding-top:1.5rem;';
@@ -3909,6 +3929,10 @@ var WUX;
             _this.reqSort = -1;
             _this.prvSort = -1;
             _this.selectedRow = -1;
+            _this.paging = false;
+            _this.plen = 1;
+            _this.page = 10;
+            _this.rows = 0;
             _this.rootTag = 'table';
             _this.header = header;
             if (keys && keys.length) {
@@ -4242,12 +4266,23 @@ var WUX;
                 tbody.innerHTML = '';
                 return;
             }
+            if (this.page < 1)
+                this.page = 1;
+            if (this.plen < 1)
+                this.plen = 10;
+            var s = (this.page - 1) * this.plen;
+            var m = s + this.plen;
             var sr = this.selectionMode && this.selectionMode != 'none' ? ' style="cursor:pointer;"' : '';
             var b = '';
-            var i = -1;
-            for (var _i = 0, _a = this.state; _i < _a.length; _i++) {
-                var row = _a[_i];
-                i++;
+            var l = this.state ? this.state.length : 0;
+            this.rows = 0;
+            for (var i = 0; i < l; i++) {
+                if (this.paging) {
+                    if (i < s || i >= m)
+                        continue;
+                }
+                this.rows++;
+                var row = this.state[i];
                 var r = '';
                 if (i == this.state.length - 1) {
                     if (this.footerStyle) {
@@ -4261,8 +4296,8 @@ var WUX;
                     r = '<tr' + WUX.buildCss(this.rowStyle) + ' id="' + this.id + '-' + i + '"' + sr + '>';
                 }
                 var j = -1;
-                for (var _b = 0, _c = this.keys; _b < _c.length; _b++) {
-                    var key = _c[_b];
+                for (var _i = 0, _a = this.keys; _i < _a.length; _i++) {
+                    var key = _a[_i];
                     var v = row[key];
                     var align = '';
                     if (v == null)
@@ -4291,25 +4326,25 @@ var WUX;
                                 align = 'text-right';
                             }
                     }
-                    var s = void 0;
+                    var s_1 = void 0;
                     if (j == 0) {
-                        s = this.col0Style ? this.col0Style : this.colStyle;
+                        s_1 = this.col0Style ? this.col0Style : this.colStyle;
                     }
                     else if (j == this.header.length - 1) {
-                        s = this.colLStyle ? this.colLStyle : this.colStyle;
+                        s_1 = this.colLStyle ? this.colLStyle : this.colStyle;
                     }
                     else {
-                        s = this.colStyle;
+                        s_1 = this.colStyle;
                     }
-                    if (typeof s == 'string') {
-                        if (s.indexOf('text-align') > 0)
+                    if (typeof s_1 == 'string') {
+                        if (s_1.indexOf('text-align') > 0)
                             align = '';
                     }
-                    else if (s && s.a) {
+                    else if (s_1 && s_1.a) {
                         align = '';
                     }
                     var w = this.widths && this.widths.length > j ? this.widths[j] : 0;
-                    r += '<td' + WUX.buildCss(s, align, { w: w }) + '>' + v + '</td>';
+                    r += '<td' + WUX.buildCss(s_1, align, { w: w }) + '>' + v + '</td>';
                 }
                 if (this.header && this.header.length > this.keys.length) {
                     for (var i_1 = 0; i_1 < this.header.length - this.keys.length; i_1++) {
@@ -4321,8 +4356,8 @@ var WUX;
                     var t = document.createElement("template");
                     t.innerHTML = r;
                     var e = { element: this.root, rowElement: t.content.firstElementChild, data: row, rowIndex: i };
-                    for (var _d = 0, _e = this.handlers['_rowprepared']; _d < _e.length; _d++) {
-                        var handler = _e[_d];
+                    for (var _b = 0, _c = this.handlers['_rowprepared']; _b < _c.length; _b++) {
+                        var handler = _c[_b];
                         handler(e);
                     }
                     r = t.innerHTML;
@@ -4614,11 +4649,16 @@ var WUX;
                     if (f.type != 'caption')
                         f.component.setState(f.value);
                     if (f.label && !f.labelComp) {
-                        var l = new WLabel(f.id + '-l', f.label, '', f.classStyle);
+                        var l = new WLabel(f.id + '-l', f.label, '', f.classStyle ? f.classStyle : WUX.CSS.LBL_CLASS);
                         f.labelComp = l.for(f.id);
                     }
                     if (g) {
-                        this.main.addGroup({ classStyle: WUX.CSS.FORM_GROUP }, f.labelComp, f.component);
+                        if (f.type == 'select') {
+                            this.main.addGroup({ classStyle: WUX.CSS.SEL_WRAPPER }, f.labelComp, f.component);
+                        }
+                        else {
+                            this.main.addGroup({ classStyle: WUX.CSS.FORM_GROUP }, f.labelComp, f.component);
+                        }
                     }
                     else {
                         this.main.add(f.labelComp);
@@ -4747,6 +4787,29 @@ var WUX;
         return r;
     }
     WUX.JQ = JQ;
+    function setJQCss(e) {
+        var a = [];
+        for (var _i = 1; _i < arguments.length; _i++) {
+            a[_i - 1] = arguments[_i];
+        }
+        if (!e || !a || !a.length)
+            return e;
+        if (e instanceof WUX.WComponent) {
+            e.css.apply(e, a);
+        }
+        else if (e instanceof jQuery) {
+            if (!e.length)
+                return e;
+            var s = WUX.css.apply(void 0, a);
+            var c = WUX.cls.apply(void 0, a);
+            if (c)
+                e.addClass(c);
+            if (s)
+                e.attr('style', s);
+        }
+        return e;
+    }
+    WUX.setJQCss = setJQCss;
     // Bootstrap / JQuery
     var WDialog = /** @class */ (function (_super) {
         __extends(WDialog, _super);
@@ -4940,9 +5003,6 @@ var WUX;
         };
         WDialog.prototype.componentDidMount = function () {
             var _this = this;
-            if (!this.root)
-                return;
-            this.$r = JQ(this.root);
             if (!this.$r)
                 return;
             this.$r.on('shown.bs.modal', function (e) {
@@ -5025,27 +5085,27 @@ var WUX;
             for (var i = 0; i < this.tabs.length; i++) {
                 var tab = this.tabs[i];
                 if (i == this.state) {
-                    r += '<li class="nav-item"><a class="nav-link active" data-toggle="tab" href="#' + this.id + '-' + i + '"> ' + tab.name + '</a></li>';
+                    r += '<li class="nav-item" role="presentation"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#' + this.id + '-' + i + '" role="tab"> ' + tab.name + '</button></li>';
                 }
                 else {
-                    r += '<li class="nav-item"><a class="nav-link" data-toggle="tab" href="#' + this.id + '-' + i + '"> ' + tab.name + '</a></li>';
+                    r += '<li class="nav-item" role="presentation"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#' + this.id + '-' + i + '" role="tab"> ' + tab.name + '</button></li>';
                 }
             }
             r += '</ul>';
             r += '<div class="tab-content">';
             for (var i = 0; i < this.tabs.length; i++) {
                 if (i == this.state) {
-                    r += '<div id="' + this.id + '-' + i + '" class="tab-pane active"></div>';
+                    r += '<div id="' + this.id + '-' + i + '" class="tab-pane show active" role="tabpanel"></div>';
                 }
                 else {
-                    r += '<div id="' + this.id + '-' + i + '" class="tab-pane"></div>';
+                    r += '<div id="' + this.id + '-' + i + '" class="tab-pane" role="tabpanel"></div>';
                 }
             }
             r += '</div></div>';
             return r;
         };
         WTab.prototype.componentDidUpdate = function (prevProps, prevState) {
-            var $t = JQ('.nav-tabs a[href="#' + this.id + '-' + this.state + '"]');
+            var $t = JQ('.nav-tabs button[data-bs-target="#' + this.id + '-' + this.state + '"]');
             if (!$t)
                 return;
             $t.tab('show');
@@ -5061,20 +5121,17 @@ var WUX;
                     continue;
                 container.mount(tabPane);
             }
-            var $r = JQ(this.root);
-            if (!$r)
-                return;
-            $r.find('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+            this.$r.find('button[data-bs-toggle="tab"]').on('shown.bs.tab', function (e) {
                 var t = e.target;
-                var href = '';
+                var b = '';
                 if (t instanceof Element) {
-                    href = t.getAttribute('href');
+                    b = t.getAttribute('data-bs-target');
                 }
-                if (!href)
+                if (!b)
                     return;
-                var sep = href.lastIndexOf('-');
+                var sep = b.lastIndexOf('-');
                 if (sep >= 0)
-                    _this.setState(parseInt(href.substring(sep + 1)));
+                    _this.setState(parseInt(b.substring(sep + 1)));
             });
         };
         WTab.prototype.componentWillUnmount = function () {

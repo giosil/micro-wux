@@ -236,13 +236,17 @@ namespace WUX {
 		span?: number;
 		value?: any;
 		type?: string;
+		key?: string;
+		icon?: string;
 		element?: Element;
+		labelCss?: string;
 		labelComp?: WComponent;
 		component?: WComponent;
 		required?: boolean;
 		readonly?: boolean;
 		enabled?: boolean;
 		visible?: boolean;
+		build?: (container: any, data: any) => void;
 	}
 
 	/** WEntity interface */
@@ -303,6 +307,7 @@ namespace WUX {
 		// Internal attributes
 		protected context: Element;
 		protected root: Element;
+		protected $r: JQuery;
 		protected internal: WComponent;
 		protected props: P;
 		protected state: S;
@@ -584,6 +589,7 @@ namespace WUX {
 				this.root.remove();
 			}
 			this.root = undefined;
+			this.$r = undefined;
 			if (this.id) {
 				let idx = registry.indexOf(this.id);
 				if (idx >= 0) registry.splice(idx, 1);
@@ -675,6 +681,8 @@ namespace WUX {
 					}
 				}
 				if (this.debug) console.log('[' + str(this) + '] componentDidMount ctx=' + str(context) + ' root=' + str(this.root));
+				let jq = window['jQuery'] ? window['jQuery'] as JQueryStatic : null;
+				if(jq) this.$r = jq(this.root);
 				this.componentDidMount();
 				if (this.root) {
 					for (let event in this.handlers) {

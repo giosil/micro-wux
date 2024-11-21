@@ -66,13 +66,17 @@ declare namespace WUX {
         span?: number;
         value?: any;
         type?: string;
+        key?: string;
+        icon?: string;
         element?: Element;
+        labelCss?: string;
         labelComp?: WComponent;
         component?: WComponent;
         required?: boolean;
         readonly?: boolean;
         enabled?: boolean;
         visible?: boolean;
+        build?: (container: any, data: any) => void;
     }
     /** WEntity interface */
     interface WEntity {
@@ -126,6 +130,7 @@ declare namespace WUX {
         rootTag: string;
         protected context: Element;
         protected root: Element;
+        protected $r: JQuery;
         protected internal: WComponent;
         protected props: P;
         protected state: S;
@@ -417,10 +422,13 @@ declare namespace WUX {
     }
 }
 declare namespace WUX {
+    let initList: (() => any)[];
     let global: WGlobal;
     class CSS {
         static FORM: string;
         static FORM_GROUP: string;
+        static LBL_CLASS: string;
+        static SEL_WRAPPER: string;
         static FORM_CTRL: string;
         static FORM_CHECK: string;
         static CHECK_STYLE: string;
@@ -638,6 +646,10 @@ declare namespace WUX {
         selClass: string;
         selectionMode: 'single' | 'multiple' | 'none';
         selectedRow: number;
+        paging: boolean;
+        plen: number;
+        page: number;
+        rows: number;
         constructor(id: string, header: string[], keys?: any[], classStyle?: string, style?: string | WStyle, attributes?: string | object, props?: any);
         onSelectionChanged(handler: (e: {
             element?: Element;
@@ -724,6 +736,7 @@ declare namespace WUX {
         type?: string;
     }
     function JQ(e: any): JQuery;
+    function setJQCss(e: WComponent | JQuery, ...a: (string | WStyle)[]): WComponent | JQuery;
     class WDialog<P = any, S = any> extends WUX.WComponent<P, S> {
         cntRoot: WUX.WContainer;
         cntMain: WUX.WContainer;
@@ -744,7 +757,6 @@ declare namespace WUX {
         ph: (e?: JQueryEventObject) => any;
         sh: (e?: JQueryEventObject) => any;
         hh: (e?: JQueryEventObject) => any;
-        $r: JQuery;
         constructor(id: string, name?: string, btnOk?: boolean, btnClose?: boolean, classStyle?: string, style?: string | WUX.WStyle, attributes?: string | object);
         makeUp(title: string, body: string | WUX.WComponent, onHidden?: (e?: JQueryEventObject) => any): this;
         onShownModal(handler: (e?: JQueryEventObject) => any): void;
