@@ -4773,6 +4773,7 @@ var WUX;
 })(WUX || (WUX = {}));
 var WUX;
 (function (WUX) {
+    WUX.BS_VER = 5;
     function JQ(e) {
         var jq = window['jQuery'] ? window['jQuery'] : null;
         if (!jq) {
@@ -4993,8 +4994,8 @@ var WUX;
                 this.cntContent.addContainer(this.cntHeader);
             if (this.cntBody)
                 this.cntContent.addContainer(this.cntBody);
-            for (var _i = 0, _a = this.buttons; _i < _a.length; _i++) {
-                var btn = _a[_i];
+            for (var _i = 0, _b = this.buttons; _i < _b.length; _i++) {
+                var btn = _b[_i];
                 this.footer.add(btn);
             }
             if (this.cntFooter)
@@ -5057,6 +5058,17 @@ var WUX;
             _super.call(this, id ? id : '*', 'WTab', props, classStyle, style, attributes) || this;
             // WTab init
             _this.tabs = [];
+            if (WUX.BS_VER > 4) {
+                // Bootstrap 5.x+
+                _this._t = 'button';
+                _this._a = 'data-bs-toggle';
+                _this._r = 'data-bs-target';
+            }
+            else {
+                _this._t = 'a';
+                _this._a = 'data-toggle';
+                _this._r = 'href';
+            }
             return _this;
         }
         WTab.prototype.addTab = function (title, icon) {
@@ -5085,10 +5097,10 @@ var WUX;
             for (var i = 0; i < this.tabs.length; i++) {
                 var tab = this.tabs[i];
                 if (i == this.state) {
-                    r += '<li class="nav-item" role="presentation"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#' + this.id + '-' + i + '" role="tab"> ' + tab.name + '</button></li>';
+                    r += '<li class="nav-item" role="presentation"><' + this._t + ' class="nav-link active" ' + this._a + '="tab" ' + this._r + '="#' + this.id + '-' + i + '" role="tab"> ' + tab.name + '</' + this._t + '></li>';
                 }
                 else {
-                    r += '<li class="nav-item" role="presentation"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#' + this.id + '-' + i + '" role="tab"> ' + tab.name + '</button></li>';
+                    r += '<li class="nav-item" role="presentation"><' + this._t + ' class="nav-link" ' + this._a + '="tab" ' + this._r + '="#' + this.id + '-' + i + '" role="tab"> ' + tab.name + '</' + this._t + '></li>';
                 }
             }
             r += '</ul>';
@@ -5105,7 +5117,7 @@ var WUX;
             return r;
         };
         WTab.prototype.componentDidUpdate = function (prevProps, prevState) {
-            var $t = JQ('.nav-tabs button[data-bs-target="#' + this.id + '-' + this.state + '"]');
+            var $t = JQ('.nav-tabs ' + this._t + '[' + this._r + '="#' + this.id + '-' + this.state + '"]');
             if (!$t)
                 return;
             $t.tab('show');
@@ -5121,11 +5133,11 @@ var WUX;
                     continue;
                 container.mount(tabPane);
             }
-            this.$r.find('button[data-bs-toggle="tab"]').on('shown.bs.tab', function (e) {
+            this.$r.find(this._t + '[' + this._a + '="tab"]').on('shown.bs.tab', function (e) {
                 var t = e.target;
                 var b = '';
                 if (t instanceof Element) {
-                    b = t.getAttribute('data-bs-target');
+                    b = t.getAttribute(_this._r);
                 }
                 if (!b)
                     return;
@@ -5135,8 +5147,8 @@ var WUX;
             });
         };
         WTab.prototype.componentWillUnmount = function () {
-            for (var _i = 0, _a = this.tabs; _i < _a.length; _i++) {
-                var c = _a[_i];
+            for (var _i = 0, _b = this.tabs; _i < _b.length; _i++) {
+                var c = _b[_i];
                 if (c)
                     c.unmount();
             }
@@ -5261,8 +5273,8 @@ var WUX;
             }
             if (!p || !p.length)
                 return this;
-            for (var _a = 0, p_1 = p; _a < p_1.length; _a++) {
-                var o = p_1[_a];
+            for (var _b = 0, p_1 = p; _b < p_1.length; _b++) {
+                var o = p_1[_b];
                 var dt = WUX.WUtil.toDate(o);
                 if (!dt)
                     continue;
@@ -5283,8 +5295,8 @@ var WUX;
             }
             if (!p || !p.length)
                 return this;
-            for (var _a = 0, p_2 = p; _a < p_2.length; _a++) {
-                var o = p_2[_a];
+            for (var _b = 0, p_2 = p; _b < p_2.length; _b++) {
+                var o = p_2[_b];
                 var dt = WUX.WUtil.toDate(o);
                 if (!dt)
                     continue;
@@ -5667,8 +5679,8 @@ var WUX;
             ctx.fillStyle = this.axis;
             ctx.font = this.fontSize + 'px ' + this.fontName;
             ctx.fillText('0', 0, r.height - pady);
-            for (var _a = 0, iy_2 = iy; _a < iy_2.length; _a++) {
-                var vy = iy_2[_a];
+            for (var _b = 0, iy_2 = iy; _b < iy_2.length; _b++) {
+                var vy = iy_2[_b];
                 ctx.fillText('' + vy, 0, r.height - pady - (vy * sy));
             }
             ctx.fillText('' + my, 0, this.offy);

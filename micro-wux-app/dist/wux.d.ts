@@ -728,6 +728,7 @@ declare namespace WUX {
     }
 }
 declare namespace WUX {
+    let BS_VER: number;
     interface WChartData {
         labels?: string[];
         titles?: string[];
@@ -785,6 +786,9 @@ declare namespace WUX {
     }
     class WTab extends WComponent<any, number> {
         tabs: WContainer[];
+        _t: string;
+        _a: string;
+        _r: string;
         constructor(id?: string, classStyle?: string, style?: string | WStyle, attributes?: string | object, props?: any);
         addTab(title: string, icon?: string): WContainer;
         protected render(): string;

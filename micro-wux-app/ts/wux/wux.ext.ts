@@ -1,5 +1,7 @@
 namespace WUX {
 	
+	export let BS_VER = 5;
+	
 	export interface WChartData {
 		labels?: string[];
 		titles?: string[];
@@ -266,12 +268,26 @@ namespace WUX {
 	
 	export class WTab extends WComponent<any, number> {
 		tabs: WContainer[];
-
+		_t: string;
+		_a: string;
+		_r: string;
+		
 		constructor(id?: string, classStyle?: string, style?: string | WStyle, attributes?: string | object, props?: any) {
 			// WComponent init
 			super(id ? id : '*', 'WTab', props, classStyle, style, attributes);
 			// WTab init
 			this.tabs = [];
+			if(BS_VER > 4) {
+				// Bootstrap 5.x+
+				this._t = 'button';
+				this._a = 'data-bs-toggle';
+				this._r = 'data-bs-target';
+			}
+			else {
+				this._t = 'a';
+				this._a = 'data-toggle';
+				this._r = 'href';
+			}
 		}
 
 		addTab(title: string, icon?: string): WContainer {
@@ -298,10 +314,10 @@ namespace WUX {
 			for (let i = 0; i < this.tabs.length; i++) {
 				let tab = this.tabs[i];
 				if (i == this.state) {
-					r += '<li class="nav-item" role="presentation"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#' + this.id + '-' + i + '" role="tab"> ' + tab.name + '</button></li>';
+					r += '<li class="nav-item" role="presentation"><' + this._t + ' class="nav-link active" ' + this._a + '="tab" ' + this._r + '="#' + this.id + '-' + i + '" role="tab"> ' + tab.name + '</'  + this._t + '></li>';
 				}
 				else {
-					r += '<li class="nav-item" role="presentation"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#' + this.id + '-' + i + '" role="tab"> ' + tab.name + '</button></li>';
+					r += '<li class="nav-item" role="presentation"><'   + this._t + ' class="nav-link" ' + this._a + '="tab" ' + this._r + '="#' + this.id + '-' + i + '" role="tab"> ' + tab.name + '</'  + this._t + '></li>';
 				}
 			}
 			r += '</ul>';
@@ -319,7 +335,7 @@ namespace WUX {
 		}
 
 		protected componentDidUpdate(prevProps: any, prevState: any): void {
-			let $t = JQ('.nav-tabs button[data-bs-target="#' + this.id + '-' + this.state + '"]');
+			let $t = JQ('.nav-tabs ' + this._t + '[' + this._r + '="#' + this.id + '-' + this.state + '"]');
 			if(!$t) return;
 			$t.tab('show');
 		}
@@ -332,11 +348,11 @@ namespace WUX {
 				if (!tabPane) continue;
 				container.mount(tabPane);
 			}
-			this.$r.find('button[data-bs-toggle="tab"]').on('shown.bs.tab', (e?: JQueryEventObject) => {
+			this.$r.find(this._t + '[' + this._a + '="tab"]').on('shown.bs.tab', (e?: JQueryEventObject) => {
 				let t = e.target;
 				let b = '';
 				if(t instanceof Element) {
-					b = t.getAttribute('data-bs-target');
+					b = t.getAttribute(this._r);
 				}
 				if(!b) return;
 				let sep = b.lastIndexOf('-');
