@@ -19,7 +19,7 @@ var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
     return to.concat(ar || Array.prototype.slice.call(from));
 };
 /**
-    Micro WRAPPED USER EXPERIENCE - WUX (tiny version)
+    Micro WRAPPED USER EXPERIENCE - WUX
 */
 var WuxDOM = /** @class */ (function () {
     function WuxDOM() {
@@ -573,6 +573,7 @@ var WUX;
                 this.root.remove();
             }
             this.root = undefined;
+            this.$r = undefined;
             if (this.id) {
                 var idx = WUX.registry.indexOf(this.id);
                 if (idx >= 0)
@@ -678,6 +679,9 @@ var WUX;
                 }
                 if (this.debug)
                     console.log('[' + str(this) + '] componentDidMount ctx=' + str(context) + ' root=' + str(this.root));
+                var jq = window['jQuery'] ? window['jQuery'] : null;
+                if (jq)
+                    this.$r = jq(this.root);
                 this.componentDidMount();
                 if (this.root) {
                     for (var event_4 in this.handlers) {
@@ -1038,6 +1042,16 @@ var WUX;
         return id1 && id2 && id1 == id2;
     }
     WUX.same = same;
+    function match(i, o) {
+        if (!o)
+            return !i;
+        if (i == null)
+            return typeof o == 'string' ? o == '' : !o.id;
+        if (typeof i == 'object')
+            return typeof o == 'string' ? o == i.id : o.id == i.id;
+        return typeof o == 'string' ? o == i : o.id == i;
+    }
+    WUX.match = match;
     /**
      * Split content "before<>content<>after" -> ["before", "content", "after"]
      * As well " content " -> ["&nbsp;", "content", "&nbsp;"]
@@ -1491,12 +1505,26 @@ var WUX;
     var _data = {};
     /** DataChanged callbacks */
     var _dccb = {};
+    WUX.initList = [];
     WUX.global = {
         locale: 'it',
         init: function _init(callback) {
             if (WUX.debug)
                 console.log('[WUX] global.init...');
             // Initialization code
+            if (WUX.initList && WUX.initList.length) {
+                for (var i = 0; i < WUX.initList.length; i++) {
+                    var initf = WUX.initList[i];
+                    if (!initf)
+                        continue;
+                    try {
+                        initf();
+                    }
+                    catch (error) {
+                        console.error('[WUX] global.init [' + i + ']', error);
+                    }
+                }
+            }
             if (WUX.debug)
                 console.log('[WUX] global.init completed');
             if (callback)
@@ -1533,3 +1561,5 @@ var WUX;
         }
     };
 })(WUX || (WUX = {}));
+
+export {WuxDOM, WUX};

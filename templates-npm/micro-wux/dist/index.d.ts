@@ -1,5 +1,8 @@
+/// <reference types="jquery" />
+/// <reference types="jquery" />
+/// <reference types="bootstrap" />
 /**
-    Micro WRAPPED USER EXPERIENCE - WUX (tiny version)
+    Micro WRAPPED USER EXPERIENCE - WUX
 */
 declare class WuxDOM {
     static components: {
@@ -43,6 +46,78 @@ declare namespace WUX {
         type: string;
         data?: any;
     }
+    /** WWrapper interface */
+    interface WWrapper {
+        id?: string;
+        type?: string;
+        classStyle?: string;
+        style?: string | WStyle;
+        attributes?: string;
+        begin?: string;
+        wrapper?: WWrapper;
+        end?: string;
+        title?: string;
+        element?: Element;
+    }
+    /** WField interface */
+    interface WField {
+        id: string;
+        label?: string;
+        classStyle?: string;
+        style?: string | WStyle;
+        attributes?: string;
+        span?: number;
+        value?: any;
+        type?: string;
+        key?: string;
+        icon?: string;
+        element?: Element;
+        labelCss?: string;
+        labelComp?: WComponent;
+        component?: WComponent;
+        required?: boolean;
+        readonly?: boolean;
+        enabled?: boolean;
+        visible?: boolean;
+        build?: (container: any, data: any) => void;
+    }
+    /** WEntity interface */
+    interface WEntity {
+        id: any;
+        text?: string;
+        code?: string;
+        group?: any;
+        type?: any;
+        reference?: any;
+        enabled?: boolean;
+        marked?: boolean;
+        date?: Date;
+        notBefore?: Date;
+        expires?: Date;
+        icon?: string;
+        color?: string;
+        value?: number;
+    }
+    /** WAction interface */
+    interface WAction {
+        /** Action name */
+        name: string;
+        /** Reference */
+        ref?: string;
+        /** Reference number (index) */
+        idx?: number;
+        /** Reference object  */
+        obj?: any;
+        /** Tag element of action */
+        tag?: string;
+        /** Component */
+        comp?: WComponent;
+    }
+    /** WISelectable interface */
+    interface WISelectable extends WComponent {
+        options: Array<string | WEntity>;
+        select(i: number): this;
+    }
     /**
      * Base class of a WUX component.
      */
@@ -58,6 +133,7 @@ declare namespace WUX {
         rootTag: string;
         protected context: Element;
         protected root: Element;
+        protected $r: JQuery;
         protected internal: WComponent;
         protected props: P;
         protected state: S;
@@ -143,6 +219,7 @@ declare namespace WUX {
     function getState(id: string, d?: any): any;
     function newInstance(n: string): WUX.WComponent;
     function same(e1: WElement, e2: WElement): boolean;
+    function match(i: any, o: string | WEntity): boolean;
     /**
      * Split content "before<>content<>after" -> ["before", "content", "after"]
      * As well " content " -> ["&nbsp;", "content", "&nbsp;"]
@@ -285,5 +362,6 @@ declare namespace WUX {
     function toggleClassOf(e: Element, name: string): void;
     function setCss(e: WComponent | Element, ...a: (string | WStyle)[]): WComponent | Element;
     function build(tagName: string, inner?: string, css?: string | WStyle, attributes?: string | object, id?: string, classStyle?: string): string;
+    let initList: (() => any)[];
     let global: WGlobal;
 }

@@ -1,5 +1,5 @@
 ﻿/** 
-	Micro WRAPPED USER EXPERIENCE - WUX (tiny version)
+	Micro WRAPPED USER EXPERIENCE - WUX
 */
 class WuxDOM {
 	public static components: { [id: string]: WUX.WComponent } = {};
@@ -212,6 +212,83 @@ namespace WUX {
 		data?: any;
 	}
 
+	/** WWrapper interface */
+	export interface WWrapper {
+		id?: string;
+		type?: string;
+		classStyle?: string;
+		style?: string | WStyle;
+		attributes?: string;
+		begin?: string;
+		wrapper?: WWrapper;
+		end?: string;
+		title?: string;
+		element?: Element;
+	}
+
+	/** WField interface */
+	export interface WField {
+		id: string;
+		label?: string;
+		classStyle?: string;
+		style?: string | WStyle;
+		attributes?: string;
+		span?: number;
+		value?: any;
+		type?: string;
+		key?: string;
+		icon?: string;
+		element?: Element;
+		labelCss?: string;
+		labelComp?: WComponent;
+		component?: WComponent;
+		required?: boolean;
+		readonly?: boolean;
+		enabled?: boolean;
+		visible?: boolean;
+		build?: (container: any, data: any) => void;
+	}
+
+	/** WEntity interface */
+	export interface WEntity {
+		id: any;
+		text?: string;
+		code?: string;
+		group?: any;
+		type?: any;
+		reference?: any;
+		enabled?: boolean;
+		marked?: boolean;
+		date?: Date;
+		notBefore?: Date;
+		expires?: Date;
+		icon?: string;
+		color?: string;
+		value?: number;
+	}
+
+	/** WAction interface */
+	export interface WAction {
+		/** Action name */
+		name: string; 
+		/** Reference */
+		ref?: string;
+		/** Reference number (index) */
+		idx?: number;
+		/** Reference object  */
+		obj?: any;
+		/** Tag element of action */
+		tag?: string;
+		/** Component */
+		comp?: WComponent;
+	}
+
+	/** WISelectable interface */
+	export interface WISelectable extends WComponent {
+		options: Array<string | WEntity>;
+		select(i: number): this;
+	}
+
 	/**
 	 * Base class of a WUX component.
 	 */
@@ -230,6 +307,7 @@ namespace WUX {
 		// Internal attributes
 		protected context: Element;
 		protected root: Element;
+		protected $r: JQuery;
 		protected internal: WComponent;
 		protected props: P;
 		protected state: S;
@@ -511,6 +589,7 @@ namespace WUX {
 				this.root.remove();
 			}
 			this.root = undefined;
+			this.$r = undefined;
 			if (this.id) {
 				let idx = registry.indexOf(this.id);
 				if (idx >= 0) registry.splice(idx, 1);
@@ -602,6 +681,8 @@ namespace WUX {
 					}
 				}
 				if (this.debug) console.log('[' + str(this) + '] componentDidMount ctx=' + str(context) + ' root=' + str(this.root));
+				let jq = window['jQuery'] ? window['jQuery'] as JQueryStatic : null;
+				if(jq) this.$r = jq(this.root as HTMLElement);
 				this.componentDidMount();
 				if (this.root) {
 					for (let event in this.handlers) {
@@ -916,6 +997,13 @@ namespace WUX {
 		let id1 = getId(e1);
 		let id2 = getId(e2);
 		return id1 && id2 && id1 == id2;
+	}
+
+	export function match(i: any, o: string | WEntity): boolean {
+		if (!o) return !i;
+		if (i == null) return typeof o == 'string' ? o == '' : !o.id;
+		if (typeof i == 'object') return typeof o == 'string' ? o == i.id : o.id == i.id;
+		return typeof o == 'string' ? o == i : o.id == i;
 	}
 
 	/**
@@ -1355,14 +1443,27 @@ namespace WUX {
 	let _data: { [key: string]: any } = {};
 	/** DataChanged callbacks */
 	let _dccb: { [key: string]: ((e?: any) => any)[] } = {};
-
+	
+	export let initList: (() => any)[] = [];
+	
 	export let global: WGlobal = {
 		locale: 'it',
 
 		init: function _init(callback: () => any) {
-			if (WUX.debug) console.log('[WUX] global.init...');
+			if (debug) console.log('[WUX] global.init...');
 			// Initialization code
-			if (WUX.debug) console.log('[WUX] global.init completed');
+			if(initList && initList.length) {
+				for(let i = 0; i < initList.length; i++) {
+					let initf = initList[i];
+					if(!initf) continue;
+					try {
+						initf();
+					} catch (error) {
+						console.error('[WUX] global.init [' + i + ']', error);
+					}
+				}
+			}
+			if (debug) console.log('[WUX] global.init completed');
 			if (callback) callback();
 		},
 
@@ -1386,5 +1487,5 @@ namespace WUX {
 			if (!_dccb[key]) _dccb[key] = [];
 			_dccb[key].push(callback);
 		}
-	}	
+	}
 }
