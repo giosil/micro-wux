@@ -682,7 +682,7 @@ namespace WUX {
 				}
 				if (this.debug) console.log('[' + str(this) + '] componentDidMount ctx=' + str(context) + ' root=' + str(this.root));
 				let jq = window['jQuery'] ? window['jQuery'] as JQueryStatic : null;
-				if(jq) this.$r = jq(this.root);
+				if(jq) this.$r = jq(this.root as HTMLElement);
 				this.componentDidMount();
 				if (this.root) {
 					for (let event in this.handlers) {
