@@ -58,7 +58,7 @@ declare namespace WUX {
     }
     /** WField interface */
     interface WField {
-        id: string;
+        id?: string;
         label?: string;
         classStyle?: string;
         style?: string | WStyle;
@@ -68,12 +68,16 @@ declare namespace WUX {
         type?: string;
         key?: string;
         icon?: string;
-        element?: Element;
+        tooltip?: string;
+        element?: WElement;
         labelCss?: string;
         labelComp?: WComponent;
+        colClass?: string;
+        colStyle?: string | WStyle;
         component?: WComponent;
         required?: boolean;
         readonly?: boolean;
+        autofocus?: boolean;
         enabled?: boolean;
         visible?: boolean;
         build?: (container: any, data: any) => void;
@@ -702,18 +706,19 @@ declare namespace WUX {
         onField(fid: string, events: 'click' | 'dblclick' | 'mouseenter' | 'mouseleave' | 'keypress' | 'keydown' | 'keyup' | 'submit' | 'change' | 'focus' | 'blur' | 'resize', handler: (e: Event) => any): this;
         onField(fid: string, events: string, handler: (e: any) => any): this;
         addRow(classStyle?: string, style?: string | WStyle, id?: string, attributes?: string | object, type?: string): this;
-        addTextField(fieldId: string, label: string, readonly?: boolean, autofocus?: boolean): this;
-        addNoteField(fieldId: string, label: string, rows: number, readonly?: boolean, autofocus?: boolean): this;
-        addDateField(fieldId: string, label: string, readonly?: boolean, autofocus?: boolean): this;
-        addTimeField(fieldId: string, label: string, readonly?: boolean, autofocus?: boolean): this;
-        addEmailField(fieldId: string, label: string, readonly?: boolean, autofocus?: boolean): this;
-        addOptionsField(fieldId: string, label: string, options?: (string | WEntity)[], attributes?: string | object, readonly?: boolean): this;
-        addRadioField(fieldId: string, label: string, options?: (string | WEntity)[], attributes?: string | object, readonly?: boolean): this;
-        addBooleanField(fieldId: string, label: string, labelCheck?: string, tooltip?: string): this;
-        addBlankField(label?: string, classStyle?: string, style?: string | WStyle): this;
+        protected _add(id: string, label: string, co: WComponent, type: string, opts?: WField): this;
+        addTextField(fieldId: string, label: string, opts?: WField): this;
+        addDateField(fieldId: string, label: string, opts?: WField): this;
+        addTimeField(fieldId: string, label: string, opts?: WField): this;
+        addEmailField(fieldId: string, label: string, opts?: WField): this;
+        addNoteField(fieldId: string, label: string, rows: number, opts?: WField): this;
+        addOptionsField(fieldId: string, label: string, options?: (string | WEntity)[], opts?: WField): this;
+        addRadioField(fieldId: string, label: string, options?: (string | WEntity)[], opts?: WField): this;
+        addBooleanField(fieldId: string, label: string, labelCheck?: string, opts?: WField): this;
+        addBlankField(label?: string, classStyle?: string, style?: string | WStyle, opts?: WField): this;
+        addCaption(text: string, icon?: string, classStyle?: string, style?: string | WStyle, opts?: WField): this;
         addInternalField(fieldId: string, value?: any): this;
-        addCaption(text: string, icon?: string, classStyle?: string, style?: string | WStyle): this;
-        addComponent(fieldId: string, label: string, component: WComponent): this;
+        addComponent(fieldId: string, label: string, component: WComponent, opts?: WField): this;
         addToFooter(c: WElement): this;
         protected componentDidMount(): void;
         componentWillUnmount(): void;
@@ -721,10 +726,13 @@ declare namespace WUX {
         setValue(fid: string, v: any, updState?: boolean): this;
         getValue(fid: string | WField): any;
         setOptions(fid: string, options: Array<string | WEntity>, prevVal?: boolean): this;
+        setSpan(fieldId: string, span: number): this;
         getValues(): any;
         getState(): any;
         protected updateState(nextState: any): void;
         protected updateView(): void;
+        setMandatory(...fids: string[]): this;
+        checkMandatory(labels?: boolean, focus?: boolean, atLeastOne?: boolean): string;
     }
 }
 declare namespace WUX {
