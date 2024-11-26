@@ -228,7 +228,7 @@ namespace WUX {
 
 	/** WField interface */
 	export interface WField {
-		id: string;
+		id?: string;
 		label?: string;
 		classStyle?: string;
 		style?: string | WStyle;
@@ -238,12 +238,16 @@ namespace WUX {
 		type?: string;
 		key?: string;
 		icon?: string;
-		element?: Element;
+		tooltip?: string;
+		element?: WElement;
 		labelCss?: string;
 		labelComp?: WComponent;
+		colClass?: string;
+		colStyle?: string | WStyle;
 		component?: WComponent;
 		required?: boolean;
 		readonly?: boolean;
+		autofocus?: boolean;
 		enabled?: boolean;
 		visible?: boolean;
 		build?: (container: any, data: any) => void;
