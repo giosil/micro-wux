@@ -1168,8 +1168,8 @@ namespace WUX {
 		selectedRow: number = -1;
 
 		paging: boolean = false;
-		plen: number = 1;
-		page: number = 10;
+		plen: number = 10;
+		page: number = 1;
 		rows: number = 0;
 
 		constructor(id: string, header: string[], keys?: any[], classStyle?: string, style?: string | WStyle, attributes?: string | object, props?: any) {
