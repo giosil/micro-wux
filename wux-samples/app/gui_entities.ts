@@ -449,7 +449,7 @@ namespace APP {
 			this.table.selectionMode = 'single';
 			this.table.filter = true;
 			this.table.exportFile = "competenze";
-			this.table.types = ['s', 's', 'w', 'w'];
+			this.table.types = ['s', 's'];
 			this.table.paging = true;
 			this.table.pageSize = 5;
 			
