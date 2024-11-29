@@ -1,13 +1,7 @@
 namespace APP {
 	
 	export function getURLServices() {
-		let h = window.location.hostname;
-		let p = window.location.protocol;
-		if(!p) p = "http:"
-		if(!h || h.indexOf('localhost') >= 0) return "http://localhost:8081";
-		let s = h.indexOf('.');
-		if(s < 1) return "http://localhost:8081";
-		return p + '//hcm-services' + h.substring(s);
+		return window.location.origin;
 	}
 	
 	export class HttpClient {
