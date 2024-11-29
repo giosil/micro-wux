@@ -107,7 +107,9 @@ namespace APP {
 			this.dlg.onHiddenModal((e: JQueryEventObject) => {
 				if (!this.dlg.ok) return;
 				
+				// Azione
 				let a = this.dlg.getProps();
+				// Valori
 				let s = this.dlg.getState();
 				if(!a || !s) return;
 				console.log('dlg action,state', a, s);
@@ -187,14 +189,17 @@ namespace APP {
 				if(x < 0) return;
 
 				if(a.name == 'delete') {
-					http.delete('entities/delete', s[x], (res: boolean) => {
-						if(res) {
-							showSuccess('Elemento eliminato con successo.');
-							this.delItem(x);
-						}
-						else {
-							showWarning('Elemento non eliminato');
-						}
+					confirm('Si vuole eliminare l\'elemento?', (cr: boolean) => {
+						if(!cr) return;
+						http.delete('entities/delete', s[x], (res: boolean) => {
+							if(res) {
+								showSuccess('Elemento eliminato con successo.');
+								this.delItem(x);
+							}
+							else {
+								showWarning('Elemento non eliminato');
+							}
+						});
 					});
 					return;
 				}
@@ -482,14 +487,17 @@ namespace APP {
 				if(x < 0) return;
 
 				if(ai == 'delete') {
-					http.delete('entities/delete', s[x], (res: boolean) => {
-						if(res) {
-							showSuccess('Elemento eliminato con successo.');
-							this.delItem(x);
-						}
-						else {
-							showWarning('Elemento non eliminato');
-						}
+					confirm('Si vuole eliminare l\'elemento?', (cr: boolean) => {
+						if(!cr) return;
+						http.delete('entities/delete', s[x], (res: boolean) => {
+							if(res) {
+								showSuccess('Elemento eliminato con successo.');
+								this.delItem(x);
+							}
+							else {
+								showWarning('Elemento non eliminato');
+							}
+						});
 					});
 					return;
 				}

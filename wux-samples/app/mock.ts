@@ -80,10 +80,10 @@ namespace APP {
             for(let i = 0; i < r.length; i++) {
                 if(r[i][key] == ent[key]) {
                     r[i] = {...r[i], ...ent};
+                    localStorage.setItem('mockd', JSON.stringify(this.dat));
                     return r[i];
                 }
             }
-            localStorage.setItem('mockd', JSON.stringify(this.dat));
             return null;
         }
 
