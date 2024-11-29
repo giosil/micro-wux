@@ -136,6 +136,10 @@ namespace APP {
                     if(typeof a == 'string') {
                         if(a.indexOf(b) < 0)  return false;
                     }
+                    else if(a == undefined || a == null) {
+                        if(b == undefined || b == null || b == '') return true;
+                        return false;
+                    }
                     else if(a != b) {
                         return false;
                     }
