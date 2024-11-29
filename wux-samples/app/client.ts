@@ -42,7 +42,12 @@ namespace APP {
 					if(success) success(d);
 				}
 				else {
-					if(failure) failure({"message": 'No mock data for ' + method + ' ' + entity});
+					if(failure) {
+						failure({"message": 'No mock data for ' + method + ' ' + entity});
+					}
+					else {
+						showError("Errore servizio", 'No mock data for ' + method + ' ' + entity);
+					}
 				}
 			}, 500);
 		}
