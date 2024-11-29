@@ -5,6 +5,7 @@ namespace APP {
 	export class GUIDemo extends WUX.WComponent {
 		
 		main: WUX.WContainer;
+		brcr: Breadcrumb;
 		
 		map: OLMap;
 		inflated: boolean;
@@ -27,6 +28,9 @@ namespace APP {
 		}
 		
 		override render() {
+			this.brcr = new Breadcrumb();
+			this.brcr.add('Demo');
+			
 			let chartData = this.loadChartData();
 			
 			let h = ['Competenza', 'Data', 'Rating'];
@@ -162,6 +166,7 @@ namespace APP {
 			
 			this.main = new WUX.WContainer();
 			this.main
+				.before(this.brcr)
 				.addRow()
 					.addCol('col-md-6')
 						.add(mapcnt)
@@ -207,6 +212,7 @@ namespace APP {
 			this.map.addPolygon(t, c, 'Test Polygon', '#ff0000', null, (e) => {console.log("polygon click ", e); this.map.showPopup(e, 'top'); });
 
 			this.map.addPolygon('LineString', [[12.4241, 41.9766],[12.3770, 42.0274],[12.2440, 42.0523],[12.2682, 42.0916]], 'Test line', '#0000aa');
+
 		}
 		
 		loadData() {
