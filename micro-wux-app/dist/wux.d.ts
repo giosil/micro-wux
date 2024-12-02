@@ -737,6 +737,7 @@ declare namespace WUX {
 }
 declare namespace WUX {
     let BS_VER: number;
+    let BS_DLG_X: string;
     interface WChartData {
         labels?: string[];
         titles?: string[];
@@ -753,6 +754,10 @@ declare namespace WUX {
         cntHeader: WUX.WContainer;
         cntBody: WUX.WContainer;
         cntFooter: WUX.WContainer;
+        mainClass: string;
+        contClass: string;
+        contStyle: string;
+        bodyClass: string;
         _title: string;
         tagTitle: string;
         btnClose: WUX.WButton;
@@ -763,6 +768,7 @@ declare namespace WUX {
         ok: boolean;
         cancel: boolean;
         isShown: boolean;
+        fullscreen: boolean;
         ph: (e?: JQueryEventObject) => any;
         sh: (e?: JQueryEventObject) => any;
         hh: (e?: JQueryEventObject) => any;

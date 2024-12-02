@@ -104,6 +104,7 @@ namespace APP {
 			};
 			
 			this.dlg = new DlgEntity(this.subId('dlg'));
+			// this.dlg.fullscreen = true;
 			this.dlg.onHiddenModal((e: JQueryEventObject) => {
 				if (!this.dlg.ok) return;
 				
@@ -480,7 +481,7 @@ namespace APP {
 				// Action value
 				let av: number = WUtil.toNumber(WUX.lastSub(e.currentTarget));
 				if (!av) return;
-				console.log('action=' + ai + ",value=" + av);
+				console.log('action=' + ai + ',value=' + av);
 				
 				let s = this.table.getState();
 				let x = WUtil.indexOf(s, 'id', av);

@@ -1,6 +1,7 @@
 namespace WUX {
 	
 	export let BS_VER = 5;
+	export let BS_DLG_X = '<span aria-hidden="true">&times;</span>';
 	
 	export interface WChartData {
 		labels?: string[];
@@ -47,6 +48,10 @@ namespace WUX {
 		cntHeader: WUX.WContainer;
 		cntBody: WUX.WContainer;
 		cntFooter: WUX.WContainer;
+		mainClass: string;
+		contClass: string;
+		contStyle: string;
+		bodyClass: string;
 		// GUI
 		_title: string;
 		tagTitle: string;
@@ -59,6 +64,7 @@ namespace WUX {
 		ok: boolean;
 		cancel: boolean;
 		isShown: boolean;
+		fullscreen: boolean;
 		// Control
 		// parent handler
 		ph: (e?: JQueryEventObject) => any;
@@ -113,7 +119,7 @@ namespace WUX {
 
 		get body(): WUX.WContainer {
 			if (this.cntBody) return this.cntBody;
-			this.cntBody = new WUX.WContainer('', WUX.cls('modal-body', this._classStyle), '', this._attributes);
+			this.cntBody = new WUX.WContainer('', WUX.cls('modal-body', this.bodyClass), '', this._attributes);
 			return this.cntBody;
 		}
 
@@ -133,7 +139,17 @@ namespace WUX {
 				te.innerText = s;
 			}
 			else {
-				this.btnClose = new WUX.WButton(this.subId('bhc'), '<span aria-hidden="true">&times;</span><span class="sr-only">Close</span>', undefined, 'close', '', 'data-dismiss="modal"');
+				if(BS_DLG_X) {
+					this.btnClose = new WUX.WButton(this.subId('bhc'), BS_DLG_X, '', 'close');
+				}
+				else if(BS_VER > 4) {
+					// Bootstrap 5.x+
+					this.btnClose = new WUX.WButton(this.subId('bhc'), '', '', 'btn-close', '', 'aria-label="' + RES.CLOSE + '"');
+				}
+				else {
+					this.btnClose = new WUX.WButton(this.subId('bhc'), '<span aria-hidden="true">&times;</span>', '', 'close');
+				}
+				// No data-dismiss="modal" or data-bs-dismiss="modal", but:
 				this.btnClose.on('click', (e: PointerEvent) => {
 					this.close();
 				});
@@ -219,10 +235,13 @@ namespace WUX {
 		}
 
 		protected render() {
+			if(!this._classStyle) this._classStyle = 'modal fade';
+			if(!this.mainClass) this.mainClass = this.fullscreen ? 'modal-dialog modal-fullscreen' : 'modal-dialog modal-lg';
+			if(!this.contClass) this.contClass = 'modal-content';
 			this.isShown = false;
-			this.cntRoot = new WUX.WContainer(this.id, 'modal inmodal fade', '', 'role="dialog" aria-hidden="true"');
-			this.cntMain = this.cntRoot.addContainer('', 'modal-dialog modal-lg', this._style);
-			this.cntContent = this.cntMain.addContainer('', 'modal-content');
+			this.cntRoot = new WUX.WContainer(this.id, this._classStyle, '', 'role="dialog" tabindex="-1" aria-hidden="true"');
+			this.cntMain = this.cntRoot.addContainer('', this.mainClass, this._style);
+			this.cntContent = this.cntMain.addContainer('', this.contClass, this.contStyle);
 			if (this.cntHeader) this.cntContent.addContainer(this.cntHeader);
 			if (this.cntBody) this.cntContent.addContainer(this.cntBody);
 			for (let btn of this.buttons) this.footer.add(btn);
