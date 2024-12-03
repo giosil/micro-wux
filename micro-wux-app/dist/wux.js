@@ -2187,30 +2187,26 @@ var WUX;
     var _data = {};
     /** DataChanged callbacks */
     var _dccb = {};
-    WUX.initList = [];
     WUX.global = {
         locale: 'it',
         init: function _init(callback) {
             if (WUX.debug)
                 console.log('[WUX] global.init...');
-            // Initialization code
-            if (WUX.initList && WUX.initList.length) {
-                for (var i = 0; i < WUX.initList.length; i++) {
-                    var initf = WUX.initList[i];
-                    if (!initf)
-                        continue;
-                    try {
-                        initf();
-                    }
-                    catch (error) {
-                        console.error('[WUX] global.init [' + i + ']', error);
-                    }
+            if (WUX.init0) {
+                if (WUX.initApp) {
+                    WUX.init0(function () { return WUX.initApp(callback); });
+                }
+                else {
+                    WUX.init0(callback);
                 }
             }
-            if (WUX.debug)
-                console.log('[WUX] global.init completed');
-            if (callback)
-                callback();
+            else if (WUX.initApp) {
+                WUX.initApp(callback);
+            }
+            else {
+                if (callback)
+                    callback();
+            }
         },
         setData: function (key, data, dontTrigger) {
             if (dontTrigger === void 0) { dontTrigger = false; }

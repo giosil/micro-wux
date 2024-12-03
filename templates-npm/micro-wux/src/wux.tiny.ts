@@ -1449,27 +1449,30 @@ namespace WUX {
 	/** DataChanged callbacks */
 	let _dccb: { [key: string]: ((e?: any) => any)[] } = {};
 	
-	export let initList: (() => any)[] = [];
+	/** Internal init */
+	export let init0: (callback: () => any) => any;
+	/** App init */
+	export let initApp: (callback: () => any) => any;
 	
 	export let global: WGlobal = {
 		locale: 'it',
 
 		init: function _init(callback: () => any) {
 			if (debug) console.log('[WUX] global.init...');
-			// Initialization code
-			if(initList && initList.length) {
-				for(let i = 0; i < initList.length; i++) {
-					let initf = initList[i];
-					if(!initf) continue;
-					try {
-						initf();
-					} catch (error) {
-						console.error('[WUX] global.init [' + i + ']', error);
-					}
+			if (init0) {
+				if (initApp) {
+					init0(() => initApp(callback));
+				}
+				else {
+					init0(callback);
 				}
 			}
-			if (debug) console.log('[WUX] global.init completed');
-			if (callback) callback();
+			else if (initApp) {
+				initApp(callback);
+			}
+			else {
+				if (callback) callback();
+			}
 		},
 
 		setData(key: string, data: any, dontTrigger: boolean = false): void {

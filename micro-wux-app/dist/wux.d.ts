@@ -427,7 +427,10 @@ declare namespace WUX {
     }
 }
 declare namespace WUX {
-    let initList: (() => any)[];
+    /** Internal init */
+    let init0: (callback: () => any) => any;
+    /** App init */
+    let initApp: (callback: () => any) => any;
     let global: WGlobal;
     class CSS {
         static FORM: string;
