@@ -1,7 +1,7 @@
 namespace WUX {
 	
 	export let BS_VER = 5;
-	export let BS_DLG_X = '<span aria-hidden="true">&times;</span>';
+	export let BS_DLG_X: string | WWrapper = '';
 	
 	export interface WChartData {
 		labels?: string[];
@@ -140,7 +140,12 @@ namespace WUX {
 			}
 			else {
 				if(BS_DLG_X) {
-					this.btnClose = new WUX.WButton(this.subId('bhc'), BS_DLG_X, '', 'close');
+					if(typeof BS_DLG_X == 'string') {
+						this.btnClose = new WUX.WButton(this.subId('bhc'), BS_DLG_X, '', 'close');
+					}
+					else {
+						this.btnClose = new WUX.WButton(this.subId('bhc'), BS_DLG_X.title, BS_DLG_X.icon, BS_DLG_X.classStyle, BS_DLG_X.style, BS_DLG_X.attributes);
+					}
 				}
 				else if(BS_VER > 4) {
 					// Bootstrap 5.x+

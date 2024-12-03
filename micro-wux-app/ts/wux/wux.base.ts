@@ -223,6 +223,7 @@ namespace WUX {
 		wrapper?: WWrapper;
 		end?: string;
 		title?: string;
+		icon?: string;
 		element?: Element;
 	}
 

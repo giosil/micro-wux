@@ -57,7 +57,8 @@
 		static SEL_WRAPPER = 'select-wrapper';
 		static FORM_CTRL = 'form-control';
 		static FORM_CHECK = 'form-check form-check-inline';
-		static CHECK_STYLE = 'padding-top:1.5rem;';
+		static CHECK_STYLE = 'padding-top:1rem;';
+		static LEVER_STYLE = '';
 		static ICON = 'margin-right:8px;';
 		static SEL_ROW = 'primary-bg-a2';
 

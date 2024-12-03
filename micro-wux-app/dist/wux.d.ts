@@ -54,6 +54,7 @@ declare namespace WUX {
         wrapper?: WWrapper;
         end?: string;
         title?: string;
+        icon?: string;
         element?: Element;
     }
     /** WField interface */
@@ -436,6 +437,7 @@ declare namespace WUX {
         static FORM_CTRL: string;
         static FORM_CHECK: string;
         static CHECK_STYLE: string;
+        static LEVER_STYLE: string;
         static ICON: string;
         static SEL_ROW: string;
         static PRIMARY: WStyle;
@@ -584,6 +586,8 @@ declare namespace WUX {
         label: string;
         value: any;
         text: string;
+        lever: boolean;
+        leverStyle: string;
         constructor(id?: string, text?: string, value?: any, checked?: boolean, classStyle?: string, style?: string | WStyle, attributes?: string | object);
         get checked(): boolean;
         set checked(b: boolean);
@@ -715,6 +719,7 @@ declare namespace WUX {
         addOptionsField(fieldId: string, label: string, options?: (string | WEntity)[], opts?: WField): this;
         addRadioField(fieldId: string, label: string, options?: (string | WEntity)[], opts?: WField): this;
         addBooleanField(fieldId: string, label: string, labelCheck?: string, opts?: WField): this;
+        addToggleField(fieldId: string, label: string, labelCheck?: string, opts?: WField): this;
         addBlankField(label?: string, classStyle?: string, style?: string | WStyle, opts?: WField): this;
         addCaption(text: string, icon?: string, classStyle?: string, style?: string | WStyle, opts?: WField): this;
         addInternalField(fieldId: string, value?: any): this;
@@ -737,7 +742,7 @@ declare namespace WUX {
 }
 declare namespace WUX {
     let BS_VER: number;
-    let BS_DLG_X: string;
+    let BS_DLG_X: string | WWrapper;
     interface WChartData {
         labels?: string[];
         titles?: string[];

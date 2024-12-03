@@ -2251,7 +2251,8 @@ var WUX;
         CSS.SEL_WRAPPER = 'select-wrapper';
         CSS.FORM_CTRL = 'form-control';
         CSS.FORM_CHECK = 'form-check form-check-inline';
-        CSS.CHECK_STYLE = 'padding-top:1.5rem;';
+        CSS.CHECK_STYLE = 'padding-top:1rem;';
+        CSS.LEVER_STYLE = '';
         CSS.ICON = 'margin-right:8px;';
         CSS.SEL_ROW = 'primary-bg-a2';
         CSS.PRIMARY = { bg: '#b8d4f1' };
@@ -3518,6 +3519,19 @@ var WUX;
             var addAttributes = 'name="' + this.id + '" type="checkbox"';
             addAttributes += this.props ? ' checked="checked"' : '';
             var inner = this.text ? '&nbsp;' + this.text : '';
+            // Label
+            if (!this.label) {
+                this.label = '';
+            }
+            else if (this._tooltip) {
+                addAttributes += ' title="' + this._tooltip + '"';
+            }
+            var l = '<label id="' + this.id + '-l" for="' + this.id + '"';
+            if (this._tooltip) {
+                l += ' title="' + this._tooltip + '"';
+            }
+            l += '>' + this.label;
+            // Wrapper
             var r0 = '';
             var r1 = '';
             if (this.divClass || this.divStyle) {
@@ -3528,20 +3542,20 @@ var WUX;
                     r0 += ' style="' + this.divStyle + '"';
                 r0 += '>';
             }
-            if (this.label) {
-                r1 += '<label id="' + this.id + '-l" for="' + this.id + '"';
-                if (this._tooltip) {
-                    r1 += ' title="' + this._tooltip + '"';
-                }
-                r1 += '>' + this.label + '</label>';
+            if (this.lever) {
+                r0 += '<div class="toggles">';
+                r0 += l;
             }
             else {
-                if (this._tooltip) {
-                    addAttributes += ' title="' + this._tooltip + '"';
-                }
+                r1 += l;
             }
-            if (r0)
+            if (r0) {
+                if (this.lever) {
+                    var ls = this.leverStyle ? ' style="' + this.leverStyle + '"' : '';
+                    r1 += '<span class="lever"' + ls + '></span></label></div>';
+                }
                 r1 += '</div>';
+            }
             return r0 + this.build(this.rootTag, inner, addAttributes) + r1;
         };
         WCheck.prototype.componentDidMount = function () {
@@ -4582,6 +4596,17 @@ var WUX;
             co.label = labelCheck;
             return this._add(id, label, co, 'boolean', opts);
         };
+        WFormPanel.prototype.addToggleField = function (fieldId, label, labelCheck, opts) {
+            var id = this.subId(fieldId);
+            var co = new WCheck(id, '');
+            co.lever = true;
+            co.divClass = WUX.CSS.FORM_CHECK;
+            co.divStyle = WUX.CSS.CHECK_STYLE;
+            co.classStyle = WUX.CSS.FORM_CTRL;
+            co.leverStyle = WUX.CSS.LEVER_STYLE;
+            co.label = labelCheck;
+            return this._add(id, label, co, 'boolean', opts);
+        };
         WFormPanel.prototype.addBlankField = function (label, classStyle, style, opts) {
             var f0 = opts ? opts : {};
             var co = new WContainer('', classStyle, style);
@@ -4873,7 +4898,7 @@ var WUX;
 var WUX;
 (function (WUX) {
     WUX.BS_VER = 5;
-    WUX.BS_DLG_X = '<span aria-hidden="true">&times;</span>';
+    WUX.BS_DLG_X = '';
     function JQ(e) {
         var jq = window['jQuery'] ? window['jQuery'] : null;
         if (!jq) {
@@ -5000,7 +5025,12 @@ var WUX;
                 }
                 else {
                     if (WUX.BS_DLG_X) {
-                        this.btnClose = new WUX.WButton(this.subId('bhc'), WUX.BS_DLG_X, '', 'close');
+                        if (typeof WUX.BS_DLG_X == 'string') {
+                            this.btnClose = new WUX.WButton(this.subId('bhc'), WUX.BS_DLG_X, '', 'close');
+                        }
+                        else {
+                            this.btnClose = new WUX.WButton(this.subId('bhc'), WUX.BS_DLG_X.title, WUX.BS_DLG_X.icon, WUX.BS_DLG_X.classStyle, WUX.BS_DLG_X.style, WUX.BS_DLG_X.attributes);
+                        }
                     }
                     else if (WUX.BS_VER > 4) {
                         // Bootstrap 5.x+
