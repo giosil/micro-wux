@@ -1,21 +1,14 @@
 namespace APP {
 	
-	export function getURLServices() {
-		return window.location.origin;
-	}
-	
 	export class HttpClient {
 		url: string;
 		mres: { [key: string]: any };
 		mock: boolean;
+		auth: string;
 		
-		constructor(url?: string) {
-			if(url) {
-				this.url = url;
-			}
-			else {
-				this.url = window.location.origin;
-			}
+		constructor(url?: string, auth?: string) {
+			this.url = url ? url : window.location.origin;
+			this.auth = auth ? auth : '';
 		}
 		
 		before() {
@@ -46,7 +39,7 @@ namespace APP {
 						failure({"message": 'No mock data for ' + method + ' ' + entity});
 					}
 					else {
-						showError("Errore servizio", 'No mock data for ' + method + ' ' + entity);
+						showError('No mock data for ' + method + ' ' + entity, 'Errore simulazione');
 					}
 				}
 			}, 500);
@@ -98,24 +91,42 @@ namespace APP {
 			let requrl = search ? this.url + "/" + entity + "?" + search : this.url + entity;
 			this.before();
 			fetch(requrl, {
-				"method" : method
+				"method" : method,
+				"headers": {
+					"Authorization": this.auth
+				}
 			})
 			.then(response => {
 				this.after();
 				if (!response.ok) {
 					console.error('[HttpClient] ' + method + ' ' + entity + ': HTTP ' + response.status);
-					if(failure) {
-						failure(new Error("HTTP " + response.status));
-					}
-					else {
-						showError("Errore servizio", "Si e' verificato un errore di servizio.");
-					}
-					return;
 				}
-				return response.json();
+				return response.json().then(body => ({
+					status: response.status,
+					body: body
+				}));
 			})
 			.then(data => {
-				if(success) success(data);
+				if(!data) return;
+				let s = data.status;
+				let b = data.body;
+				if(s >= 200 && s < 300) {
+					if(success) success(b);
+				}
+				else {
+					if(!b) b = {};
+					let m = b.message;
+					if(!m) {
+						m = 'Errore HTTP ' + s;
+						b["message"] = m;
+					}
+					if(failure) {
+						failure(b);
+					}
+					else {
+						showError(m, 'Errore servizio');
+					}
+				}
 			})
 			.catch(error => {
 				console.error('[HttpClient] ' + method + ' ' + entity + ':', error);
@@ -124,7 +135,7 @@ namespace APP {
 					failure(error);
 				}
 				else {
-					showError("Errore servizio", "Si e' verificato un errore di servizio.");
+					showError('Servizio non disponibile.', 'Errore chiamata');
 				}
 			});
 		}
@@ -136,7 +147,8 @@ namespace APP {
 			fetch(requrl, {
 				"method" : method,
 				headers: {
-					"Content-Type": "application/json",
+					"Content-Type": 'application/json',
+					"Authorization": this.auth
 				},
 				body: JSON.stringify(data)
 			})
@@ -144,18 +156,33 @@ namespace APP {
 				this.after();
 				if (!response.ok) {
 					console.error('[HttpClient] ' + method + ' ' + entity + ': HTTP ' + response.status);
-					if(failure) {
-						failure(new Error("HTTP " + response.status));
-					}
-					else {
-						showError("Errore servizio", "Si e' verificato un errore di servizio.");
-					}
-					return;
 				}
-				return response.json();
+				return response.json().then(body => ({
+					status: response.status,
+					body: body
+				}));
 			})
 			.then(data => {
-				if(success) success(data);
+				if(!data) return;
+				let s = data.status;
+				let b = data.body;
+				if(s >= 200 && s < 300) {
+					if(success) success(b);
+				}
+				else {
+					if(!b) b = {};
+					let m = b.message;
+					if(!m) {
+						m = 'Errore HTTP ' + s;
+						b["message"] = m;
+					}
+					if(failure) {
+						failure(b);
+					}
+					else {
+						showError(m, 'Errore servizio');
+					}
+				}
 			})
 			.catch(error => {
 				console.error('[HttpClient] ' + method + ' ' + entity + ':', error);
@@ -164,11 +191,11 @@ namespace APP {
 					failure(error);
 				}
 				else {
-					showError("Errore servizio", "Si e' verificato un errore di servizio.");
+					showError('Servizio non disponibile.', 'Errore chiamata');
 				}
 			});
 		}
 	}
 
-	export let http = new HttpClient(getURLServices());
+	export let http = new HttpClient();
 }
