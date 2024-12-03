@@ -1,29 +1,21 @@
-// Add init funtion
-WUX.initList.push(WUX.initDX);
-
 namespace WUX {
 	
-	export function initDX() {
-		let l = WUX.global.locale
-		if(!l) l = 'it';
-		let u = '/cldr/cldr-data-' + l + '.json';
-		fetch(u, {"method" : 'GET'})
-		.then(response => {
-			if (response.ok) {
-				return response.json();
-			}
-			else {
-				console.error('[initDX] load ' + u + ' failed ' + response.status);
-			}
+	export function initDX(callback: () => any) {
+		if (debug) console.log('[WUX] initDX...');
+		let u = '/cldr/cldr-data-' + global.locale + '.json';
+		fetch(u).then(response => {
+			if (response.ok) return response.json();
+			console.error('[WUX] initDX loading ' + u + ' failed', response);
 		})
 		.then(data => {
 			Globalize.load(data);
 			Globalize.locale(global.locale);
 			DevExpress.localization.locale(global.locale);
 			DevExpress.config({ defaultCurrency: 'EUR' });
+			if(callback) callback();
 		})
 		.catch(error => {
-			console.error('[initDX] load ' + u + ' failed:', error);
+			console.error('[WUX] initDX loading ' + u + ' failed', error);
 		});
 	}
 	
@@ -1154,3 +1146,5 @@ namespace WUX {
 		}
 	}
 }
+// Internal init
+WUX.init0 = WUX.initDX;
