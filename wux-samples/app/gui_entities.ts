@@ -119,7 +119,8 @@ namespace APP {
 						http.post('entities/insert', s, (res: Entity) => {
 							if(res) {
 								showSuccess('Elemento inserito con successo.');
-								this.addItem(res);
+								addItem(this.addActions(res), this.table);
+								this.refresh();
 							}
 							else {
 								showWarning('Elemento non inserito');
@@ -130,7 +131,7 @@ namespace APP {
 						http.put('entities/update', s, (res: Entity) => {
 							if(res) {
 								showSuccess('Elemento aggiornato con successo.');
-								this.updItem(res);
+								updItem(this.addActions(res), this.table, 'id');
 							}
 							else {
 								showWarning('Elemento non aggiornato');
@@ -195,7 +196,8 @@ namespace APP {
 						http.delete('entities/delete', s[x], (res: boolean) => {
 							if(res) {
 								showSuccess('Elemento eliminato con successo.');
-								this.delItem(x);
+								delItem(x, this.table);
+								this.refresh();
 							}
 							else {
 								showWarning('Elemento non eliminato');
@@ -284,9 +286,7 @@ namespace APP {
 			http.get('entities/find', filter, (data: Entity[]) => {
 				if(!data) data = [];
 				let l = data.length;
-				if(!l) {
-					showWarning('Nessun elemento trovato.');
-				}
+				if(!l) showWarning('Nessun elemento trovato.');
 				for(let r of data) {
 					this.addActions(r);
 				}
@@ -295,33 +295,6 @@ namespace APP {
 				this.table.setState(data);
 				this.refresh();
 			});
-		}
-
-		addItem(r: any) {
-			if(!r) return;
-			let ts = this.table.getState();
-			if(!ts) ts = [];
-			ts.push(this.addActions(r));
-			this.table.setState(ts);
-			this.refresh();
-		}
-
-		updItem(r: any) {
-			if(!r) return;
-			let ts = this.table.getState();
-			if(!ts) ts = [];
-			let x = WUtil.indexOf(ts, 'id', r['id']);
-			if(x >= 0) ts[x] = r;
-			this.table.setState(ts);
-		}
-
-		delItem(i: number) {
-			if(i < 0) return;
-			let ts = this.table.getState();
-			if(!ts || ts.length <= i) return;
-			ts.splice(i, 1);
-			this.table.setState(ts);
-			this.refresh();
 		}
 
 		addActions(r: any): any {
@@ -333,9 +306,7 @@ namespace APP {
 		}
 		
 		refresh(updTable: boolean = false) {
-			if(updTable) {
-				this.table.forceUpdate();
-			}
+			if(updTable) this.table.forceUpdate();
 			let data = this.table.getState();
 			let l = data ? data.length : 0;
 			this.respg.refresh(this.table.rows, this.table.plen, l, this.table.page);
@@ -393,7 +364,7 @@ namespace APP {
 						http.post('entities/insert', s, (res: Entity) => {
 							if(res) {
 								showSuccess('Elemento inserito con successo.');
-								this.addItem(res);
+								addItem(res, this.table);
 							}
 							else {
 								showWarning('Elemento non inserito');
@@ -404,7 +375,7 @@ namespace APP {
 						http.put('entities/update', s, (res: Entity) => {
 							if(res) {
 								showSuccess('Elemento aggiornato con successo.');
-								this.updItem(res);
+								updItem(res, this.table, 'id');
 							}
 							else {
 								showWarning('Elemento non aggiornato');
@@ -493,7 +464,7 @@ namespace APP {
 						http.delete('entities/delete', s[x], (res: boolean) => {
 							if(res) {
 								showSuccess('Elemento eliminato con successo.');
-								this.delItem(x);
+								delItem(x, this.table);
 							}
 							else {
 								showWarning('Elemento non eliminato');
@@ -539,7 +510,7 @@ namespace APP {
 					.addCol('col-md-4', {a : 'right'})
 						.add(cntBtn)
 				.addRow()
-					.addCol('col-md-12')
+					.addCol('col-md-12', 'padding-top: 1rem;')
 						.add(this.table);
 			
 			return this.main;
@@ -562,31 +533,6 @@ namespace APP {
 				}
 				this.table.setState(data);
 			});
-		}
-
-		addItem(r: any) {
-			if(!r) return;
-			let ts = this.table.getState();
-			if(!ts) ts = [];
-			ts.push(r);
-			this.table.setState(ts);
-		}
-
-		updItem(r: any) {
-			if(!r) return;
-			let ts = this.table.getState();
-			if(!ts) ts = [];
-			let x = WUtil.indexOf(ts, 'id', r['id']);
-			if(x >= 0) ts[x] = r;
-			this.table.setState(ts);
-		}
-
-		delItem(i: number) {
-			if(i < 0) return;
-			let ts = this.table.getState();
-			if(!ts || ts.length <= i) return;
-			ts.splice(i, 1);
-			this.table.setState(ts);
 		}
 	}
 }

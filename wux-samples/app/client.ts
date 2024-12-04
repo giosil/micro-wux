@@ -52,8 +52,16 @@ namespace APP {
 			}
 			this._get('GET', entity, params, success, failure);
 		}
-		
+
 		delete(entity: string, params: { [key: string]: any }, success: (result: any) => void, failure?: (error: any) => void) {
+			if(this.mock) {
+				this.sim('delete', entity, params, success, failure);
+				return;
+			}
+			this._send('DELETE', entity, params, success, failure);
+		}
+		
+		remove(entity: string, params: { [key: string]: any }, success: (result: any) => void, failure?: (error: any) => void) {
 			if(this.mock) {
 				this.sim('delete', entity, params, success, failure);
 				return;

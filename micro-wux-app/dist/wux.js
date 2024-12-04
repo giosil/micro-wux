@@ -3506,7 +3506,7 @@ var WUX;
                 this.state = this.props ? this.value : undefined;
             }
             else {
-                this.props = !this.state && this.state == this.value;
+                this.props = this.state && this.state == this.value;
             }
             if (this.root)
                 this.root['checked'] = this.props;

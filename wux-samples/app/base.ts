@@ -1,14 +1,17 @@
 namespace APP {
 
+	import WUtil = WUX.WUtil;
+
 	export function getPageComponent(): WUX.WComponent {
 		let p = WUX.WUtil.getParam('test');
 		switch(window.location.pathname) {
-			case '/app-adc':  return new GUIAreeCompetenza();
+			case '/app-adc':  return new GUIText('Aree di competenza', 'In fase di sviluppo.');
 			case '/app-cco':  return new GUICompetenze('Competenze comportamentali', 'C_COM');
 			case '/app-ctp':  return new GUICompetenze('Competenze Tecnico Professionali', 'C_TP');
-			case '/app-cts':  return new GUICompetenzeDX('Competenze Tecnico Specialistiche', 'C_TS');
+			case '/app-cts':  return new GUICompetenze('Competenze Tecnico Specialistiche', 'C_TS');
 			case '/app-demo': return new GUIDemo();
-			case '/app-test': return p == 'dx' ? new GUIEntitiesDX() : new GUIEntities();
+			case '/app-test': return p == 'bs' ? new GUIEntities() : new GUIEntitiesDX();
+			case '/app-mrat': return new GUIRating();
 		}
 		return null;
 	}
@@ -52,5 +55,45 @@ namespace APP {
 		if(items) r += items;
 		r +=  '</ul></div></div>';
 		return r;
+	}
+
+	export function addItem(r: any, t: WUX.WComponent) {
+		if(!r || !t) return;
+		let s = t.getState();
+		if(!s) s = [];
+		s.push(r);
+		t.setState(s);
+	}
+
+	export function updItem(r: any, c: WUX.WComponent, f: string, a?: boolean) {
+		if(!r || !c || !f) return;
+		let s = c.getState();
+		if(!s || s.length == 0) return;
+		let x = WUtil.indexOf(s, f, r[f]);
+		if(x < 0) return;
+		s[x] = r;
+		if(a) {
+			c.setState([]);
+			setTimeout(()=> { c.setState(s); }, 0);
+		}
+		c.setState(s);
+	}
+
+	export function delItem(i: number, c: WUX.WComponent) {
+		if(i < 0) return;
+		let s = c.getState();
+		if(!s || s.length <= i) return;
+		s.splice(i, 1);
+		c.setState(s);
+	}
+
+	export function delItemBy(f: string, v: any, c: WUX.WComponent) {
+		if(!f || !v || !c) return;
+		let s = c.getState();
+		if(!s || s.length == 0) return;
+		let x = WUtil.indexOf(s, f, v);
+		if(x < 0) return;
+		s.splice(x, 1);
+		c.setState(s);
 	}
 }
