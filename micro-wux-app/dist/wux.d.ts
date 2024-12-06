@@ -521,6 +521,24 @@ declare namespace WUX {
         protected cs(cs: string): string;
         getElement(r: number, c?: number): HTMLElement;
     }
+    class WPages extends WComponent<any, number> {
+        components: WComponent[];
+        sp: number;
+        constructor(id?: string, classStyle?: string, style?: string | WStyle, attributes?: string | object, props?: any);
+        get pages(): number;
+        add(c: WComponent): this;
+        first(): this;
+        last(): this;
+        back(): this;
+        next(): boolean;
+        prev(): boolean;
+        show(p: number, before?: (c: WComponent) => any, after?: (c: WComponent) => any, t?: number): WComponent;
+        curr(): WComponent;
+        protected render(): string;
+        protected updateState(nextState: number): void;
+        protected componentDidMount(): void;
+        componentWillUnmount(): void;
+    }
     class WLink extends WComponent<string, string> {
         protected _href: string;
         protected _target: string;

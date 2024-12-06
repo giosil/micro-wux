@@ -342,6 +342,144 @@ namespace WUX {
 		}
 	}
 
+	export class WPages extends WComponent<any, number> {
+		components: WComponent[];
+		sp: number = 0;
+		
+		constructor(id?: string, classStyle?: string, style?: string | WStyle, attributes?: string | object, props?: any) {
+			// WComponent init
+			super(id ? id : '*', 'WPages', props, classStyle, style, attributes);
+			// WPages init
+			this.components = [];
+		}
+
+		get pages(): number {
+			if(!this.components) return 0;
+			return this.components.length;
+		}
+
+		add(c: WComponent): this {
+			if (!c) return;
+			this.components.push(c);
+			return this;
+		}
+
+		first(): this {
+			this.setState(0);
+			return this;
+		}
+
+		last(): this {
+			this.setState(this.components.length - 1);
+			return this;
+		}
+
+		back(): this {
+			this.setState(this.sp);
+			return this;
+		}
+
+		next(): boolean {
+			let l = this.components.length;
+			if (!l) return false;
+			let s = this.state;
+			if (!s) s = 0;
+			s++;
+			if (s >= l) return false;
+			this.setState(s);
+			return true;
+		}
+
+		prev(): boolean {
+			let l = this.components.length;
+			if (!l) return false;
+			let s = this.state;
+			if (!s) s = 0;
+			s--;
+			if (s < 0) return false;
+			this.setState(s);
+			return true;
+		}
+
+		show(p: number, before?: (c: WComponent) => any, after?: (c: WComponent) => any, t: number = 0): WComponent {
+			let l = this.components.length;
+			if (!l) return null;
+			if (!p) p = 0;
+			if (p < 0) p = l + p;
+			if (p < 0) p = 0;
+			if (p >= l) return null;
+			let c = this.components[p];
+			if (!c) return null;
+			if (before) before(c);
+			this.setState(p);
+			if (after) setTimeout(() => after(c), t);
+			return c;
+		}
+
+		curr(): WComponent {
+			let l = this.components.length;
+			let i = this.state;
+			if(i >= 0 && i < l) return this.components[i];
+			return null;
+		}
+
+		protected render() {
+			let l = this.components.length;
+			if (!this.state) this.state = 0;
+			if (this.state < 0) this.state = l + this.state;
+			if (this.state < 0) this.state = 0;
+			this.sp = this.state;
+			let r: string = '<div';
+			r += ' id="' + this.id + '"';
+			if (this._classStyle) r += ' class="' + this._classStyle + '"';
+			if (this._style) r += ' style="' + this._style + '"';
+			if (this._attributes) r += ' ' + this._attributes;
+			r += '>';
+			for (let i = 0; i < l; i++) {
+				if (i == this.state) {
+					r += '<div id="' + this.id + '-' + i + '" style="display:block;"></div>';
+				}
+				else {
+					r += '<div id="' + this.id + '-' + i + '" style="display:none;"></div>';
+				}
+			}
+			r += '</div>';
+			return r;
+		}
+
+		protected updateState(nextState: number): void {
+			this.sp = this.state;
+			this.state = nextState;
+			let l = this.components.length;
+			if (!this.state) this.state = 0;
+			if (this.state < 0) this.state = l + this.state;
+			if (this.state < 0) this.state = 0;
+			if (!this.mounted) return;
+			for (let i = 0; i < l; i++) {
+				let e = document.getElementById(this.id + '-' + i);
+				if(!e) continue;
+				e.style.display = i == this.state ? 'block' : 'none';
+			}
+		}
+
+		protected componentDidMount(): void {
+			let l = this.components.length;
+			if (!l) return;
+			for (let i = 0; i < l; i++) {
+				let c = this.components[i];
+				let e = document.getElementById(this.id + '-' + i);
+				if (!e) continue;
+				c.mount(e);
+			}
+		}
+
+		componentWillUnmount(): void {
+			for (let c of this.components) {
+				if(c) c.unmount();
+			}
+		}
+	}
+
 	export class WLink extends WComponent<string, string> {
 		protected _href: string;
 		protected _target: string;

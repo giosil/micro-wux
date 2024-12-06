@@ -3047,6 +3047,170 @@ var WUX;
         return WContainer;
     }(WUX.WComponent));
     WUX.WContainer = WContainer;
+    var WPages = /** @class */ (function (_super) {
+        __extends(WPages, _super);
+        function WPages(id, classStyle, style, attributes, props) {
+            var _this = 
+            // WComponent init
+            _super.call(this, id ? id : '*', 'WPages', props, classStyle, style, attributes) || this;
+            _this.sp = 0;
+            // WPages init
+            _this.components = [];
+            return _this;
+        }
+        Object.defineProperty(WPages.prototype, "pages", {
+            get: function () {
+                if (!this.components)
+                    return 0;
+                return this.components.length;
+            },
+            enumerable: false,
+            configurable: true
+        });
+        WPages.prototype.add = function (c) {
+            if (!c)
+                return;
+            this.components.push(c);
+            return this;
+        };
+        WPages.prototype.first = function () {
+            this.setState(0);
+            return this;
+        };
+        WPages.prototype.last = function () {
+            this.setState(this.components.length - 1);
+            return this;
+        };
+        WPages.prototype.back = function () {
+            this.setState(this.sp);
+            return this;
+        };
+        WPages.prototype.next = function () {
+            var l = this.components.length;
+            if (!l)
+                return false;
+            var s = this.state;
+            if (!s)
+                s = 0;
+            s++;
+            if (s >= l)
+                return false;
+            this.setState(s);
+            return true;
+        };
+        WPages.prototype.prev = function () {
+            var l = this.components.length;
+            if (!l)
+                return false;
+            var s = this.state;
+            if (!s)
+                s = 0;
+            s--;
+            if (s < 0)
+                return false;
+            this.setState(s);
+            return true;
+        };
+        WPages.prototype.show = function (p, before, after, t) {
+            if (t === void 0) { t = 0; }
+            var l = this.components.length;
+            if (!l)
+                return null;
+            if (!p)
+                p = 0;
+            if (p < 0)
+                p = l + p;
+            if (p < 0)
+                p = 0;
+            if (p >= l)
+                return null;
+            var c = this.components[p];
+            if (!c)
+                return null;
+            if (before)
+                before(c);
+            this.setState(p);
+            if (after)
+                setTimeout(function () { return after(c); }, t);
+            return c;
+        };
+        WPages.prototype.curr = function () {
+            var l = this.components.length;
+            var i = this.state;
+            if (i >= 0 && i < l)
+                return this.components[i];
+            return null;
+        };
+        WPages.prototype.render = function () {
+            var l = this.components.length;
+            if (!this.state)
+                this.state = 0;
+            if (this.state < 0)
+                this.state = l + this.state;
+            if (this.state < 0)
+                this.state = 0;
+            this.sp = this.state;
+            var r = '<div';
+            r += ' id="' + this.id + '"';
+            if (this._classStyle)
+                r += ' class="' + this._classStyle + '"';
+            if (this._style)
+                r += ' style="' + this._style + '"';
+            if (this._attributes)
+                r += ' ' + this._attributes;
+            r += '>';
+            for (var i = 0; i < l; i++) {
+                if (i == this.state) {
+                    r += '<div id="' + this.id + '-' + i + '" style="display:block;"></div>';
+                }
+                else {
+                    r += '<div id="' + this.id + '-' + i + '" style="display:none;"></div>';
+                }
+            }
+            r += '</div>';
+            return r;
+        };
+        WPages.prototype.updateState = function (nextState) {
+            this.sp = this.state;
+            this.state = nextState;
+            var l = this.components.length;
+            if (!this.state)
+                this.state = 0;
+            if (this.state < 0)
+                this.state = l + this.state;
+            if (this.state < 0)
+                this.state = 0;
+            if (!this.mounted)
+                return;
+            for (var i = 0; i < l; i++) {
+                var e = document.getElementById(this.id + '-' + i);
+                if (!e)
+                    continue;
+                e.style.display = i == this.state ? 'block' : 'none';
+            }
+        };
+        WPages.prototype.componentDidMount = function () {
+            var l = this.components.length;
+            if (!l)
+                return;
+            for (var i = 0; i < l; i++) {
+                var c = this.components[i];
+                var e = document.getElementById(this.id + '-' + i);
+                if (!e)
+                    continue;
+                c.mount(e);
+            }
+        };
+        WPages.prototype.componentWillUnmount = function () {
+            for (var _i = 0, _a = this.components; _i < _a.length; _i++) {
+                var c = _a[_i];
+                if (c)
+                    c.unmount();
+            }
+        };
+        return WPages;
+    }(WUX.WComponent));
+    WUX.WPages = WPages;
     var WLink = /** @class */ (function (_super) {
         __extends(WLink, _super);
         function WLink(id, text, icon, classStyle, style, attributes, href, target) {
@@ -5220,7 +5384,7 @@ var WUX;
             return tab;
         };
         WTab.prototype.render = function () {
-            if (this.state == null)
+            if (!this.state)
                 this.state = 0;
             var r = '<div';
             if (this._classStyle) {
@@ -5232,8 +5396,8 @@ var WUX;
             r += ' id="' + this.id + '"';
             if (this._style)
                 r += ' style="' + this._style + '"';
-            if (this.attributes)
-                r += ' ' + this.attributes;
+            if (this._attributes)
+                r += ' ' + this._attributes;
             r += '>';
             r += '<ul class="nav nav-tabs auto" role="tablist">';
             for (var i = 0; i < this.tabs.length; i++) {

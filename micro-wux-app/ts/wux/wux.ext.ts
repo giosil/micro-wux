@@ -322,7 +322,7 @@ namespace WUX {
 		}
 
 		protected render() {
-			if (this.state == null) this.state = 0;
+			if (!this.state) this.state = 0;
 			let r: string = '<div';
 			if (this._classStyle) {
 				r += ' class="tabs-container ' + this._classStyle + '"';
@@ -332,7 +332,7 @@ namespace WUX {
 			}
 			r += ' id="' + this.id + '"';
 			if (this._style) r += ' style="' + this._style + '"';
-			if (this.attributes) r += ' ' + this.attributes;
+			if (this._attributes) r += ' ' + this._attributes;
 			r += '>';
 			r += '<ul class="nav nav-tabs auto" role="tablist">';
 			for (let i = 0; i < this.tabs.length; i++) {
@@ -360,7 +360,7 @@ namespace WUX {
 
 		protected componentDidUpdate(prevProps: any, prevState: any): void {
 			let $t = JQ('.nav-tabs ' + this._t + '[' + this._r + '="#' + this.id + '-' + this.state + '"]');
-			if(!$t) return;
+			if (!$t) return;
 			$t.tab('show');
 		}
 
