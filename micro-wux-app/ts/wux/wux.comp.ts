@@ -344,6 +344,8 @@ namespace WUX {
 
 	export class WPages extends WComponent<any, number> {
 		components: WComponent[];
+		compBefore: WUX.WComponent
+		compAfter: WUX.WComponent
 		sp: number = 0;
 		
 		constructor(id?: string, classStyle?: string, style?: string | WStyle, attributes?: string | object, props?: any) {
@@ -361,6 +363,16 @@ namespace WUX {
 		add(c: WComponent): this {
 			if (!c) return;
 			this.components.push(c);
+			return this;
+		}
+
+		before(c: WComponent): this {
+			this.compBefore = c;
+			return this;
+		}
+
+		after(c: WComponent): this {
+			this.compAfter = c;
 			return this;
 		}
 
@@ -435,6 +447,9 @@ namespace WUX {
 			if (this._style) r += ' style="' + this._style + '"';
 			if (this._attributes) r += ' ' + this._attributes;
 			r += '>';
+			if(this.compBefore) {
+				r += '<div id="' + this.id + '-b""></div>';
+			}
 			for (let i = 0; i < l; i++) {
 				if (i == this.state) {
 					r += '<div id="' + this.id + '-' + i + '" style="display:block;"></div>';
@@ -442,6 +457,9 @@ namespace WUX {
 				else {
 					r += '<div id="' + this.id + '-' + i + '" style="display:none;"></div>';
 				}
+			}
+			if(this.compAfter) {
+				r += '<div id="' + this.id + '-a""></div>';
 			}
 			r += '</div>';
 			return r;
@@ -463,20 +481,29 @@ namespace WUX {
 		}
 
 		protected componentDidMount(): void {
+			if(this.compBefore) {
+				let b = document.getElementById(this.id + '-b');
+				if(b) this.compBefore.mount(b);
+			}
 			let l = this.components.length;
-			if (!l) return;
 			for (let i = 0; i < l; i++) {
 				let c = this.components[i];
 				let e = document.getElementById(this.id + '-' + i);
 				if (!e) continue;
 				c.mount(e);
 			}
+			if(this.compAfter) {
+				let a = document.getElementById(this.id + '-a');
+				if(a) this.compAfter.mount(a);
+			}
 		}
 
 		componentWillUnmount(): void {
+			if(this.compBefore) this.compBefore.unmount();
 			for (let c of this.components) {
 				if(c) c.unmount();
 			}
+			if(this.compAfter) this.compAfter.unmount();
 		}
 	}
 

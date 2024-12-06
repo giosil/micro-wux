@@ -3073,6 +3073,14 @@ var WUX;
             this.components.push(c);
             return this;
         };
+        WPages.prototype.before = function (c) {
+            this.compBefore = c;
+            return this;
+        };
+        WPages.prototype.after = function (c) {
+            this.compAfter = c;
+            return this;
+        };
         WPages.prototype.first = function () {
             this.setState(0);
             return this;
@@ -3159,6 +3167,9 @@ var WUX;
             if (this._attributes)
                 r += ' ' + this._attributes;
             r += '>';
+            if (this.compBefore) {
+                r += '<div id="' + this.id + '-b""></div>';
+            }
             for (var i = 0; i < l; i++) {
                 if (i == this.state) {
                     r += '<div id="' + this.id + '-' + i + '" style="display:block;"></div>';
@@ -3166,6 +3177,9 @@ var WUX;
                 else {
                     r += '<div id="' + this.id + '-' + i + '" style="display:none;"></div>';
                 }
+            }
+            if (this.compAfter) {
+                r += '<div id="' + this.id + '-a""></div>';
             }
             r += '</div>';
             return r;
@@ -3190,9 +3204,12 @@ var WUX;
             }
         };
         WPages.prototype.componentDidMount = function () {
+            if (this.compBefore) {
+                var b = document.getElementById(this.id + '-b');
+                if (b)
+                    this.compBefore.mount(b);
+            }
             var l = this.components.length;
-            if (!l)
-                return;
             for (var i = 0; i < l; i++) {
                 var c = this.components[i];
                 var e = document.getElementById(this.id + '-' + i);
@@ -3200,13 +3217,22 @@ var WUX;
                     continue;
                 c.mount(e);
             }
+            if (this.compAfter) {
+                var a = document.getElementById(this.id + '-a');
+                if (a)
+                    this.compAfter.mount(a);
+            }
         };
         WPages.prototype.componentWillUnmount = function () {
+            if (this.compBefore)
+                this.compBefore.unmount();
             for (var _i = 0, _a = this.components; _i < _a.length; _i++) {
                 var c = _a[_i];
                 if (c)
                     c.unmount();
             }
+            if (this.compAfter)
+                this.compAfter.unmount();
         };
         return WPages;
     }(WUX.WComponent));

@@ -523,10 +523,14 @@ declare namespace WUX {
     }
     class WPages extends WComponent<any, number> {
         components: WComponent[];
+        compBefore: WUX.WComponent;
+        compAfter: WUX.WComponent;
         sp: number;
         constructor(id?: string, classStyle?: string, style?: string | WStyle, attributes?: string | object, props?: any);
         get pages(): number;
         add(c: WComponent): this;
+        before(c: WComponent): this;
+        after(c: WComponent): this;
         first(): this;
         last(): this;
         back(): this;
