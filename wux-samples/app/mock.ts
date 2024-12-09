@@ -134,11 +134,14 @@ namespace APP {
                     let a = rec[f];
                     let b = flt[f];
                     if(typeof a == 'string') {
-                        if(a.indexOf(b) < 0)  return false;
+                        if(b && a.indexOf(b) < 0)  return false;
                     }
                     else if(a == undefined || a == null) {
                         if(b == undefined || b == null || b == '') return true;
                         return false;
+                    }
+                    else if(b == undefined || b == null) {
+                        return true;
                     }
                     else if(a != b) {
                         return false;

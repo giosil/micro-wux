@@ -361,7 +361,11 @@ namespace WUX {
 		}
 
 		add(c: WComponent): this {
-			if (!c) return;
+			if (!c) return this;
+			if (c instanceof WDialog) {
+				c.addToPages(this);
+				return this;
+			}
 			this.components.push(c);
 			return this;
 		}
@@ -1739,7 +1743,7 @@ namespace WUX {
 		}
 	}
 
-	export class WFormPanel extends WComponent<WField[][], any> {
+	export class WForm extends WComponent<WField[][], any> {
 		title: string;
 		rows: WField[][];
 		roww: WWrapper[];
@@ -1753,7 +1757,7 @@ namespace WUX {
 
 		constructor(id?: string, title?: string, action?: string) {
 			// WComponent init
-			super(id ? id : '*', 'WFormPanel');
+			super(id ? id : '*', 'WForm');
 			this.rootTag = 'form';
 			if (action) {
 				this._attributes = 'role="form" name="' + this.id + '" action="' + action + '"';
@@ -1761,7 +1765,7 @@ namespace WUX {
 			else {
 				this._attributes = 'role="form" name="' + this.id + '" action="javascript:void(0);"';
 			}
-			// WFormPanel init
+			// WForm init
 			this.title = title;
 			if(CSS.FORM) {
 				if(CSS.FORM.indexOf(':') > 0) {

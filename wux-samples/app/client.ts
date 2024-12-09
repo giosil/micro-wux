@@ -1,5 +1,9 @@
 namespace APP {
 	
+	export function getURLServices() {
+		return window.location.origin;
+	}
+	
 	export class HttpClient {
 		url: string;
 		mres: { [key: string]: any };
@@ -205,5 +209,5 @@ namespace APP {
 		}
 	}
 
-	export let http = new HttpClient();
+	export let http = new HttpClient(getURLServices(), 'Basic dXNlcjpwYXNzd29yZA==');
 }

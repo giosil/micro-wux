@@ -3069,7 +3069,11 @@ var WUX;
         });
         WPages.prototype.add = function (c) {
             if (!c)
-                return;
+                return this;
+            if (c instanceof WUX.WDialog) {
+                c.addToPages(this);
+                return this;
+            }
             this.components.push(c);
             return this;
         };
@@ -4574,12 +4578,12 @@ var WUX;
         return WTable;
     }(WUX.WComponent));
     WUX.WTable = WTable;
-    var WFormPanel = /** @class */ (function (_super) {
-        __extends(WFormPanel, _super);
-        function WFormPanel(id, title, action) {
+    var WForm = /** @class */ (function (_super) {
+        __extends(WForm, _super);
+        function WForm(id, title, action) {
             var _this = 
             // WComponent init
-            _super.call(this, id ? id : '*', 'WFormPanel') || this;
+            _super.call(this, id ? id : '*', 'WForm') || this;
             _this.rootTag = 'form';
             if (action) {
                 _this._attributes = 'role="form" name="' + _this.id + '" action="' + action + '"';
@@ -4587,7 +4591,7 @@ var WUX;
             else {
                 _this._attributes = 'role="form" name="' + _this.id + '" action="javascript:void(0);"';
             }
-            // WFormPanel init
+            // WForm init
             _this.title = title;
             if (WUX.CSS.FORM) {
                 if (WUX.CSS.FORM.indexOf(':') > 0) {
@@ -4600,7 +4604,7 @@ var WUX;
             _this.init();
             return _this;
         }
-        WFormPanel.prototype.init = function () {
+        WForm.prototype.init = function () {
             this.rows = [];
             this.roww = [];
             this.currRow = null;
@@ -4609,7 +4613,7 @@ var WUX;
             this.addRow();
             return this;
         };
-        WFormPanel.prototype.focus = function () {
+        WForm.prototype.focus = function () {
             if (!this.mounted)
                 return this;
             var f = this.first(true);
@@ -4623,7 +4627,7 @@ var WUX;
             }
             return this;
         };
-        WFormPanel.prototype.first = function (enabled) {
+        WForm.prototype.first = function (enabled) {
             if (!this.rows)
                 return null;
             for (var _i = 0, _a = this.rows; _i < _a.length; _i++) {
@@ -4643,7 +4647,7 @@ var WUX;
             }
             return null;
         };
-        WFormPanel.prototype.focusOn = function (fieldId) {
+        WForm.prototype.focusOn = function (fieldId) {
             if (!this.mounted)
                 return this;
             var f = this.getField(fieldId);
@@ -4657,7 +4661,7 @@ var WUX;
             }
             return this;
         };
-        WFormPanel.prototype.getField = function (fid) {
+        WForm.prototype.getField = function (fid) {
             if (!fid)
                 return;
             var sid = fid.indexOf(this.id + '-') == 0 ? fid : this.subId(fid);
@@ -4671,7 +4675,7 @@ var WUX;
             }
             return;
         };
-        WFormPanel.prototype.getComponent = function (fid, def) {
+        WForm.prototype.getComponent = function (fid, def) {
             var f = this.getField(fid);
             if (!f) {
                 console.error('[' + WUX.str(this) + '] Field ' + fid + ' not found.');
@@ -4684,14 +4688,14 @@ var WUX;
             }
             return c;
         };
-        WFormPanel.prototype.onField = function (fid, events, handler) {
+        WForm.prototype.onField = function (fid, events, handler) {
             var c = this.getComponent(fid);
             if (!c)
                 return;
             c.on(events, handler);
             return this;
         };
-        WFormPanel.prototype.addRow = function (classStyle, style, id, attributes, type) {
+        WForm.prototype.addRow = function (classStyle, style, id, attributes, type) {
             if (type === void 0) { type = 'row'; }
             if (this.currRow && !this.currRow.length) {
                 this.roww[this.roww.length - 1] = {
@@ -4714,7 +4718,7 @@ var WUX;
             });
             return this;
         };
-        WFormPanel.prototype._add = function (id, label, co, type, opts) {
+        WForm.prototype._add = function (id, label, co, type, opts) {
             var f = opts ? opts : {};
             if (co instanceof WInput || co instanceof WTextArea) {
                 co.readonly = !!f.readonly;
@@ -4736,44 +4740,44 @@ var WUX;
             this.currRow.push(f);
             return this;
         };
-        WFormPanel.prototype.addTextField = function (fieldId, label, opts) {
+        WForm.prototype.addTextField = function (fieldId, label, opts) {
             var id = this.subId(fieldId);
             var co = new WInput(id, 'text', 0, WUX.CSS.FORM_CTRL);
             return this._add(id, label, co, 'text', opts);
         };
-        WFormPanel.prototype.addDateField = function (fieldId, label, opts) {
+        WForm.prototype.addDateField = function (fieldId, label, opts) {
             var id = this.subId(fieldId);
             var co = new WInput(id, 'date', 0, WUX.CSS.FORM_CTRL);
             return this._add(id, label, co, 'date', opts);
         };
-        WFormPanel.prototype.addTimeField = function (fieldId, label, opts) {
+        WForm.prototype.addTimeField = function (fieldId, label, opts) {
             var id = this.subId(fieldId);
             var co = new WInput(id, 'time', 0, WUX.CSS.FORM_CTRL);
             return this._add(id, label, co, 'time', opts);
         };
-        WFormPanel.prototype.addEmailField = function (fieldId, label, opts) {
+        WForm.prototype.addEmailField = function (fieldId, label, opts) {
             var id = this.subId(fieldId);
             var co = new WInput(id, 'email', 0, WUX.CSS.FORM_CTRL);
             return this._add(id, label, co, 'email', opts);
         };
-        WFormPanel.prototype.addNoteField = function (fieldId, label, rows, opts) {
+        WForm.prototype.addNoteField = function (fieldId, label, rows, opts) {
             if (!rows)
                 rows = 3;
             var id = this.subId(fieldId);
             var co = new WTextArea(id, rows, WUX.CSS.FORM_CTRL);
             return this._add(id, label, co, 'note', opts);
         };
-        WFormPanel.prototype.addOptionsField = function (fieldId, label, options, opts) {
+        WForm.prototype.addOptionsField = function (fieldId, label, options, opts) {
             var id = this.subId(fieldId);
             var co = new WSelect(id, options, false, WUX.CSS.FORM_CTRL);
             return this._add(id, label, co, 'select', opts);
         };
-        WFormPanel.prototype.addRadioField = function (fieldId, label, options, opts) {
+        WForm.prototype.addRadioField = function (fieldId, label, options, opts) {
             var id = this.subId(fieldId);
             var co = new WRadio(id, options, WUX.CSS.FORM_CTRL, WUX.CSS.CHECK_STYLE);
             return this._add(id, label, co, 'select', opts);
         };
-        WFormPanel.prototype.addBooleanField = function (fieldId, label, labelCheck, opts) {
+        WForm.prototype.addBooleanField = function (fieldId, label, labelCheck, opts) {
             var id = this.subId(fieldId);
             var co = new WCheck(id, '');
             co.divClass = WUX.CSS.FORM_CHECK;
@@ -4782,7 +4786,7 @@ var WUX;
             co.label = labelCheck;
             return this._add(id, label, co, 'boolean', opts);
         };
-        WFormPanel.prototype.addToggleField = function (fieldId, label, labelCheck, opts) {
+        WForm.prototype.addToggleField = function (fieldId, label, labelCheck, opts) {
             var id = this.subId(fieldId);
             var co = new WCheck(id, '');
             co.lever = true;
@@ -4793,26 +4797,26 @@ var WUX;
             co.label = labelCheck;
             return this._add(id, label, co, 'boolean', opts);
         };
-        WFormPanel.prototype.addBlankField = function (label, classStyle, style, opts) {
+        WForm.prototype.addBlankField = function (label, classStyle, style, opts) {
             var f0 = opts ? opts : {};
             var co = new WContainer('', classStyle, style);
             if (f0.element)
                 co.add(f0.element);
             return this._add('', label, co, 'blank', opts);
         };
-        WFormPanel.prototype.addCaption = function (text, icon, classStyle, style, opts) {
+        WForm.prototype.addCaption = function (text, icon, classStyle, style, opts) {
             if (!text)
                 text = '';
             var co = new WLabel('', text, icon, classStyle, style);
             return this._add('', '', co, 'caption', opts);
         };
-        WFormPanel.prototype.addInternalField = function (fieldId, value) {
+        WForm.prototype.addInternalField = function (fieldId, value) {
             if (value === undefined)
                 value = null;
             this.currRow.push({ id: this.subId(fieldId), value: value, type: 'internal' });
             return this;
         };
-        WFormPanel.prototype.addComponent = function (fieldId, label, component, opts) {
+        WForm.prototype.addComponent = function (fieldId, label, component, opts) {
             var f0 = opts ? opts : {};
             if (!component)
                 return this;
@@ -4827,13 +4831,13 @@ var WUX;
             }
             return this;
         };
-        WFormPanel.prototype.addToFooter = function (c) {
+        WForm.prototype.addToFooter = function (c) {
             if (!c && !this.footer)
                 return this;
             this.footer.push(c);
             return this;
         };
-        WFormPanel.prototype.componentDidMount = function () {
+        WForm.prototype.componentDidMount = function () {
             this.main = new WContainer(this.id + '-c');
             for (var i = 0; i < this.rows.length; i++) {
                 var w = this.roww[i];
@@ -4914,11 +4918,11 @@ var WUX;
             }
             this.main.mount(this.root);
         };
-        WFormPanel.prototype.componentWillUnmount = function () {
+        WForm.prototype.componentWillUnmount = function () {
             if (!this.main)
                 this.main.unmount();
         };
-        WFormPanel.prototype.clear = function () {
+        WForm.prototype.clear = function () {
             for (var i = 0; i < this.rows.length; i++) {
                 var row = this.rows[i];
                 for (var j = 0; j < row.length; j++) {
@@ -4932,7 +4936,7 @@ var WUX;
             }
             return this;
         };
-        WFormPanel.prototype.setValue = function (fid, v, updState) {
+        WForm.prototype.setValue = function (fid, v, updState) {
             if (updState === void 0) { updState = true; }
             var f = this.getField(fid);
             if (!f)
@@ -4951,7 +4955,7 @@ var WUX;
             }
             return this;
         };
-        WFormPanel.prototype.getValue = function (fid) {
+        WForm.prototype.getValue = function (fid) {
             var f = typeof fid == 'string' ? this.getField(fid) : fid;
             if (!f)
                 return null;
@@ -4959,7 +4963,7 @@ var WUX;
                 return f.component.getState();
             return f.value;
         };
-        WFormPanel.prototype.setOptions = function (fid, options, prevVal) {
+        WForm.prototype.setOptions = function (fid, options, prevVal) {
             var f = this.getField(fid);
             if (!f)
                 return this;
@@ -4972,14 +4976,14 @@ var WUX;
             }
             return this;
         };
-        WFormPanel.prototype.setSpan = function (fieldId, span) {
+        WForm.prototype.setSpan = function (fieldId, span) {
             var f = this.getField(fieldId);
             if (!f)
                 return this;
             f.span = span;
             return this;
         };
-        WFormPanel.prototype.getValues = function () {
+        WForm.prototype.getValues = function () {
             var r = {};
             for (var i = 0; i < this.rows.length; i++) {
                 var row = this.rows[i];
@@ -4990,11 +4994,11 @@ var WUX;
             }
             return r;
         };
-        WFormPanel.prototype.getState = function () {
+        WForm.prototype.getState = function () {
             this.state = this.getValues();
             return this.state;
         };
-        WFormPanel.prototype.updateState = function (nextState) {
+        WForm.prototype.updateState = function (nextState) {
             _super.prototype.updateState.call(this, nextState);
             if (!nextState || WUX.WUtil.isEmpty(nextState)) {
                 this.clear();
@@ -5003,7 +5007,7 @@ var WUX;
                 this.updateView();
             }
         };
-        WFormPanel.prototype.updateView = function () {
+        WForm.prototype.updateView = function () {
             if (!this.state) {
                 this.clear();
                 return;
@@ -5012,7 +5016,7 @@ var WUX;
                 this.setValue(id, this.state[id], false);
             }
         };
-        WFormPanel.prototype.setMandatory = function () {
+        WForm.prototype.setMandatory = function () {
             var fids = [];
             for (var _i = 0; _i < arguments.length; _i++) {
                 fids[_i] = arguments[_i];
@@ -5039,7 +5043,7 @@ var WUX;
             }
             return this;
         };
-        WFormPanel.prototype.checkMandatory = function (labels, focus, atLeastOne) {
+        WForm.prototype.checkMandatory = function (labels, focus, atLeastOne) {
             var values = this.getState();
             if (!values)
                 values = {};
@@ -5077,9 +5081,9 @@ var WUX;
                 return r.substring(1);
             return r;
         };
-        return WFormPanel;
+        return WForm;
     }(WUX.WComponent));
-    WUX.WFormPanel = WFormPanel;
+    WUX.WForm = WForm;
 })(WUX || (WUX = {}));
 var WUX;
 (function (WUX) {
@@ -5130,6 +5134,7 @@ var WUX;
             if (btnOk === void 0) { btnOk = true; }
             if (btnClose === void 0) { btnClose = true; }
             var _this = _super.call(this, id, name, undefined, classStyle, style, attributes) || this;
+            _this.pg = 0;
             _this.buttons = [];
             _this.tagTitle = 'h5';
             if (btnClose) {
@@ -5151,10 +5156,51 @@ var WUX;
             WuxDOM.onRender(function (e) {
                 if (_this.mounted)
                     return;
+                if (_this.wp)
+                    return;
                 _this.mount(e.element);
             });
             return _this;
         }
+        WDialog.prototype.addToPages = function (wp, headVis, footVis, headStyle, footStyle, btnStyle) {
+            if (headVis === void 0) { headVis = true; }
+            if (footVis === void 0) { footVis = true; }
+            this.wp = wp;
+            if (!wp)
+                return this;
+            this.isShown = false;
+            if (!this.contClass)
+                this.contClass = 'modal-content';
+            this.cntRoot = new WUX.WContainer(this.id);
+            this.cntMain = this.cntRoot.addContainer('', this.mainClass, this._style);
+            this.cntContent = this.cntMain.addContainer('', this.contClass, this.contStyle);
+            if (headVis && this.cntHeader) {
+                if (headStyle == null)
+                    headStyle = 'margin-bottom:2rem;';
+                this.cntHeader.style = WUX.css(this.cntHeader.style, headStyle);
+                this.cntContent.addContainer(this.cntHeader);
+            }
+            if (this.cntBody)
+                this.cntContent.addContainer(this.cntBody);
+            if (footVis) {
+                if (btnStyle == null)
+                    btnStyle = 'margin:0.25rem;';
+                for (var _i = 0, _b = this.buttons; _i < _b.length; _i++) {
+                    var btn = _b[_i];
+                    btn.style = WUX.css(btn.style, btnStyle);
+                    this.footer.add(btn);
+                }
+                if (this.cntFooter) {
+                    if (footStyle) {
+                        this.cntFooter.style = WUX.css(this.cntFooter.style, footStyle);
+                    }
+                    this.cntContent.addContainer(this.cntFooter);
+                }
+            }
+            wp.add(this.cntRoot);
+            this.pg = wp.pages - 1;
+            return this;
+        };
         WDialog.prototype.makeUp = function (title, body, onHidden) {
             this.title = title;
             this.body.addRow().addCol('12').add(body);
@@ -5164,9 +5210,11 @@ var WUX;
         };
         WDialog.prototype.onShownModal = function (handler) {
             this.sh = handler;
+            return this;
         };
         WDialog.prototype.onHiddenModal = function (handler) {
             this.hh = handler;
+            return this;
         };
         Object.defineProperty(WDialog.prototype, "header", {
             get: function () {
@@ -5259,6 +5307,11 @@ var WUX;
                 if (_this.onClickOk()) {
                     _this.ok = true;
                     _this.cancel = false;
+                    if (_this.wp) {
+                        _this.wp.back();
+                        _this._h();
+                        return;
+                    }
                     if (_this.$r)
                         _this.$r.modal('hide');
                 }
@@ -5274,6 +5327,11 @@ var WUX;
                 if (_this.onClickCancel()) {
                     _this.ok = false;
                     _this.cancel = true;
+                    if (_this.wp) {
+                        _this.wp.back();
+                        _this._h();
+                        return;
+                    }
                     if (_this.$r)
                         _this.$r.modal('hide');
                 }
@@ -5287,6 +5345,11 @@ var WUX;
             this.cancel = false;
             this.parent = parent;
             this.ph = handler;
+            if (this.wp) {
+                this.wp.show(this.pg);
+                this._s();
+                return;
+            }
             if (!this.mounted)
                 WuxDOM.mount(this);
             if (!this.$r)
@@ -5295,12 +5358,22 @@ var WUX;
             this.$r.modal('show');
         };
         WDialog.prototype.hide = function () {
+            if (this.wp) {
+                this.wp.back();
+                this._h();
+                return;
+            }
             if (this.$r)
                 this.$r.modal('hide');
         };
         WDialog.prototype.close = function () {
             this.ok = false;
             this.cancel = false;
+            if (this.wp) {
+                this.wp.back();
+                this._h();
+                return;
+            }
             if (this.$r)
                 this.$r.modal('hide');
         };
@@ -5339,21 +5412,31 @@ var WUX;
             if (!this.$r)
                 return;
             this.$r.on('shown.bs.modal', function (e) {
-                _this.isShown = true;
-                _this.onShown();
-                if (_this.sh)
-                    _this.sh(e);
+                _this._s(e);
             });
             this.$r.on('hidden.bs.modal', function (e) {
-                _this.isShown = false;
-                _this.onHidden();
-                if (_this.hh)
-                    _this.hh(e);
-                if (_this.ph) {
-                    _this.ph(e);
-                    _this.ph = null;
-                }
+                _this._h(e);
             });
+        };
+        WDialog.prototype._s = function (e) {
+            if (!e)
+                e = { "type": "shown" };
+            this.isShown = true;
+            this.onShown();
+            if (this.sh)
+                this.sh(e);
+        };
+        WDialog.prototype._h = function (e) {
+            if (!e)
+                e = { "type": "hidden" };
+            this.isShown = false;
+            this.onHidden();
+            if (this.hh)
+                this.hh(e);
+            if (this.ph) {
+                this.ph(e);
+                this.ph = null;
+            }
         };
         WDialog.prototype.componentWillUnmount = function () {
             this.isShown = false;
@@ -5377,7 +5460,8 @@ var WUX;
         WDialog.prototype.buildTitle = function () {
             if (!this.tagTitle)
                 this.tagTitle = 'h3';
-            return '<' + this.tagTitle + ' class="modal-title" id="' + this.subId('title') + '">' + WUX.WUtil.toText(this._title) + '</' + this.tagTitle + '>';
+            var c = this.wp ? '' : '  class="modal-title"';
+            return '<' + this.tagTitle + c + ' id="' + this.subId('title') + '">' + WUX.WUtil.toText(this._title) + '</' + this.tagTitle + '>';
         };
         return WDialog;
     }(WUX.WComponent));

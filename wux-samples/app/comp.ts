@@ -2,6 +2,9 @@ namespace APP {
 	
 	export class Breadcrumb extends WUX.WComponent<string, string[]> {
 		home: string;
+		lhtm: string;
+		leid: string;
+
 		constructor(id?: string, classStyle?: string, style?: string | WUX.WStyle, attributes?: string | object) {
 			super(id ? id : '*', 'Breadcrumb', '/', classStyle, style, attributes);
 			this.rootTag = 'nav';
@@ -10,6 +13,15 @@ namespace APP {
 		add(link: string): this {
 			if(!this.state) this.state = [];
 			if(link) this.state.push(link);
+			return this;
+		}
+
+		status(t: string): this {
+			if(!this.leid) return this;
+			if(!this.lhtm) this.lhtm = '';
+			let l = document.getElementById(this.leid);
+			let h = t ? ' <span class="badge bg-primary" style="margin-left:0.5rem;">' + t + '</span>' : '';
+			if(l) l.innerHTML = this.lhtm + h;
 			return this;
 		}
 		
@@ -27,10 +39,14 @@ namespace APP {
 					let e = this.state[i];
 					let s = i < l - 1 ? '<span class="separator">/</span>' : '';
 					if(l[0] == '<') {
-						r += '<li class="breadcrumb-item">' + e + s + '</li>';
+						r += '<li class="breadcrumb-item" id="' + this.id + '-' + i + '">' + e + s + '</li>';
 					}
 					else {
-						r += '<li class="breadcrumb-item"><a href="#">' + e + s + '</a></li>';
+						r += '<li class="breadcrumb-item"><a href="#" id="' + this.id + '-' + i + '">' + e + s + '</a></li>';
+					}
+					if(i == l - 1) {
+						this.lhtm = e;
+						this.leid = this.id + '-' + i;
 					}
 				}
 			}

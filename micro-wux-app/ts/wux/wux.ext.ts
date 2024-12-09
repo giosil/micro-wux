@@ -72,6 +72,9 @@ namespace WUX {
 		sh: (e?: JQueryEventObject) => any;
 		// hidden handler
 		hh: (e?: JQueryEventObject) => any;
+		// Pages
+		wp: WPages;
+		pg: number = 0;
 
 		constructor(id: string, name: string = 'WDialog', btnOk = true, btnClose = true, classStyle?: string, style?: string | WUX.WStyle, attributes?: string | object) {
 			super(id, name, undefined, classStyle, style, attributes);
@@ -92,8 +95,41 @@ namespace WUX {
 			}
 			WuxDOM.onRender((e: WUX.WEvent) => {
 				if (this.mounted) return;
+				if (this.wp) return;
 				this.mount(e.element);
 			});
+		}
+
+		addToPages(wp: WPages, headVis: boolean = true, footVis: boolean = true, headStyle?: string | WStyle, footStyle?: string | WStyle, btnStyle?: string | WStyle): this {
+			this.wp = wp;
+			if(!wp) return this;
+			this.isShown = false;
+			if(!this.contClass) this.contClass = 'modal-content';
+			this.cntRoot = new WContainer(this.id);
+			this.cntMain = this.cntRoot.addContainer('', this.mainClass, this._style);
+			this.cntContent = this.cntMain.addContainer('', this.contClass, this.contStyle);
+			if (headVis && this.cntHeader) {
+				if(headStyle == null) headStyle = 'margin-bottom:2rem;';
+				this.cntHeader.style = css(this.cntHeader.style, headStyle);
+				this.cntContent.addContainer(this.cntHeader);
+			}
+			if (this.cntBody) this.cntContent.addContainer(this.cntBody);
+			if (footVis) {
+				if (btnStyle == null) btnStyle = 'margin:0.25rem;';
+				for (let btn of this.buttons) {
+					btn.style = css(btn.style, btnStyle);
+					this.footer.add(btn);
+				}
+				if (this.cntFooter) {
+					if (footStyle) {
+						this.cntFooter.style = css(this.cntFooter.style, footStyle);
+					}
+					this.cntContent.addContainer(this.cntFooter);
+				}
+			}
+			wp.add(this.cntRoot);
+			this.pg = wp.pages - 1;
+			return this;
 		}
 
 		makeUp(title: string, body: string | WUX.WComponent, onHidden?: (e?: JQueryEventObject) => any): this {
@@ -103,12 +139,14 @@ namespace WUX {
 			return this;
 		}
 
-		onShownModal(handler: (e?: JQueryEventObject) => any) {
+		onShownModal(handler: (e?: JQueryEventObject) => any): this {
 			this.sh = handler;
+			return this;
 		}
 
-		onHiddenModal(handler: (e?: JQueryEventObject) => any) {
+		onHiddenModal(handler: (e?: JQueryEventObject) => any): this {
 			this.hh = handler;
+			return this;
 		}
 
 		get header(): WUX.WContainer {
@@ -188,6 +226,11 @@ namespace WUX {
 				if (this.onClickOk()) {
 					this.ok = true;
 					this.cancel = false;
+					if(this.wp) {
+						this.wp.back();
+						this._h();
+						return;
+					}
 					if(this.$r) this.$r.modal('hide');
 				}
 			});
@@ -201,6 +244,11 @@ namespace WUX {
 				if (this.onClickCancel()) {
 					this.ok = false;
 					this.cancel = true;
+					if(this.wp) {
+						this.wp.back();
+						this._h();
+						return;
+					}
 					if(this.$r) this.$r.modal('hide');
 				}
 			});
@@ -213,20 +261,35 @@ namespace WUX {
 			this.cancel = false;
 			this.parent = parent;
 			this.ph = handler;
+			if (this.wp) {
+				this.wp.show(this.pg);
+				this._s();
+				return;
+			}
 			if (!this.mounted) WuxDOM.mount(this);
-			if(!this.$r) return;
+			if (!this.$r) return;
 			this.$r.modal({ backdrop: 'static', keyboard: false, show: false});
 			this.$r.modal('show');
 		}
 
 		hide(): void {
-			if(this.$r) this.$r.modal('hide');
+			if (this.wp) {
+				this.wp.back();
+				this._h();
+				return;
+			}
+			if (this.$r) this.$r.modal('hide');
 		}
 
 		close(): void {
 			this.ok = false;
 			this.cancel = false;
-			if(this.$r) this.$r.modal('hide');
+			if (this.wp) {
+				this.wp.back();
+				this._h();
+				return;
+			}
+			if (this.$r) this.$r.modal('hide');
 		}
 
 		protected beforeShow(): boolean {
@@ -255,21 +318,31 @@ namespace WUX {
 		}
 
 		protected componentDidMount(): void {
-			if(!this.$r) return;
+			if (!this.$r) return;
 			this.$r.on('shown.bs.modal', (e: JQueryEventObject) => {
-				this.isShown = true;
-				this.onShown();
-				if (this.sh) this.sh(e);
+				this._s(e);
 			});
 			this.$r.on('hidden.bs.modal', (e: JQueryEventObject) => {
-				this.isShown = false;
-				this.onHidden();
-				if (this.hh) this.hh(e);
-				if (this.ph) {
-					this.ph(e);
-					this.ph = null;
-				}
+				this._h(e);
 			});
+		}
+
+		protected _s(e?: JQueryEventObject) {
+			if (!e) e = {"type": "shown"} as JQueryEventObject
+			this.isShown = true;
+			this.onShown();
+			if (this.sh) this.sh(e);
+		}
+
+		protected _h(e?: JQueryEventObject) {
+			if (!e) e = {"type": "hidden"} as JQueryEventObject
+			this.isShown = false;
+			this.onHidden();
+			if (this.hh) this.hh(e);
+			if (this.ph) {
+				this.ph(e);
+				this.ph = null;
+			}
 		}
 
 		componentWillUnmount(): void {
@@ -286,7 +359,8 @@ namespace WUX {
 
 		protected buildTitle(): string {
 			if (!this.tagTitle) this.tagTitle = 'h3';
-			return '<' + this.tagTitle + ' class="modal-title" id="' + this.subId('title') + '">' + WUtil.toText(this._title) + '</' + this.tagTitle + '>';
+			let c = this.wp ? '' : '  class="modal-title"';
+			return '<' + this.tagTitle + c + ' id="' + this.subId('title') + '">' + WUtil.toText(this._title) + '</' + this.tagTitle + '>';
 		}
 	}
 	

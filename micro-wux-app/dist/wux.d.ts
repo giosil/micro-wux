@@ -713,7 +713,7 @@ declare namespace WUX {
         protected buildBody(): void;
         onSort(h: (e: WEvent) => any): void;
     }
-    class WFormPanel extends WComponent<WField[][], any> {
+    class WForm extends WComponent<WField[][], any> {
         title: string;
         rows: WField[][];
         roww: WWrapper[];
@@ -802,10 +802,13 @@ declare namespace WUX {
         ph: (e?: JQueryEventObject) => any;
         sh: (e?: JQueryEventObject) => any;
         hh: (e?: JQueryEventObject) => any;
+        wp: WPages;
+        pg: number;
         constructor(id: string, name?: string, btnOk?: boolean, btnClose?: boolean, classStyle?: string, style?: string | WUX.WStyle, attributes?: string | object);
+        addToPages(wp: WPages, headVis?: boolean, footVis?: boolean, headStyle?: string | WStyle, footStyle?: string | WStyle, btnStyle?: string | WStyle): this;
         makeUp(title: string, body: string | WUX.WComponent, onHidden?: (e?: JQueryEventObject) => any): this;
-        onShownModal(handler: (e?: JQueryEventObject) => any): void;
-        onHiddenModal(handler: (e?: JQueryEventObject) => any): void;
+        onShownModal(handler: (e?: JQueryEventObject) => any): this;
+        onHiddenModal(handler: (e?: JQueryEventObject) => any): this;
         get header(): WUX.WContainer;
         get body(): WUX.WContainer;
         get footer(): WUX.WContainer;
@@ -825,6 +828,8 @@ declare namespace WUX {
         protected onHidden(): void;
         protected render(): WContainer;
         protected componentDidMount(): void;
+        protected _s(e?: JQueryEventObject): void;
+        protected _h(e?: JQueryEventObject): void;
         componentWillUnmount(): void;
         protected buildTitle(): string;
     }

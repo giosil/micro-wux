@@ -11,14 +11,14 @@ namespace APP {
 	}
 
 	export class DlgEntity extends WUX.WDialog<string, Entity> {
-		fp: WUX.WFormPanel;
+		fp: WUX.WForm;
 		
 		constructor(id: string) {
 			super(id, 'DlgEntity');
 			
 			this.title = 'Entity';
 			
-			this.fp = new WUX.WFormPanel(this.subId('fp'));
+			this.fp = new WUX.WForm(this.subId('fp'));
 			this.fp.addRow();
 			this.fp.addTextField('code', 'Codice');
 			this.fp.addRow();
@@ -66,7 +66,7 @@ namespace APP {
 		// Components
 		main: WUX.WContainer;
 		brcr: Breadcrumb;
-		form: WUX.WFormPanel;
+		form: WUX.WForm;
 		btnFind: WUX.WButton;
 		btnReset: WUX.WButton;
 		btnNew: WUX.WButton;
@@ -146,7 +146,7 @@ namespace APP {
 			this.brcr = new Breadcrumb();
 			this.brcr.add('Entities');
 
-			this.form = new WUX.WFormPanel(this.subId('form'));
+			this.form = new WUX.WForm(this.subId('form'));
 			this.form
 				.addRow()
 					.addTextField('code', 'Codice')
@@ -318,7 +318,7 @@ namespace APP {
 		// Components
 		main: WUX.WContainer;
 		brcr: Breadcrumb;
-		form: WUX.WFormPanel;
+		form: WUX.WForm;
 		btnFind: WUX.WButton;
 		btnReset: WUX.WButton;
 		btnNew: WUX.WButton;
@@ -329,6 +329,8 @@ namespace APP {
 		
 		// Dialogs
 		dlg: DlgEntity;
+		// Pages
+		pages: WUX.WPages;
 		
 		constructor() {
 			super();
@@ -353,6 +355,7 @@ namespace APP {
 			
 			this.dlg = new DlgEntity(this.subId('dlg'));
 			this.dlg.onHiddenModal((e: JQueryEventObject) => {
+				this.brcr.status('');
 				if (!this.dlg.ok) return;
 				
 				let a = this.dlg.getProps();
@@ -390,7 +393,7 @@ namespace APP {
 			this.brcr = new Breadcrumb();
 			this.brcr.add('Entities');
 
-			this.form = new WUX.WFormPanel(this.subId('form'));
+			this.form = new WUX.WForm(this.subId('form'));
 			this.form
 				.addRow()
 					.addTextField('code', 'Codice')
@@ -410,6 +413,8 @@ namespace APP {
 			});
 			this.btnNew = new WUX.WButton(this.subId('btnNew'), 'Nuovo', 'fa-plus-circle', 'btn-icon btn btn-primary', 'margin-right: 0.5rem;');
 			this.btnNew.on('click', (e: PointerEvent) => {
+				this.brcr.status('Nuovo');
+				
 				this.dlg.setProps('new');
 				this.dlg.setState(null);
 				this.dlg.show(this);
@@ -473,6 +478,12 @@ namespace APP {
 					});
 					return;
 				}
+				else if(ai == 'view') {
+					this.brcr.status('Visualizza');
+				}
+				else if(ai == 'edit') {
+					this.brcr.status('Modifica');
+				}
 				
 				this.dlg.setProps(ai);
 				this.dlg.setState(s[x]);
@@ -498,9 +509,10 @@ namespace APP {
 				.addRow('form-row')
 					.add(this.btnNew);
 
+			
 			this.main = new WUX.WContainer();
 			this.main
-				.before(this.brcr)
+				// .before(this.brcr) // -> spostato in pages
 				.addRow()
 					.addCol('col-md-12')
 						.add(this.form)
@@ -512,8 +524,16 @@ namespace APP {
 				.addRow()
 					.addCol('col-md-12', 'padding-top: 1rem;')
 						.add(this.table);
-			
-			return this.main;
+
+			this.pages = new WUX.WPages();
+			this.pages
+				.before(this.brcr)
+				.add(this.main);
+
+			// Visualizzazione in pagina
+			this.dlg.addToPages(this.pages, false);
+
+			return this.pages;
 		}
 		
 		doFind() {
