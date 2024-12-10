@@ -2697,12 +2697,16 @@ var WUX;
             // WComponent init
             _super.call(this, id ? id : '*', 'WContainer', type, classStyle, WUX.style(style), attributes) || this;
             // WContainer init
-            _this.cbef = [];
-            _this.caft = [];
-            _this.cint = [];
-            _this.comp = [];
-            _this.sr_c = [];
-            _this.grid = [];
+            _this.cbef = []; // Components before the container
+            _this.ashe = []; // Head 
+            _this.cbgr = []; //   Components before Grid
+            _this.comp = []; //     Grid components
+            _this.sr_c = []; //     Grid ids
+            _this.grid = []; //     Grid of class^style
+            _this._end = false; //     End grid
+            _this.cagr = []; //   Components after Grid
+            _this.asta = []; // Tail 
+            _this.caft = []; // Components after the container
             _this.rootTag = inline ? 'span' : 'div';
             return _this;
         }
@@ -2731,6 +2735,28 @@ var WUX;
             g.push(classStyle);
             return this;
         };
+        WContainer.prototype.head = function () {
+            var _a;
+            var items = [];
+            for (var _i = 0; _i < arguments.length; _i++) {
+                items[_i] = arguments[_i];
+            }
+            if (!items)
+                return this;
+            (_a = this.ashe).push.apply(_a, items);
+            return this;
+        };
+        WContainer.prototype.tail = function () {
+            var _a;
+            var items = [];
+            for (var _i = 0; _i < arguments.length; _i++) {
+                items[_i] = arguments[_i];
+            }
+            if (!items)
+                return this;
+            (_a = this.asta).push.apply(_a, items);
+            return this;
+        };
         WContainer.prototype.before = function () {
             var items = [];
             for (var _i = 0; _i < arguments.length; _i++) {
@@ -2738,7 +2764,22 @@ var WUX;
             }
             if (!items)
                 return this;
-            this.cbef = items;
+            for (var _a = 0, items_1 = items; _a < items_1.length; _a++) {
+                var e = items_1[_a];
+                if (!e)
+                    continue;
+                if (typeof e == 'string') {
+                    this.cbef.push(new Wrapp(e));
+                    return this;
+                }
+                else if (e instanceof Element) {
+                    this.cbef.push(new Wrapp(e));
+                    return this;
+                }
+                else {
+                    this.cbef.push(e);
+                }
+            }
             return this;
         };
         WContainer.prototype.after = function () {
@@ -2748,56 +2789,59 @@ var WUX;
             }
             if (!items)
                 return this;
-            this.caft = items;
+            for (var _a = 0, items_2 = items; _a < items_2.length; _a++) {
+                var e = items_2[_a];
+                if (!e)
+                    continue;
+                if (typeof e == 'string') {
+                    this.caft.push(new Wrapp(e));
+                    return this;
+                }
+                else if (e instanceof Element) {
+                    this.caft.push(new Wrapp(e));
+                    return this;
+                }
+                else {
+                    this.caft.push(e);
+                }
+            }
             return this;
         };
-        WContainer.prototype.add = function (component, constraints) {
-            if (!component)
+        WContainer.prototype.add = function (e) {
+            if (!e)
                 return this;
-            if (typeof component == 'string') {
-                this.add(new Wrapp(component), constraints);
+            if (typeof e == 'string') {
+                this.add(new Wrapp(e));
                 return this;
             }
-            else if (component instanceof Element) {
-                this.add(new Wrapp(component), constraints);
+            else if (e instanceof Element) {
+                this.add(new Wrapp(e));
                 return this;
             }
             else {
-                if (!component.parent)
-                    component.parent = this;
-                if (!this.grid.length) {
-                    this.cint.push(component);
+                if (!e.parent)
+                    e.parent = this;
+                if (this.mounted) {
+                    // Runtime
+                    e.mount(this.root);
                     return this;
                 }
-                if (constraints == 'internal') {
-                    this.cint.push(component);
-                    return this;
+                var l = this.grid.length;
+                if (this._end) {
+                    // After Grid
+                    this.cagr.push(e);
                 }
-                if (constraints == 'before') {
-                    this.cbef.push(component);
-                    return this;
+                else if (!l) {
+                    // Before Grid
+                    this.cbgr.push(e);
                 }
-                if (constraints == 'after') {
-                    this.caft.push(component);
-                    return this;
+                else {
+                    // Grid
+                    var r = l - 1; // row
+                    var c = this.grid[r].length - 1; // column
+                    this.comp.push(e);
+                    this.sr_c.push(this.subId(r + '_' + c));
                 }
-                var r = this.grid.length - 1;
-                if (constraints) {
-                    var x = parseInt(constraints);
-                    if (!isNaN(x)) {
-                        if (x < 0) {
-                            this.cint.push(component);
-                            return this;
-                        }
-                        else {
-                            r = x;
-                        }
-                    }
-                }
-                var g = this.grid[r];
-                var c = g.length - 1;
-                this.comp.push(component);
-                this.sr_c.push(this.subId(r + '_' + c));
                 return this;
             }
         };
@@ -2871,15 +2915,15 @@ var WUX;
             this.add(w);
             return this;
         };
-        WContainer.prototype.addContainer = function (c_w_i, con_cls, style, attributes, inline, type) {
+        WContainer.prototype.addContainer = function (c_w_i, cls, style, attributes, inline, type) {
             var c;
             if (typeof c_w_i == 'string') {
-                c = new WContainer(c_w_i, con_cls, style, attributes, inline, type);
+                c = new WContainer(c_w_i, cls, style, attributes, inline, type);
                 this.add(c);
             }
             else if (c_w_i instanceof WContainer) {
                 c_w_i.parent = this;
-                this.add(c_w_i, con_cls);
+                this.add(c_w_i);
             }
             else {
                 c = new WContainer();
@@ -2888,80 +2932,84 @@ var WUX;
                     c.style = WUX.style(c_w_i.style);
                     c.attributes = c_w_i.attributes;
                 }
-                this.add(c, con_cls);
+                this.add(c);
             }
             return c;
         };
         WContainer.prototype.addDiv = function (hcss, inner, cls_att, id) {
+            var d;
             if (typeof hcss == 'number') {
                 if (hcss < 1)
                     return this;
-                var r = WUX.build('div', inner, { h: hcss, n: cls_att });
-                return this.add(r);
+                d = WUX.build('div', inner, { h: hcss, n: cls_att });
             }
             else {
-                var r = WUX.build('div', inner, hcss, cls_att, id);
-                return this.add(r);
+                d = WUX.build('div', inner, hcss, cls_att, id);
             }
+            return this.add(d);
         };
         WContainer.prototype.end = function () {
             if (this.parent instanceof WContainer)
                 return this.parent.end();
+            this._end = true;
             return this;
         };
         WContainer.prototype.componentWillMount = function () {
+            // Before the container
             for (var _i = 0, _a = this.cbef; _i < _a.length; _i++) {
-                var e = _a[_i];
-                if (typeof e == 'string') {
-                    // string (see render)
-                }
-                else if (e instanceof Element) {
-                    // Element
-                    if (this.context)
-                        this.context.append(e);
-                }
-                else {
-                    // WComponent
-                    e.mount(this.context);
-                }
+                var c = _a[_i];
+                c.mount(this.context);
             }
         };
         WContainer.prototype.render = function () {
             var inner = '';
-            var rm = this.grid.length;
-            if (rm) {
-                for (var r = 0; r < rm; r++) {
+            // Head
+            for (var _i = 0, _a = this.ashe; _i < _a.length; _i++) {
+                var s = _a[_i];
+                inner += s;
+            }
+            // Grid
+            var l = this.grid.length;
+            if (l) {
+                // Before the Grid
+                inner += '<div id="' + this.subId('bg') + '"></div>';
+                // Build Grid
+                for (var r = 0; r < l; r++) {
                     var g = this.grid[r];
-                    var cm = g.length;
-                    if (!cm)
+                    var cl = g.length;
+                    if (!cl)
                         continue;
                     inner += '<div ' + this.cs(g[0]) + ' id="' + this.subId(r + '_0') + '">';
-                    for (var c = 1; c < cm; c++) {
+                    for (var c = 1; c < cl; c++) {
                         inner += '<div id="' + this.subId(r + '_' + c) + '" ' + this.cs(g[c]) + '></div>';
                     }
                     inner += "</div>";
                 }
             }
-            var s0 = '';
-            var s1 = '';
-            // Before
-            for (var _i = 0, _a = this.cbef; _i < _a.length; _i++) {
-                var e = _a[_i];
-                if (typeof e == 'string')
-                    s0 += e;
+            // Tail
+            for (var _b = 0, _c = this.asta; _b < _c.length; _b++) {
+                var s = _c[_b];
+                inner += s;
             }
-            // After
-            for (var _b = 0, _c = this.caft; _b < _c.length; _b++) {
-                var e = _c[_b];
-                if (typeof e == 'string')
-                    s1 += e;
-            }
-            return s0 + this.buildRoot(this.rootTag, inner) + s1;
+            return this.buildRoot(this.rootTag, inner);
         };
         WContainer.prototype.componentDidMount = function () {
-            for (var i = 0; i < this.cint.length; i++) {
-                this.cint[i].mount(this.root);
+            // Before the container (See componentWillMount)
+            // Before the grid
+            var bg = document.getElementById(this.subId('bg'));
+            if (bg) {
+                for (var _i = 0, _a = this.cbgr; _i < _a.length; _i++) {
+                    var c = _a[_i];
+                    c.mount(bg);
+                }
             }
+            else {
+                for (var _b = 0, _c = this.cbgr; _b < _c.length; _b++) {
+                    var c = _c[_b];
+                    c.mount(this.root);
+                }
+            }
+            // Grid
             for (var i = 0; i < this.comp.length; i++) {
                 var c = this.comp[i];
                 var e = document.getElementById(this.sr_c[i]);
@@ -2969,41 +3017,38 @@ var WUX;
                     continue;
                 c.mount(e);
             }
-            for (var _i = 0, _a = this.caft; _i < _a.length; _i++) {
-                var e = _a[_i];
-                if (typeof e == 'string') {
-                    // string (see render)
-                }
-                else if (e instanceof Element) {
-                    // Element
-                    if (this.context)
-                        this.context.append(e);
-                }
-                else {
-                    // WComponent
-                    e.mount(this.context);
-                }
+            // After Grid
+            for (var _d = 0, _e = this.cagr; _d < _e.length; _d++) {
+                var c = _e[_d];
+                c.mount(this.root);
+            }
+            // After the container
+            for (var _f = 0, _g = this.caft; _f < _g.length; _f++) {
+                var e = _g[_f];
+                e.mount(this.context);
             }
         };
         WContainer.prototype.componentWillUnmount = function () {
-            for (var _i = 0, _a = this.cbef; _i < _a.length; _i++) {
-                var e = _a[_i];
-                if (e instanceof WUX.WComponent)
-                    e.unmount();
-            }
-            for (var _b = 0, _c = this.cint; _b < _c.length; _b++) {
+            for (var _i = 0, _a = this.caft; _i < _a.length; _i++) {
+                var c = _a[_i];
+                c.unmount();
+            } // Components after the container
+            for (var _b = 0, _c = this.cagr; _b < _c.length; _b++) {
                 var c = _c[_b];
                 c.unmount();
-            }
+            } //   Components after Grid
             for (var _d = 0, _e = this.comp; _d < _e.length; _d++) {
                 var c = _e[_d];
                 c.unmount();
-            }
-            for (var _f = 0, _g = this.caft; _f < _g.length; _f++) {
-                var e = _g[_f];
-                if (e instanceof WUX.WComponent)
-                    e.unmount();
-            }
+            } //     Grid components
+            for (var _f = 0, _g = this.cbgr; _f < _g.length; _f++) {
+                var c = _g[_f];
+                c.unmount();
+            } //   Components before Grid
+            for (var _h = 0, _j = this.cbef; _h < _j.length; _h++) {
+                var c = _j[_h];
+                c.unmount();
+            } // Components before the container
         };
         WContainer.prototype.cs = function (cs) {
             if (!cs)
@@ -4912,7 +4957,7 @@ var WUX;
                 this.foot = new WContainer(this.subId('__foot'), this.footerClass, this.footerStyle);
                 for (var _i = 0, _a = this.footer; _i < _a.length; _i++) {
                     var f = _a[_i];
-                    this.foot.addRow().addCol('12').add(f, 'push');
+                    this.foot.addRow().addCol('12').add(f);
                 }
                 this.main.addRow().addCol('12').add(this.foot);
             }
@@ -5487,8 +5532,8 @@ var WUX;
             }
             return _this;
         }
-        WTab.prototype.addTab = function (title, icon) {
-            var tab = new WUX.WContainer('', 'panel-body');
+        WTab.prototype.addTab = function (title, icon, style, attributes) {
+            var tab = new WUX.WContainer('', 'panel-body', style, attributes);
             tab.name = WUX.buildIcon(icon, '', ' ') + title;
             this.tabs.push(tab);
             return tab;
@@ -5520,7 +5565,10 @@ var WUX;
                 }
             }
             r += '</ul>';
-            r += '<div class="tab-content">';
+            var cs = WUX.css(this.contStyle);
+            if (cs)
+                cs = ' style="' + cs + '"';
+            r += '<div class="tab-content"' + cs + '>';
             for (var i = 0; i < this.tabs.length; i++) {
                 if (i == this.state) {
                     r += '<div id="' + this.id + '-' + i + '" class="tab-pane show active" role="tabpanel"></div>';

@@ -366,6 +366,7 @@ namespace WUX {
 	
 	export class WTab extends WComponent<any, number> {
 		tabs: WContainer[];
+		contStyle: string | WStyle;
 		_t: string;
 		_a: string;
 		_r: string;
@@ -388,8 +389,8 @@ namespace WUX {
 			}
 		}
 
-		addTab(title: string, icon?: string): WContainer {
-			let tab = new WContainer('', 'panel-body');
+		addTab(title: string, icon?: string, style?: string | WStyle, attributes?: string | object): WContainer {
+			let tab = new WContainer('', 'panel-body', style, attributes);
 			tab.name = WUX.buildIcon(icon, '', ' ') + title;
 			this.tabs.push(tab);
 			return tab;
@@ -419,7 +420,9 @@ namespace WUX {
 				}
 			}
 			r += '</ul>';
-			r += '<div class="tab-content">';
+			let cs = css(this.contStyle);
+			if(cs) cs = ' style="' + cs + '"';
+			r += '<div class="tab-content"' + cs + '>';
 			for (let i = 0; i < this.tabs.length; i++) {
 				if (i == this.state) {
 					r += '<div id="' + this.id + '-' + i + '" class="tab-pane show active" role="tabpanel"></div>';

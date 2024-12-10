@@ -29,23 +29,31 @@ namespace WUX {
 	}
 
 	export class WContainer extends WComponent<string, any> {
-		cbef: WElement[];   // Before elements 
-		caft: WElement[];   // After elements
-		cint: WComponent[]; // internal components
-		comp: WComponent[];
-		sr_c: string[];
-		grid: string[][];
+		cbef: WComponent[]; // Components before the container
+		ashe: string[];     // Head 
+		cbgr: WComponent[]; //   Components before Grid
+		comp: WComponent[]; //     Grid components
+		sr_c: string[];     //     Grid ids
+		grid: string[][];   //     Grid of class^style
+		_end: boolean;      //     End grid
+		cagr: WComponent[]; //   Components after Grid
+		asta: string[];     // Tail 
+		caft: WComponent[]; // Components after the container
 
 		constructor(id?: string, classStyle?: string, style?: string | WStyle, attributes?: string | object, inline?: boolean, type?: string) {
 			// WComponent init
 			super(id ? id : '*', 'WContainer', type, classStyle, WUX.style(style), attributes);
 			// WContainer init
-			this.cbef = [];
-			this.caft = [];
-			this.cint = [];
-			this.comp = [];
-			this.sr_c = [];
-			this.grid = [];
+			this.cbef = [];    // Components before the container
+			this.ashe = [];    // Head 
+			this.cbgr = [];    //   Components before Grid
+			this.comp = [];    //     Grid components
+			this.sr_c = [];    //     Grid ids
+			this.grid = [];    //     Grid of class^style
+			this._end = false; //     End grid
+			this.cagr = [];    //   Components after Grid
+			this.asta = [];    // Tail 
+			this.caft = [];    // Components after the container
 			this.rootTag = inline ? 'span' : 'div';
 		}
 
@@ -70,63 +78,89 @@ namespace WUX {
 			return this;
 		}
 
+		head(...items: string[]): this {
+			if(!items) return this;
+			this.ashe.push(...items);
+			return this;
+		}
+
+		tail(...items: string[]): this {
+			if(!items) return this;
+			this.asta.push(...items);
+			return this;
+		}
+
 		before(...items: WElement[]): this {
 			if(!items) return this;
-			this.cbef = items;
+			for(let e of items) {
+				if (!e) continue;
+				if (typeof e == 'string') {
+					this.cbef.push(new Wrapp(e));
+					return this;
+				}
+				else if (e instanceof Element) {
+					this.cbef.push(new Wrapp(e));
+					return this;
+				}
+				else {
+					this.cbef.push(e);
+				}
+			}
 			return this;
 		}
 
 		after(...items: WElement[]): this {
 			if(!items) return this;
-			this.caft = items;
+			for(let e of items) {
+				if (!e) continue;
+				if (typeof e == 'string') {
+					this.caft.push(new Wrapp(e));
+					return this;
+				}
+				else if (e instanceof Element) {
+					this.caft.push(new Wrapp(e));
+					return this;
+				}
+				else {
+					this.caft.push(e);
+				}
+			}
 			return this;
 		}
 
-		add(component: WElement, constraints?: string): this {
-			if(!component) return this;
-			if(typeof component == 'string') {
-				this.add(new Wrapp(component), constraints);
+		add(e: WElement): this {
+			if (!e) return this;
+			if (typeof e == 'string') {
+				this.add(new Wrapp(e));
 				return this;
 			}
-			else if(component instanceof Element) {
-				this.add(new Wrapp(component), constraints);
+			else if (e instanceof Element) {
+				this.add(new Wrapp(e));
 				return this;
 			}
 			else {
-				if(!component.parent) component.parent = this;
-				if(!this.grid.length) {
-					this.cint.push(component);
+				if (!e.parent) e.parent = this;
+				if (this.mounted) {
+					// Runtime
+					e.mount(this.root);
 					return this;
 				}
-				if(constraints == 'internal') {
-					this.cint.push(component);
-					return this;
+				let l = this.grid.length;
+				if (this._end) {
+					// After Grid
+					this.cagr.push(e);
 				}
-				if(constraints == 'before') {
-					this.cbef.push(component);
-					return this;
+				else if(!l) {
+					// Before Grid
+					this.cbgr.push(e);
 				}
-				if(constraints == 'after') {
-					this.caft.push(component);
-					return this;
+				else {
+					// Grid
+					let r = l - 1;                   // row
+					let c = this.grid[r].length - 1; // column
+					this.comp.push(e);
+					this.sr_c.push(this.subId(r + '_' + c));
 				}
-				let r = this.grid.length - 1;
-				if(constraints) {
-					let x = parseInt(constraints);
-					if(!isNaN(x)) {
-						if(x < 0) {
-							this.cint.push(component);
-							return this;
-						}
-						else {
-							r = x;
-						}
-					}
-				}
-				let g = this.grid[r];
-				let c = g.length - 1;
-				this.comp.push(component);
-				this.sr_c.push(this.subId(r + '_' + c));
 				return this;
 			}
 		}
@@ -180,18 +214,18 @@ namespace WUX {
 			return this;
 		}
 
-		addContainer(c: WUX.WContainer, constraints?: string): WContainer;
-		addContainer(w: WWrapper, constraints?: string): WContainer;
+		addContainer(c: WUX.WContainer): WContainer;
+		addContainer(w: WWrapper): WContainer;
 		addContainer(i: string, classStyle?: string, style?: string, attributes?: string | object, inline?: boolean, type?: string): WContainer;
-		addContainer(c_w_i: WUX.WContainer | WWrapper | string , con_cls?: string, style?: string, attributes?: string | object, inline?: boolean, type?: string): WContainer {
+		addContainer(c_w_i: WUX.WContainer | WWrapper | string , cls?: string, style?: string, attributes?: string | object, inline?: boolean, type?: string): WContainer {
 			let c: WContainer;
 			if(typeof c_w_i == 'string') {
-				c = new WContainer(c_w_i, con_cls, style, attributes, inline, type);
+				c = new WContainer(c_w_i, cls, style, attributes, inline, type);
 				this.add(c);
 			}
 			else if(c_w_i instanceof WContainer) {
 				c_w_i.parent = this;
-				this.add(c_w_i, con_cls);
+				this.add(c_w_i);
 			}
 			else {
 				c = new WContainer();
@@ -200,7 +234,7 @@ namespace WUX {
 					c.style = WUX.style(c_w_i.style);
 					c.attributes = c_w_i.attributes;
 				}
-				this.add(c, con_cls);
+				this.add(c);
 			}
 			return c;
 		}
@@ -208,100 +242,97 @@ namespace WUX {
 		addDiv(height: number, inner?: string, classStyle?: string): WContainer;
 		addDiv(css: string | WStyle, inner?: string, attributes?: string, id?: string): WContainer;
 		addDiv(hcss: number | string | WStyle, inner?: string, cls_att?: string, id?: string): WContainer {
+			let d: string;
 			if (typeof hcss == 'number') {
 				if (hcss < 1) return this;
-				let r = WUX.build('div', inner, { h: hcss, n: cls_att });
-				return this.add(r);
+				d = WUX.build('div', inner, { h: hcss, n: cls_att });
 			}
 			else {
-				let r = WUX.build('div', inner, hcss, cls_att, id);
-				return this.add(r);
+				d = WUX.build('div', inner, hcss, cls_att, id);
 			}
+			return this.add(d);
 		}
 
 		end(): WContainer {
 			if (this.parent instanceof WContainer) return this.parent.end();
+			this._end = true;
 			return this;
 		}
 
 		protected componentWillMount(): void {
-			for(let e of this.cbef) {
-				if(typeof e == 'string') {
-					// string (see render)
-				}
-				else if(e instanceof Element) {
-					// Element
-					if(this.context) this.context.append(e);
-				}
-				else {
-					// WComponent
-					e.mount(this.context);
-				}
+			// Before the container
+			for(let c of this.cbef) {
+				c.mount(this.context);
 			}
 		}
 
 		protected render(): any {
 			let inner = '';
-			let rm = this.grid.length;
-			if(rm) {
-				for(let r = 0; r < rm; r++) {
+			// Head
+			for(let s of this.ashe) {
+				inner += s;
+			}
+			// Grid
+			let l = this.grid.length;
+			if(l) {
+				// Before the Grid
+				inner += '<div id="' + this.subId('bg') + '"></div>';
+				// Build Grid
+				for(let r = 0; r < l; r++) {
 					let g = this.grid[r];
-					let cm = g.length;
-					if(!cm) continue;
+					let cl = g.length;
+					if(!cl) continue;
 					inner += '<div ' + this.cs(g[0]) + ' id="' + this.subId(r + '_0') + '">';
-					for(let c = 1; c < cm; c++) {
+					for(let c = 1; c < cl; c++) {
 						inner += '<div id="' + this.subId(r + '_' + c) + '" ' + this.cs(g[c]) + '></div>';
 					}
 					inner += "</div>";
 				}
 			}
-			let s0 = '';
-			let s1 = '';
-			// Before
-			for(let e of this.cbef) {
-				if(typeof e == 'string') s0 += e;
+			// Tail
+			for(let s of this.asta) {
+				inner += s;
 			}
-			// After
-			for(let e of this.caft) {
-				if(typeof e == 'string') s1 += e;
-			}
-			return s0 + this.buildRoot(this.rootTag, inner) + s1;
+			return this.buildRoot(this.rootTag, inner);
 		}
 
 		protected componentDidMount(): void {
-			for(let i = 0; i < this.cint.length; i++) {
-				this.cint[i].mount(this.root);
+			// Before the container (See componentWillMount)
+			// Before the grid
+			let bg = document.getElementById(this.subId('bg'));
+			if(bg) {
+				for(let c of this.cbgr) {
+					c.mount(bg);
+				}
 			}
+			else {
+				for(let c of this.cbgr) {
+					c.mount(this.root);
+				}
+			}
+			// Grid
 			for(let i = 0; i < this.comp.length; i++) {
 				let c = this.comp[i];
 				let e = document.getElementById(this.sr_c[i]);
 				if(!e) continue;
 				c.mount(e);
 			}
+			// After Grid
+			for(let c of this.cagr) {
+				c.mount(this.root);
+			}
+			// After the container
 			for(let e of this.caft) {
-				if(typeof e == 'string') {
-					// string (see render)
-				}
-				else if(e instanceof Element) {
-					// Element
-					if(this.context) this.context.append(e);
-				}
-				else {
-					// WComponent
-					e.mount(this.context);
-				}
+				e.mount(this.context);
 			}
 		}
 
 		componentWillUnmount(): void {
-			for(let e of this.cbef) {
-				if(e instanceof WComponent) e.unmount();
-			}
-			for(let c of this.cint) c.unmount();
-			for(let c of this.comp) c.unmount();
-			for(let e of this.caft) {
-				if(e instanceof WComponent) e.unmount();
-			}
+			for(let c of this.caft) c.unmount(); // Components after the container
+			for(let c of this.cagr) c.unmount(); //   Components after Grid
+			for(let c of this.comp) c.unmount(); //     Grid components
+			for(let c of this.cbgr) c.unmount(); //   Components before Grid
+			for(let c of this.cbef) c.unmount(); // Components before the container
 		}
 
 		protected cs(cs: string) {
@@ -2090,7 +2121,7 @@ namespace WUX {
 			if (this.footer && this.footer.length) {
 				this.foot = new WContainer(this.subId('__foot'), this.footerClass, this.footerStyle);
 				for(let f of this.footer) {
-					this.foot.addRow().addCol('12').add(f, 'push');
+					this.foot.addRow().addCol('12').add(f);
 				}
 				this.main.addRow().addCol('12').add(this.foot);
 			}

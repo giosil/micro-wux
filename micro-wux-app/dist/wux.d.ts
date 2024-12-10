@@ -493,23 +493,29 @@ declare namespace WUX {
         protected componentDidMount(): void;
     }
     class WContainer extends WComponent<string, any> {
-        cbef: WElement[];
-        caft: WElement[];
-        cint: WComponent[];
+        cbef: WComponent[];
+        ashe: string[];
+        cbgr: WComponent[];
         comp: WComponent[];
         sr_c: string[];
         grid: string[][];
+        _end: boolean;
+        cagr: WComponent[];
+        asta: string[];
+        caft: WComponent[];
         constructor(id?: string, classStyle?: string, style?: string | WStyle, attributes?: string | object, inline?: boolean, type?: string);
         addRow(classStyle?: string, style?: string | WStyle): this;
         addCol(classStyle?: string, style?: string | WStyle): this;
+        head(...items: string[]): this;
+        tail(...items: string[]): this;
         before(...items: WElement[]): this;
         after(...items: WElement[]): this;
-        add(component: WElement, constraints?: string): this;
+        add(e: WElement): this;
         addGroup(w: WWrapper, ...ac: WElement[]): this;
         addLine(style: string | WStyle, ...ac: WElement[]): this;
         addStack(style: string | WStyle, ...ac: WElement[]): this;
-        addContainer(c: WUX.WContainer, constraints?: string): WContainer;
-        addContainer(w: WWrapper, constraints?: string): WContainer;
+        addContainer(c: WUX.WContainer): WContainer;
+        addContainer(w: WWrapper): WContainer;
         addContainer(i: string, classStyle?: string, style?: string, attributes?: string | object, inline?: boolean, type?: string): WContainer;
         addDiv(height: number, inner?: string, classStyle?: string): WContainer;
         addDiv(css: string | WStyle, inner?: string, attributes?: string, id?: string): WContainer;
@@ -835,11 +841,12 @@ declare namespace WUX {
     }
     class WTab extends WComponent<any, number> {
         tabs: WContainer[];
+        contStyle: string | WStyle;
         _t: string;
         _a: string;
         _r: string;
         constructor(id?: string, classStyle?: string, style?: string | WStyle, attributes?: string | object, props?: any);
-        addTab(title: string, icon?: string): WContainer;
+        addTab(title: string, icon?: string, style?: string | WStyle, attributes?: string | object): WContainer;
         protected render(): string;
         protected componentDidUpdate(prevProps: any, prevState: any): void;
         protected componentDidMount(): void;
