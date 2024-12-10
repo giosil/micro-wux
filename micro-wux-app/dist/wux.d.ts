@@ -529,12 +529,13 @@ declare namespace WUX {
     }
     class WPages extends WComponent<any, number> {
         components: WComponent[];
-        compBefore: WUX.WComponent;
-        compAfter: WUX.WComponent;
+        cbef: WUX.WComponent;
+        caft: WUX.WComponent;
         sp: number;
         constructor(id?: string, classStyle?: string, style?: string | WStyle, attributes?: string | object, props?: any);
         get pages(): number;
         add(c: WComponent): this;
+        addContainer(cid?: string, cls?: string, style?: string, attributes?: string | object, inline?: boolean, type?: string): WContainer;
         before(c: WComponent): this;
         after(c: WComponent): this;
         first(): this;

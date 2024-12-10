@@ -2968,7 +2968,9 @@ var WUX;
             var l = this.grid.length;
             if (l) {
                 // Before the Grid
-                inner += '<div id="' + this.subId('bg') + '"></div>';
+                if (this.cbgr.length) {
+                    inner += '<div id="' + this.subId('bg') + '"></div>';
+                }
                 // Build Grid
                 for (var r = 0; r < l; r++) {
                     var g = this.grid[r];
@@ -3118,12 +3120,17 @@ var WUX;
             this.components.push(c);
             return this;
         };
+        WPages.prototype.addContainer = function (cid, cls, style, attributes, inline, type) {
+            var c = new WContainer(cid, cls, style, attributes, inline, type);
+            this.add(c);
+            return c;
+        };
         WPages.prototype.before = function (c) {
-            this.compBefore = c;
+            this.cbef = c;
             return this;
         };
         WPages.prototype.after = function (c) {
-            this.compAfter = c;
+            this.caft = c;
             return this;
         };
         WPages.prototype.first = function () {
@@ -3212,7 +3219,7 @@ var WUX;
             if (this._attributes)
                 r += ' ' + this._attributes;
             r += '>';
-            if (this.compBefore) {
+            if (this.cbef) {
                 r += '<div id="' + this.id + '-b""></div>';
             }
             for (var i = 0; i < l; i++) {
@@ -3223,7 +3230,7 @@ var WUX;
                     r += '<div id="' + this.id + '-' + i + '" style="display:none;"></div>';
                 }
             }
-            if (this.compAfter) {
+            if (this.caft) {
                 r += '<div id="' + this.id + '-a""></div>';
             }
             r += '</div>';
@@ -3249,10 +3256,10 @@ var WUX;
             }
         };
         WPages.prototype.componentDidMount = function () {
-            if (this.compBefore) {
+            if (this.cbef) {
                 var b = document.getElementById(this.id + '-b');
                 if (b)
-                    this.compBefore.mount(b);
+                    this.cbef.mount(b);
             }
             var l = this.components.length;
             for (var i = 0; i < l; i++) {
@@ -3262,22 +3269,22 @@ var WUX;
                     continue;
                 c.mount(e);
             }
-            if (this.compAfter) {
+            if (this.caft) {
                 var a = document.getElementById(this.id + '-a');
                 if (a)
-                    this.compAfter.mount(a);
+                    this.caft.mount(a);
             }
         };
         WPages.prototype.componentWillUnmount = function () {
-            if (this.compBefore)
-                this.compBefore.unmount();
+            if (this.cbef)
+                this.cbef.unmount();
             for (var _i = 0, _a = this.components; _i < _a.length; _i++) {
                 var c = _a[_i];
                 if (c)
                     c.unmount();
             }
-            if (this.compAfter)
-                this.compAfter.unmount();
+            if (this.caft)
+                this.caft.unmount();
         };
         return WPages;
     }(WUX.WComponent));

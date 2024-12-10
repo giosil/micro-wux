@@ -272,7 +272,9 @@ namespace WUX {
 			let l = this.grid.length;
 			if(l) {
 				// Before the Grid
-				inner += '<div id="' + this.subId('bg') + '"></div>';
+				if(this.cbgr.length) {
+					inner += '<div id="' + this.subId('bg') + '"></div>';
+				}
 				// Build Grid
 				for(let r = 0; r < l; r++) {
 					let g = this.grid[r];
@@ -371,8 +373,8 @@ namespace WUX {
 
 	export class WPages extends WComponent<any, number> {
 		components: WComponent[];
-		compBefore: WUX.WComponent
-		compAfter: WUX.WComponent
+		cbef: WUX.WComponent
+		caft: WUX.WComponent
 		sp: number = 0;
 		
 		constructor(id?: string, classStyle?: string, style?: string | WStyle, attributes?: string | object, props?: any) {
@@ -397,13 +399,19 @@ namespace WUX {
 			return this;
 		}
 
+		addContainer(cid?: string, cls?: string, style?: string, attributes?: string | object, inline?: boolean, type?: string): WContainer {
+			let c = new WContainer(cid, cls, style, attributes, inline, type);
+			this.add(c);
+			return c;
+		}
+
 		before(c: WComponent): this {
-			this.compBefore = c;
+			this.cbef = c;
 			return this;
 		}
 
 		after(c: WComponent): this {
-			this.compAfter = c;
+			this.caft = c;
 			return this;
 		}
 
@@ -478,7 +486,7 @@ namespace WUX {
 			if (this._style) r += ' style="' + this._style + '"';
 			if (this._attributes) r += ' ' + this._attributes;
 			r += '>';
-			if(this.compBefore) {
+			if(this.cbef) {
 				r += '<div id="' + this.id + '-b""></div>';
 			}
 			for (let i = 0; i < l; i++) {
@@ -489,7 +497,7 @@ namespace WUX {
 					r += '<div id="' + this.id + '-' + i + '" style="display:none;"></div>';
 				}
 			}
-			if(this.compAfter) {
+			if(this.caft) {
 				r += '<div id="' + this.id + '-a""></div>';
 			}
 			r += '</div>';
@@ -512,9 +520,9 @@ namespace WUX {
 		}
 
 		protected componentDidMount(): void {
-			if(this.compBefore) {
+			if(this.cbef) {
 				let b = document.getElementById(this.id + '-b');
-				if(b) this.compBefore.mount(b);
+				if(b) this.cbef.mount(b);
 			}
 			let l = this.components.length;
 			for (let i = 0; i < l; i++) {
@@ -523,18 +531,18 @@ namespace WUX {
 				if (!e) continue;
 				c.mount(e);
 			}
-			if(this.compAfter) {
+			if(this.caft) {
 				let a = document.getElementById(this.id + '-a');
-				if(a) this.compAfter.mount(a);
+				if(a) this.caft.mount(a);
 			}
 		}
 
 		componentWillUnmount(): void {
-			if(this.compBefore) this.compBefore.unmount();
+			if(this.cbef) this.cbef.unmount();
 			for (let c of this.components) {
 				if(c) c.unmount();
 			}
-			if(this.compAfter) this.compAfter.unmount();
+			if(this.caft) this.caft.unmount();
 		}
 	}
 
