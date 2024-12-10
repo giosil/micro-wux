@@ -96,11 +96,9 @@ namespace WUX {
 				if (!e) continue;
 				if (typeof e == 'string') {
 					this.cbef.push(new Wrapp(e));
-					return this;
 				}
 				else if (e instanceof Element) {
 					this.cbef.push(new Wrapp(e));
-					return this;
 				}
 				else {
 					this.cbef.push(e);
@@ -115,11 +113,9 @@ namespace WUX {
 				if (!e) continue;
 				if (typeof e == 'string') {
 					this.caft.push(new Wrapp(e));
-					return this;
 				}
 				else if (e instanceof Element) {
 					this.caft.push(new Wrapp(e));
-					return this;
 				}
 				else {
 					this.caft.push(e);

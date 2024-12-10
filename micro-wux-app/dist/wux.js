@@ -2770,11 +2770,9 @@ var WUX;
                     continue;
                 if (typeof e == 'string') {
                     this.cbef.push(new Wrapp(e));
-                    return this;
                 }
                 else if (e instanceof Element) {
                     this.cbef.push(new Wrapp(e));
-                    return this;
                 }
                 else {
                     this.cbef.push(e);
@@ -2795,11 +2793,9 @@ var WUX;
                     continue;
                 if (typeof e == 'string') {
                     this.caft.push(new Wrapp(e));
-                    return this;
                 }
                 else if (e instanceof Element) {
                     this.caft.push(new Wrapp(e));
-                    return this;
                 }
                 else {
                     this.caft.push(e);
