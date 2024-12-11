@@ -40,6 +40,7 @@ namespace WUX {
 		scrolling: string;
 		pageSize: number;
 		paging: boolean;
+		sorting: boolean;
 		selectionFilter: any[];
 		dataSource: any;
 		storeKey: string;
@@ -86,6 +87,7 @@ namespace WUX {
 			this.scrolling = 'virtual';
 			this.pageSize = 100;
 			this.paging = false;
+			this.sorting = true;
 
 			this.actions = [];
 			this.groups = [];
@@ -677,6 +679,7 @@ namespace WUX {
 
 							scol = { caption: this.header[i], dataField: i.toString() };
 						}
+						scol.allowSorting = this.sorting;
 						let w = this.widths && this.widths.length > i ? this.widths[i] : 0;
 						if (w) {
 							if (w < 0) {
@@ -763,6 +766,7 @@ namespace WUX {
 
 						col = { caption: this.header[i], dataField: k };
 					}
+					col.allowSorting = this.sorting;
 					let w = this.widths && this.widths.length > i ? this.widths[i] : 0;
 					if (w) {
 						if (w < 0) {

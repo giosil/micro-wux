@@ -1,7 +1,13 @@
 namespace APP {
 	
 	export function getURLServices() {
-		return window.location.origin;
+		let h = window.location.hostname;
+		let p = window.location.protocol;
+		if(!p) p = "http:"
+		if(!h || h.indexOf('localhost') >= 0) return "http://localhost:8081";
+		let s = h.indexOf('.');
+		if(s < 1) return "http://localhost:8081";
+		return p + '//hcm-services' + h.substring(s);
 	}
 	
 	export class HttpClient {
@@ -100,7 +106,7 @@ namespace APP {
 		_get(method: string, entity: string, params: { [key: string]: any }, success: (result: any) => void, failure?: (error: any) => void) {
 			if(!method) method = 'GET';
 			let search = params ? new URLSearchParams(params).toString() : "";
-			let requrl = search ? this.url + "/" + entity + "?" + search : this.url + entity;
+			let requrl = search ? this.url + "/" + entity + "?" + search : this.url + "/" + entity;
 			this.before();
 			fetch(requrl, {
 				"method" : method,

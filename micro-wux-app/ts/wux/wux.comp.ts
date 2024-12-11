@@ -966,6 +966,7 @@ namespace WUX {
 				this.state = this.props ? this.value : undefined;
 			}
 			else {
+				if (this.state == 'true') this.state = '1';
 				this.props = this.state && this.state == this.value;
 			}
 			if (this.root) this.root['checked'] = this.props;
@@ -1780,6 +1781,7 @@ namespace WUX {
 
 	export class WForm extends WComponent<WField[][], any> {
 		title: string;
+		fieldset: Element;
 		rows: WField[][];
 		roww: WWrapper[];
 		currRow: WField[];
@@ -1811,6 +1813,23 @@ namespace WUX {
 				}
 			}
 			this.init();
+		}
+
+		get enabled(): boolean {
+			if (this.internal) return this.internal.enabled;
+			return this._enabled;
+		}
+		set enabled(b: boolean) {
+			this._enabled = b;
+			if (this.internal) this.internal.enabled = b;
+			if (this.fieldset) {
+				if (this._enabled) {
+					this.fieldset.removeAttribute('disabled');
+				}
+				else {
+					this.fieldset.setAttribute('disabled', '');
+				}
+			}
 		}
 
 		init(): this {
@@ -2053,7 +2072,13 @@ namespace WUX {
 		}
 
 		protected componentDidMount(): void {
-			this.main = new WContainer(this.id + '-c');
+			this.fieldset = document.createElement('fieldset');
+			if(!this._enabled) {
+				this.fieldset.setAttribute('disabled', '');
+			}
+			this.root.appendChild(this.fieldset);
+
+			this.main = new WContainer(this.id + '__c');
 			for (let i = 0; i < this.rows.length; i++) {
 				let w = this.roww[i];
 				this.main.addRow(WUX.cls(w.type, w.classStyle, w.style), WUX.style(w.style));
@@ -2129,7 +2154,7 @@ namespace WUX {
 				}
 				this.main.addRow().addCol('12').add(this.foot);
 			}
-			this.main.mount(this.root);
+			this.main.mount(this.fieldset);
 		}
 
 		componentWillUnmount(): void {
@@ -2187,6 +2212,25 @@ namespace WUX {
 			let f = this.getField(fieldId);
 			if (!f) return this;
 			f.span = span;
+			return this;
+		}
+
+		setEnabled(fieldId: string, v: boolean): this {
+			let f = this.getField(fieldId);
+			if (!f) return this;
+			f.enabled = v;
+			if (f.component) f.component.enabled = v;
+			return this;
+		}
+
+		setReadOnly(fieldId: string, v: boolean): this {
+			let f = this.getField(fieldId);
+			if (!f) return this;
+			f.readonly = v;
+			let c = f.component;
+			if (c instanceof WUX.WInput || c instanceof WUX.WTextArea) {
+				c.readonly = v;
+			}
 			return this;
 		}
 

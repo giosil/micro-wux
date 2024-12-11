@@ -255,6 +255,36 @@ namespace WUX {
 			this.buttons.push(this.btnCancel);
 		}
 
+		updButtons(ok?: string, canc?: string): this {
+			if(this.btnOK) {
+				if(ok) {
+					this.btnOK.setText(ok);
+					this.btnOK.visible = true;
+				}
+				else if(ok == '') {
+					this.btnOK.visible = false;
+				}
+				else {
+					this.btnOK.setText(RES.OK);
+					this.btnOK.visible = true;
+				}
+			}
+			if(this.btnCancel) {
+				if(canc) {
+					this.btnCancel.setText(canc);
+					this.btnCancel.visible = true;
+				}
+				else if(canc == '') {
+					this.btnCancel.visible = false;
+				}
+				else {
+					this.btnCancel.setText(RES.CANCEL);
+					this.btnCancel.visible = true;
+				}
+			}
+			return this;
+		}
+
 		show(parent?: WUX.WComponent, handler?: (e?: JQueryEventObject) => any): void {
 			if (!this.beforeShow()) return;
 			this.ok = false;
@@ -547,7 +577,7 @@ namespace WUX {
 			// Style day selected (table-primary)
 			this.ss = 'text-align:center;vertical-align:middle;background-color:#b8d4f1;'; 
 			// Style day marked (table-warning)
-			this.sk = 'text-align:center;vertical-align:middle;background-color:#e6d3b8;';
+			this.sk = 'text-align:center;vertical-align:middle;background-color:#ffeebc;';
 			// Style empty
 			this.se = 'background-color:#f0f0f0;';
 			// Style today

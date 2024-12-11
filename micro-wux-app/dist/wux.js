@@ -1819,7 +1819,7 @@ var WUX;
             return a;
         };
         WUtil.getValue = function (a, k, d) {
-            if (!k)
+            if (!a || !k)
                 return d;
             if (Array.isArray(a) && a.length) {
                 if (k == '-1') {
@@ -3748,6 +3748,8 @@ var WUX;
                 this.state = this.props ? this.value : undefined;
             }
             else {
+                if (this.state == 'true')
+                    this.state = '1';
                 this.props = this.state && this.state == this.value;
             }
             if (this.root)
@@ -4652,6 +4654,28 @@ var WUX;
             _this.init();
             return _this;
         }
+        Object.defineProperty(WForm.prototype, "enabled", {
+            get: function () {
+                if (this.internal)
+                    return this.internal.enabled;
+                return this._enabled;
+            },
+            set: function (b) {
+                this._enabled = b;
+                if (this.internal)
+                    this.internal.enabled = b;
+                if (this.fieldset) {
+                    if (this._enabled) {
+                        this.fieldset.removeAttribute('disabled');
+                    }
+                    else {
+                        this.fieldset.setAttribute('disabled', '');
+                    }
+                }
+            },
+            enumerable: false,
+            configurable: true
+        });
         WForm.prototype.init = function () {
             this.rows = [];
             this.roww = [];
@@ -4886,7 +4910,12 @@ var WUX;
             return this;
         };
         WForm.prototype.componentDidMount = function () {
-            this.main = new WContainer(this.id + '-c');
+            this.fieldset = document.createElement('fieldset');
+            if (!this._enabled) {
+                this.fieldset.setAttribute('disabled', '');
+            }
+            this.root.appendChild(this.fieldset);
+            this.main = new WContainer(this.id + '__c');
             for (var i = 0; i < this.rows.length; i++) {
                 var w = this.roww[i];
                 this.main.addRow(WUX.cls(w.type, w.classStyle, w.style), WUX.style(w.style));
@@ -4964,7 +4993,7 @@ var WUX;
                 }
                 this.main.addRow().addCol('12').add(this.foot);
             }
-            this.main.mount(this.root);
+            this.main.mount(this.fieldset);
         };
         WForm.prototype.componentWillUnmount = function () {
             if (!this.main)
@@ -5029,6 +5058,26 @@ var WUX;
             if (!f)
                 return this;
             f.span = span;
+            return this;
+        };
+        WForm.prototype.setEnabled = function (fieldId, v) {
+            var f = this.getField(fieldId);
+            if (!f)
+                return this;
+            f.enabled = v;
+            if (f.component)
+                f.component.enabled = v;
+            return this;
+        };
+        WForm.prototype.setReadOnly = function (fieldId, v) {
+            var f = this.getField(fieldId);
+            if (!f)
+                return this;
+            f.readonly = v;
+            var c = f.component;
+            if (c instanceof WUX.WInput || c instanceof WUX.WTextArea) {
+                c.readonly = v;
+            }
             return this;
         };
         WForm.prototype.getValues = function () {
@@ -5386,6 +5435,35 @@ var WUX;
             });
             this.buttons.push(this.btnCancel);
         };
+        WDialog.prototype.updButtons = function (ok, canc) {
+            if (this.btnOK) {
+                if (ok) {
+                    this.btnOK.setText(ok);
+                    this.btnOK.visible = true;
+                }
+                else if (ok == '') {
+                    this.btnOK.visible = false;
+                }
+                else {
+                    this.btnOK.setText(WUX.RES.OK);
+                    this.btnOK.visible = true;
+                }
+            }
+            if (this.btnCancel) {
+                if (canc) {
+                    this.btnCancel.setText(canc);
+                    this.btnCancel.visible = true;
+                }
+                else if (canc == '') {
+                    this.btnCancel.visible = false;
+                }
+                else {
+                    this.btnCancel.setText(WUX.RES.CANCEL);
+                    this.btnCancel.visible = true;
+                }
+            }
+            return this;
+        };
         WDialog.prototype.show = function (parent, handler) {
             if (!this.beforeShow())
                 return;
@@ -5658,7 +5736,7 @@ var WUX;
             // Style day selected (table-primary)
             _this.ss = 'text-align:center;vertical-align:middle;background-color:#b8d4f1;';
             // Style day marked (table-warning)
-            _this.sk = 'text-align:center;vertical-align:middle;background-color:#e6d3b8;';
+            _this.sk = 'text-align:center;vertical-align:middle;background-color:#ffeebc;';
             // Style empty
             _this.se = 'background-color:#f0f0f0;';
             // Style today

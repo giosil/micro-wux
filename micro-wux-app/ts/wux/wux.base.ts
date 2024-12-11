@@ -1694,7 +1694,7 @@ namespace WUX {
 		}
 
 		static getValue(a: any, k: string, d?: any): any {
-			if (!k) return d;
+			if (!a || !k) return d;
 			if (Array.isArray(a) && a.length) {
 				if (k == '-1') {
 					return WUtil.getLast(a, d);

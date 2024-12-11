@@ -16,11 +16,11 @@ namespace APP {
 			return this;
 		}
 
-		status(t: string): this {
+		status(t: string, cls: string = 'bg-primary'): this {
 			if(!this.leid) return this;
 			if(!this.lhtm) this.lhtm = '';
 			let l = document.getElementById(this.leid);
-			let h = t ? ' <span class="badge bg-primary" style="margin-left:0.5rem;">' + t + '</span>' : '';
+			let h = t ? ' <span class="badge ' + cls + '" style="margin-left:0.5rem;">' + t + '</span>' : '';
 			if(l) l.innerHTML = this.lhtm + h;
 			return this;
 		}
@@ -280,6 +280,38 @@ namespace APP {
 					this.setState(v);
 				});
 			}
+		}
+	}
+
+	export class DlgConfirm extends WUX.WDialog<string, boolean> {
+		_msg: string;
+
+		constructor(id?: string, msg?: string) {
+			super(id ? id : '*', 'DlgConfirm');
+			
+			this.title = "Conferma";
+			this._msg = msg;
+			if(!this._msg) this._msg = "Si vuole procedere con l'operazione?";
+			
+			this.body.addRow().addCol('12').add(this._msg);
+		}
+
+		get message(): string {
+			return this._msg;
+		}
+		set message(s: string) {
+			this._msg = s;
+			if(!this._msg) this._msg = "Si vuole procedere con l'operazione?";
+			let em = this.body.getElement(0, 0);
+			if(em) em.innerText = this._msg;
+		}
+
+		protected buildBtnOK(): WUX.WButton {
+			return new WUX.WButton(this.subId('bfo'), 'S&igrave;', '', 'btn btn-primary button-sm', '', '');
+		}
+
+		protected buildBtnCancel(): WUX.WButton {
+			return new WUX.WButton(this.subId('bfc'), 'No', '', 'btn btn-secondary button-sm', '', '');
 		}
 	}
 }

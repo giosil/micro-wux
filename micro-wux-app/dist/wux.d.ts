@@ -722,6 +722,7 @@ declare namespace WUX {
     }
     class WForm extends WComponent<WField[][], any> {
         title: string;
+        fieldset: Element;
         rows: WField[][];
         roww: WWrapper[];
         currRow: WField[];
@@ -732,6 +733,8 @@ declare namespace WUX {
         footerStyle: string | WStyle;
         captions: WComponent[];
         constructor(id?: string, title?: string, action?: string);
+        get enabled(): boolean;
+        set enabled(b: boolean);
         init(): this;
         focus(): this;
         first(enabled?: boolean): WField;
@@ -764,6 +767,8 @@ declare namespace WUX {
         getValue(fid: string | WField): any;
         setOptions(fid: string, options: Array<string | WEntity>, prevVal?: boolean): this;
         setSpan(fieldId: string, span: number): this;
+        setEnabled(fieldId: string, v: boolean): this;
+        setReadOnly(fieldId: string, v: boolean): this;
         getValues(): any;
         getState(): any;
         protected updateState(nextState: any): void;
@@ -827,6 +832,7 @@ declare namespace WUX {
         protected buildBtnCancel(): WUX.WButton;
         buttonOk(): WUX.WButton;
         buttonCancel(): WUX.WButton;
+        updButtons(ok?: string, canc?: string): this;
         show(parent?: WUX.WComponent, handler?: (e?: JQueryEventObject) => any): void;
         hide(): void;
         close(): void;

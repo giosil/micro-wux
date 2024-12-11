@@ -58,6 +58,17 @@ namespace APP {
 		}
 		
 		protected onShown() {
+			if(this.props == 'view') {
+				this.fp.enabled = false;
+				this.updButtons('Chiudi', '');
+			}
+			else {
+				this.fp.enabled = true;
+				if(this.props == 'edit') {
+					this.fp.setReadOnly('codice', true);
+				}
+				this.updButtons('Salva');
+			}
 			setTimeout(() => { this.fp.focusOn('code'); });
 		}
 	}
@@ -492,7 +503,7 @@ namespace APP {
 			this.table.onDoubleClick((e: { element?: JQuery }) => {
 				let srd = this.table.getSelectedRowsData();
 				if (!srd || !srd.length) return;
-				
+				this.brcr.status('Visualizza');
 				this.dlg.setProps('view');
 				this.dlg.setState(srd[0]);
 				this.dlg.show(this);

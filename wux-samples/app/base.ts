@@ -5,8 +5,13 @@ namespace APP {
 	export function getPageComponent(): WUX.WComponent {
 		let p = WUX.WUtil.getParam('test');
 		switch(window.location.pathname) {
+			case '/app-adc':  return new GUIText('Aree di competenza', 'In fase di sviluppo.');
+			case '/app-cco':  return new GUICompetenze('Competenze comportamentali', 'C_COM');
+			case '/app-ctp':  return new GUICompetenze('Competenze Tecnico Professionali', 'C_TP');
+			case '/app-cts':  return new GUICompetenze('Competenze Tecnico Specialistiche', 'C_TS');
 			case '/app-demo': return new GUIDemo();
 			case '/app-test': return p == 'bs' ? new GUIEntities() : new GUIEntitiesDX();
+			case '/app-mrat': return new GUIRating();
 		}
 		return null;
 	}
@@ -90,5 +95,44 @@ namespace APP {
 		if(x < 0) return;
 		s.splice(x, 1);
 		c.setState(s);
+	}
+
+	export function upSelItem(c: WUX.WDXTable): number {
+		let r = c.getSelectedRows();
+		if(!r || !r.length) {
+			showWarning('Selezionare l\'elemento da spostare');
+			return -1;
+		}
+		let i = r[0];
+		if (i < 1) return -1;
+		let s = c.getState();
+		if (s.length == 1) return -1;
+		let e = s[i];
+		let p = s[i - 1];
+		s[i - 1] = e;
+		s[i] = p;
+		c.setState(s);
+		setTimeout(() => { c.select([i - 1]); }, 50);
+		return i - 1;
+	}
+
+	export function downSelItem(c: WUX.WDXTable): number {
+		let r = c.getSelectedRows();
+		if(!r || !r.length) {
+			showWarning('Selezionare l\'elemento da spostare');
+			return -1;
+		}
+		let i = r[0];
+		if (i < 0) return -1;
+		let s = c.getState();
+		if (s.length == 1) return -1;
+		if (i >= s.length - 1) return -1;
+		let e = s[i];
+		let n = s[i + 1];
+		s[i + 1] = e;
+		s[i] = n;
+		c.setState(s);
+		setTimeout(() => { c.select([i + 1]); }, 50);
+		return i + 1;
 	}
 }
