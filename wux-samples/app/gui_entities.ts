@@ -67,6 +67,9 @@ namespace APP {
 				if(this.props == 'edit') {
 					this.fp.setReadOnly('codice', true);
 				}
+				else {
+					this.fp.setReadOnly('codice', false);
+				}
 				this.updButtons('Salva');
 			}
 			setTimeout(() => { this.fp.focusOn('code'); });

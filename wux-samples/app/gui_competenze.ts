@@ -54,6 +54,11 @@ namespace APP {
 			if(this.fp) {
 				this.state = this.fp.getState();
 			}
+			if(this.state) {
+				if(!this.state["validityState"]) {
+					this.state["validityState"] = 'false';
+				}
+			}
 			return this.state;
 		}
 		
@@ -70,6 +75,9 @@ namespace APP {
 				this.fp.enabled = true;
 				if(this.props == 'edit') {
 					this.fp.setReadOnly('codice', true);
+				}
+				else {
+					this.fp.setReadOnly('codice', false);
 				}
 				this.updButtons('Salva');
 			}

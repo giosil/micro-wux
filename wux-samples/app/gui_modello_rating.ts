@@ -142,7 +142,7 @@ namespace APP {
 			if(this.fp) this.state = this.fp.getState();
 			if(this.state) {
 				if(!this.state["validityState"]) {
-					this.state["validityState"] = 'true';
+					this.state["validityState"] = 'false';
 				}
 				let l = this.tlv.getState();
 				if(l) {
@@ -172,6 +172,7 @@ namespace APP {
 		
 		protected onShown() {
 			if(this.props == 'view') {
+				// Visualizza
 				this.fp.enabled = false;
 				this.btnAdd.enabled = false;
 				this.btnRem.enabled = false;
@@ -182,7 +183,14 @@ namespace APP {
 			else {
 				this.fp.enabled = true;
 				if(this.props == 'edit') {
+					// Modifica
 					this.fp.setReadOnly('codice', true);
+				}
+				else {
+					// Nuovo
+					this.fp.setReadOnly('codice', false);
+					this.fp.setValue('startValidityDate', WUtil.getCurrDate());
+					this.fp.setValue('validityState', true);
 				}
 				this.btnAdd.enabled = true;
 				this.btnRem.enabled = true;
@@ -484,10 +492,10 @@ namespace APP {
 			this.pages = new WUX.WPages();
 			this.pages
 				.before(this.brcr)
-				.add(this.main);
+				.add(this.main); // Pagina 0
 
 			// Visualizzazione in pagina
-			this.dlg.addToPages(this.pages, false);
+			this.dlg.addToPages(this.pages, false); // Pagina 1
 			
 			return this.pages;
 		}
