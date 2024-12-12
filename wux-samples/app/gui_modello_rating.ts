@@ -463,17 +463,6 @@ namespace APP {
 				this.dlg.show(this);
 			});
 
-			let cntFlt = new WUX.WContainer();
-			cntFlt
-				.addRow('form-row')
-					.add(this.btnFind)
-					.add(this.btnReset);
-
-			let cntBtn = new WUX.WContainer();
-			cntBtn
-				.addRow('form-row')
-					.add(this.btnNew);
-
 			this.main = new WUX.WContainer();
 			this.main
 				// .before(this.brcr)
@@ -482,9 +471,9 @@ namespace APP {
 						.add(this.form)
 				.addRow()
 					.addCol('col-md-8')
-						.add(cntFlt)
+						.addGroup({"classStyle": "form-row"}, this.btnFind, this.btnReset)
 					.addCol('col-md-4', {a : 'right'})
-						.add(cntBtn)
+						.addGroup({"classStyle": "form-row"}, this.btnNew)
 				.addRow()
 					.addCol('col-md-12', 'padding-top: 1rem;')
 						.add(this.table);
