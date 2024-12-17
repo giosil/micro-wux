@@ -64,15 +64,16 @@ namespace APP {
 			}
 			else {
 				this.fp.enabled = true;
+				this.updButtons('Salva');
 				if(this.props == 'edit') {
-					this.fp.setReadOnly('codice', true);
+					this.fp.setReadOnly('code', true);
+					setTimeout(() => { this.fp.focusOn('name'); });
 				}
 				else {
-					this.fp.setReadOnly('codice', false);
+					this.fp.setReadOnly('code', false);
+					setTimeout(() => { this.fp.focusOn('code'); });
 				}
-				this.updButtons('Salva');
 			}
-			setTimeout(() => { this.fp.focusOn('code'); });
 		}
 	}
 
