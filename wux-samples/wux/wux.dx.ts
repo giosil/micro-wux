@@ -965,7 +965,7 @@ namespace WUX {
 		}
 
 		getInstance(opt?: DevExpress.ui.dxTreeViewOptions): DevExpress.ui.dxTreeView {
-			if (!this.mounted) return null;
+			if (!this.$r) return null;
 			if(opt) this.$r.dxTreeView(opt);
 			return this.$r.dxTreeView('instance');
 		}

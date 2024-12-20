@@ -268,7 +268,7 @@ namespace APP {
 			if(this.props == 'new' || this.props == 'edit') {
 				let m = this.fp.checkMandatory(true, true);
 				if(m) {
-					showWarning('Valorizzare i seguenti campi: ' + m);
+					showWarning('Valorizzare: ' + m);
 					return false;
 				}
 			}

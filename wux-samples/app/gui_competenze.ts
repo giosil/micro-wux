@@ -9,7 +9,7 @@ namespace APP {
 		nome?: string;
 		descrizione?: string;
 		areaCompetenza?: string;
-		statoValidita?: string;
+		validityState?: string;
 		commento?: string;
 		creationDate?: any;
 		creationBy?: string;
@@ -55,14 +55,21 @@ namespace APP {
 				this.state = this.fp.getState();
 			}
 			if(this.state) {
-				if(!this.state["validityState"]) {
-					this.state["validityState"] = 'false';
+				if(!this.state.validityState) {
+					this.state.validityState = 'false';
 				}
 			}
 			return this.state;
 		}
 		
 		override onClickOk(): boolean {
+			if(this.props == 'new' || this.props == 'edit') {
+				let m = this.fp.checkMandatory(true, true);
+				if(m) {
+					showWarning('Valorizzare: ' + m);
+					return false;
+				}
+			}
 			return true;
 		}
 		
@@ -73,15 +80,16 @@ namespace APP {
 			}
 			else {
 				this.fp.enabled = true;
+				this.updButtons('Salva');
 				if(this.props == 'edit') {
 					this.fp.setReadOnly('codice', true);
+					setTimeout(() => { this.fp.focusOn('nome'); });
 				}
 				else {
 					this.fp.setReadOnly('codice', false);
+					setTimeout(() => { this.fp.focusOn('codice'); });
 				}
-				this.updButtons('Salva');
 			}
-			setTimeout(() => { this.fp.focusOn('nome'); });
 		}
 		
 		clear() {
@@ -219,9 +227,9 @@ namespace APP {
 		
 		doFind() {
 			// Ricerca
-			let filter = this.form.getState();
-			filter["tipoCompetenza"] = this.tipo;
-			filter["validityState"] = 'true';
+			let filter = this.form.getState() as Competenza;
+			filter.tipoCompetenza = this.tipo;
+			filter.validityState = 'true';
 
 			http.get('competenza/findByFilters', filter, (data: Competenza[]) => {
 				if(!data) data = [];
