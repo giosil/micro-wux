@@ -1,4 +1,6 @@
 namespace WUX {
+
+	export type DxComponentType = 'dxAccordion' | 'dxActionSheet' | 'dxAutocomplete' | 'dxBox' | 'dxButton' | 'dxButtonGroup' | 'dxCalendar' | 'dxCheckBox' | 'dxColorBox' | 'dxContextMenu' | 'dxDataGrid' | 'dxDateBox' | 'dxDeferRendering' | 'dxDiagram' | 'dxDraggable' | 'dxDrawer' | 'dxDropDownBox' | 'dxDropDownButton' | 'dxFileManager' | 'dxFileUploader' | 'dxFilterBuilder' | 'dxForm' | 'dxGallery' | 'dxGantt' | 'dxHtmlEditor' | 'dxList' | 'dxLoadIndicator' | 'dxLoadPanel' | 'dxLookup' | 'dxMap' | 'dxMenu' | 'dxMultiView' | 'dxNavBar' | 'dxNumberBox' | 'dxPivotGrid' | 'dxPivotGridFieldChooser' | 'dxPopover' | 'dxPopup' | 'dxProgressBar' | 'dxRadioGroup' | 'dxRangeSlider' | 'dxRecurrenceEditor' | 'dxResizable' | 'dxResponsiveBox' | 'dxScheduler' | 'dxScrollView' | 'dxSelectBox' | 'dxSlideOut' | 'dxSlideOutView' | 'dxSlider' | 'dxSortable' | 'dxSpeedDialAction' | 'dxSwitch' | 'dxTabPanel' | 'dxTabs' | 'dxTagBox' | 'dxTextArea' | 'dxTextBox' | 'dxTileView' | 'dxToast' | 'dxToolbar' | 'dxTooltip' | 'dxTreeList' | 'dxTreeView' | 'dxValidationGroup' | 'dxValidationSummary' | 'dxValidator' | 'dxBarGauge' | 'dxBullet' | 'dxChart' | 'dxCircularGauge' | 'dxFunnel' | 'dxLinearGauge' | 'dxPieChart' | 'dxPolarChart' | 'dxRangeSelector' | 'dxSankey' | 'dxSparkline' | 'dxTreeMap' | 'dxVectorMap';
 	
 	export function initDX(callback: () => any) {
 		if (debug) console.log('[WUX] initDX...');
@@ -17,6 +19,23 @@ namespace WUX {
 		.catch(error => {
 			console.error('[WUX] initDX loading ' + u + ' failed', error);
 		});
+	}
+
+	export function dx(e: WElement, t: DxComponentType, o?: any, c?: (i: any) => void): any {
+		if (!e || !t) return null;
+		let j = (e instanceof WComponent) ? JQ(e.getRoot()) : JQ(e);
+		if (!j) return null;
+		try {
+			let r = o ? j[t](o) : j[t]();
+			r = o == 'instance' ? r : j[t]('instance');
+			if (!r) return null;
+			if (c) c(r);
+			return r;
+		}
+		catch(x) {
+			console.error('dx(' + e + ',' + t + ',' + o + ',' + c + ') error', x);
+		}
+		return null;
 	}
 	
 	/**
@@ -63,7 +82,8 @@ namespace WUX {
 		hiddenCols: string[];
 
 		// Auxiliary
-		$cbSelAll: JQuery;
+		$csa: JQuery; // Combo Select All
+		$i: DevExpress.ui.dxDataGrid;
 
 		constructor(id: string, header: string[], keys?: any[], classStyle?: string, style?: string | WStyle, attributes?: string | Object, props?: any) {
 			// WComponent init
@@ -104,17 +124,11 @@ namespace WUX {
 		}
 		set editable(b: boolean) {
 			this._editable = b;
-			if (this.mounted) {
-				let gopt: DevExpress.ui.dxDataGridOptions = {
-					editing: { mode: "cell", allowUpdating: true }
-				};
-				this.$r.dxDataGrid(gopt);
-			}
+			this.getInstance({editing:{mode: "cell", allowUpdating: true}});
 		}
 
 		setCellEditable(row: number, col: number | string, editable: boolean): this {
 			this.editmap[row + '_' + col] = editable;
-			if (!this.mounted) return this;
 			return this;
 		}
 
@@ -124,47 +138,43 @@ namespace WUX {
 		}
 
 		refresh(): this {
-			if (!this.mounted) return this;
-			this.$r.dxDataGrid('instance').refresh();
+			if (this.$i) this.$i.refresh();
 			return this;
 		}
 
 		refreshAndEdit(row?: number, col?: any, t: number = 50): this {
-			if (!this.mounted) return this;
-			let i = this.$r.dxDataGrid('instance');
+			if (!this.$i) return this;
 			if (row == null || col == null || col == '' || col == -1) {
-				i.refresh();
+				this.$i.refresh();
 			}
 			else {
-				i.refresh().done([() => { setTimeout(() => { if (col) i.editCell(row, col); }, t); }]);
+				this.$i.refresh().done([() => { setTimeout(() => { if (col) this.$i.editCell(row, col); }, t); }]);
 			}
 			return this;
 		}
 
 		repaintAndEdit(row?: number, col?: any, t: number = 50): this {
-			if (!this.mounted) return this;
-			let i = this.$r.dxDataGrid('instance');
+			if (!this.$i) return this;
 			if (row == null || col == null || col == '' || col == -1) {
-				i.repaint();
+				this.$i.repaint();
 			}
 			else {
-				i.repaintRows([row]);
-				if (col != null) setTimeout(() => { if (col) i.editCell(row, col); }, t);
+				this.$i.repaintRows([row]);
+				if (col != null) setTimeout(() => { if (col) this.$i.editCell(row, col); }, t);
 			}
 			return this;
 		}
 
 		repaint(): this {
-			if (!this.mounted) return this;
-			this.$r.dxDataGrid('instance').repaint();
+			if (this.$i) this.$i.repaint();
 			if (this.handlers['_selectall'] && this.selectionMode == 'multiple') {
 				setTimeout(() => {
 					let $cb = $('.dx-header-row .dx-checkbox').first();
 					if($cb && $cb.length) {
-						if (!this.$cbSelAll || !this.$cbSelAll.is($cb)) {
-							this.$cbSelAll = $cb;
-							let val = this.$cbSelAll.dxCheckBox('instance').option('value');
-							this.$cbSelAll.on('click', (e: JQueryEventObject) => {
+						if (!this.$csa || !this.$csa.is($cb)) {
+							this.$csa = $cb;
+							let val = this.$csa.dxCheckBox('instance').option('value');
+							this.$csa.on('click', (e: JQueryEventObject) => {
 								e.data = val;
 								for(let h of this.handlers['_selectall']) h(e);
 							});
@@ -176,23 +186,20 @@ namespace WUX {
 		}
 
 		closeEditCell(): this {
-			if (!this.mounted) return this;
-			this.$r.dxDataGrid('instance').closeEditCell();
+			if (this.$i) this.$i.closeEditCell();
 			return this;
 		}
 
 		repaintRows(idxs: number[]): this {
-			if (!this.mounted) return this;
-			this.$r.dxDataGrid('instance').repaintRows(idxs);
+			if (this.$i) this.$i.repaintRows(idxs);
 			return this;
 		}
 
 		repaintRowByKey(key: any): this {
-			if (!this.mounted || !key) return this;
-			let i = this.$r.dxDataGrid('instance');
-			let idx = i.getRowIndexByKey(key);
-			if (idx < 0) return this;
-			i.repaintRows([ idx ]);
+			if (!this.$i || !key) return this;
+			let r = this.$i.getRowIndexByKey(key);
+			if (r < 0) return this;
+			this.$i.repaintRows([ r ]);
 			return this;
 		}
 
@@ -268,12 +275,7 @@ namespace WUX {
 		onSelectionChanged(h: (e: { element?: JQuery, selectedRowsData?: Array<any> }) => any): void {
 			// Single handler
 			this.handlers['_selectionchanged'] = [h];
-			if (this.mounted) {
-				let gopt: DevExpress.ui.dxDataGridOptions = {
-					onSelectionChanged: h
-				};
-				this.$r.dxDataGrid(gopt);
-			}
+			this.getInstance({onSelectionChanged: h});
 		}
 
 		onDoubleClick(h: (e: { element?: JQuery }) => any): void {
@@ -294,131 +296,78 @@ namespace WUX {
 		onRowPrepared(h: (e: { element?: JQuery, rowElement?: JQuery, data?: any, rowIndex?: number, isSelected?: boolean }) => any) {
 			// Single handler
 			this.handlers['_rowprepared'] = [h];
-			if (this.mounted) {
-				let gopt: DevExpress.ui.dxDataGridOptions = {
-					onRowPrepared: h
-				};
-				this.$r.dxDataGrid(gopt);
-			}
+			this.getInstance({onRowPrepared: h});
 		}
 
 		onCellPrepared(h: (e: { component?: DevExpress.DOMComponent, element?: DevExpress.core.dxElement, model?: any, data?: any, key?: any, value?: any, displayValue?: string, text?: string, columnIndex?: number, column?: DevExpress.ui.dxDataGridColumn, rowIndex?: number, rowType?: string, row?: DevExpress.ui.dxDataGridRowObject, isSelected?: boolean, isExpanded?: boolean, cellElement?: DevExpress.core.dxElement }) => any) {
 			// Single handler
 			this.handlers['_cellprepared'] = [h];
-			if (this.mounted) {
-				let gopt: DevExpress.ui.dxDataGridOptions = {
-					onCellPrepared: h
-				};
-				this.$r.dxDataGrid(gopt);
-			}
+			this.getInstance({onCellPrepared: h});
 		}
 
 		onContentReady(h: (e: { component?: DevExpress.ui.dxDataGrid, element?: DevExpress.core.dxElement, model?: any }) => any) {
 			// Single handler
 			this.handlers['_contentready'] = [h];
-			if (this.mounted) {
-				let gopt: DevExpress.ui.dxDataGridOptions = {
-					onContentReady: h
-				};
-				this.$r.dxDataGrid(gopt);
-			}
+			this.getInstance({onContentReady: h});
 		}
 
 		onRowUpdated(h: (e: { component?: DevExpress.DOMComponent, element?: DevExpress.core.dxElement, model?: any, data?: any, key?: any, error?: Error }) => any) {
 			// Single handler
 			this.handlers['_rowupdated'] = [h];
-			if (this.mounted) {
-				let gopt: DevExpress.ui.dxDataGridOptions = {
-					onRowUpdated: h
-				};
-				this.$r.dxDataGrid(gopt);
-			}
+			this.getInstance({onRowUpdated: h});
 		}
 
 		onEditorPreparing(h: (e: { component?: DevExpress.DOMComponent, element?: DevExpress.core.dxElement, model?: any, parentType?: string, value?: any, setValue?: any, updateValueTimeout?: number, width?: number, disabled?: boolean, rtlEnabled?: boolean, cancel?: boolean, editorElement?: DevExpress.core.dxElement, readOnly?: boolean, editorName?: string, editorOptions?: any, dataField?: string, row?: DevExpress.ui.dxDataGridRowObject }) => any) {
 			// Single handler
 			this.handlers['_editorpreparing'] = [h];
-			if (this.mounted) {
-				let gopt: DevExpress.ui.dxDataGridOptions = {
-					onEditorPreparing: h
-				};
-				this.$r.dxDataGrid(gopt);
-			}
+			this.getInstance({onEditorPreparing: h});
 		}
 
 		onEditorPrepared(h: (e: { component?: DevExpress.DOMComponent, element?: DevExpress.core.dxElement, model?: any, parentType?: string, value?: any, setValue?: any, updateValueTimeout?: number, width?: number, disabled?: boolean, rtlEnabled?: boolean, editorElement?: DevExpress.core.dxElement, readOnly?: boolean, dataField?: string, row?: DevExpress.ui.dxDataGridRowObject }) => any) {
 			// Single handler
 			this.handlers['_editorprepared'] = [h];
-			if (this.mounted) {
-				let gopt: DevExpress.ui.dxDataGridOptions = {
-					onEditorPrepared: h
-				};
-				this.$r.dxDataGrid(gopt);
-			}
+			this.getInstance({onEditorPrepared: h});
 		}
 
 		onEditingStart(h: (e: { component?: DevExpress.DOMComponent, element?: DevExpress.core.dxElement, model?: any, parentType?: string, value?: any, setValue?: any, updateValueTimeout?: number, width?: number, disabled?: boolean, rtlEnabled?: boolean, editorElement?: DevExpress.core.dxElement, readOnly?: boolean, dataField?: string, row?: DevExpress.ui.dxDataGridRowObject }) => any) {
 			// Single handler
 			this.handlers['_editingstart'] = [h];
-			if (this.mounted) {
-				let gopt: DevExpress.ui.dxDataGridOptions = {
-					onEditingStart: h
-				};
-				this.$r.dxDataGrid(gopt);
-			}
+			this.getInstance({onEditingStart: h});
 		}
 
 		onCellClick(h: (e: { component?: DevExpress.DOMComponent, element?: DevExpress.core.dxElement, model?: any, jQueryEvent?: JQueryEventObject, event?: DevExpress.event, data?: any, key?: any, value?: any, displayValue?: string, text?: string, columnIndex?: number, column?: any, rowIndex?: number, rowType?: string, cellElement?: DevExpress.core.dxElement, row?: DevExpress.ui.dxDataGridRowObject }) => any) {
 			// Single handler
 			this.handlers['_cellclick'] = [h];
-			if (this.mounted) {
-				let gopt: DevExpress.ui.dxDataGridOptions = {
-					onCellClick: h
-				};
-				this.$r.dxDataGrid(gopt);
-			}
+			this.getInstance({onCellClick: h});
 		}
 
 		onScroll(h: (e: { element?: JQuery, reachedBottom?: boolean, reachedLeft?: boolean, reachedRight?: boolean, reachedTop?: boolean, scrollOffset?: { top?: number, left?: number } }) => any) {
 			// Single handler
 			this.handlers['_scroll'] = [h];
-			if (this.mounted) {
-				this.$r.dxDataGrid('instance').getScrollable().on('scroll', h);
-			}
+			if (this.$i) this.$i.getScrollable().on('scroll', h);
 		}
 
 		onKeyDown(h: (e: { component?: DevExpress.DOMComponent, element?: DevExpress.core.dxElement, model?: any, jQueryEvent?: JQueryEventObject, event?: DevExpress.event, handled?: boolean }) => any) {
 			// Single handler
 			this.handlers['_keydown'] = [h];
-			if (this.mounted) {
-				let gopt: DevExpress.ui.dxDataGridOptions = {
-					onKeyDown: h
-				};
-				this.$r.dxDataGrid(gopt);
-			}
+			this.getInstance({onKeyDown: h});
 		}
 
 		onToolbarPreparing(h: (e: { component?: DevExpress.DOMComponent, element?: DevExpress.core.dxElement, model?: any, toolbarOptions?: DevExpress.ui.dxToolbarOptions }) => any) {
 			// Single handler
 			this.handlers['_toolbarpreparing'] = [h];
-			if (this.mounted) {
-				let gopt: DevExpress.ui.dxDataGridOptions = {
-					onToolbarPreparing: h
-				};
-				this.$r.dxDataGrid(gopt);
-			}
+			this.getInstance({onToolbarPreparing: h});
 		}
 
 		scrollTo(location: any) {
-			if (!this.mounted) return;
-			this.$r.dxDataGrid('instance').getScrollable().scrollTo(location);
+			if (this.$i) this.$i.getScrollable().scrollTo(location);
 		}
 
 		scrollToRow(row: number, delta: number = 0, timeOut: number = 0) {
-			if (!this.mounted || !this.state) return;
+			if (!this.$i || !this.state) return;
 			let l = this.state.length;
 			if(l < 2) return;
-			let s = this.$r.dxDataGrid('instance').getScrollable();
+			let s = this.$i.getScrollable();
 			if(!s) return;
 			let h = s.scrollHeight();
 			if(!h) return;
@@ -436,8 +385,8 @@ namespace WUX {
 		}
 
 		clearFilter() {
-			if (!this.mounted || !this.state) return;
-			this.$r.dxDataGrid('instance').clearFilter();
+			if (!this.$i || !this.state) return;
+			this.$i.clearFilter();
 		}
 
 		off(events?: string): this {
@@ -455,61 +404,56 @@ namespace WUX {
 			if (events.indexOf('_cellclick') >= 0) gopt.onCellClick = null;
 			if (events.indexOf('_keydown') >= 0) gopt.onKeyDown = null;
 			if (events.indexOf('_toolbarpreparing') >= 0) gopt.onToolbarPreparing = null;
-			this.$r.dxDataGrid(gopt);
+			this.getInstance(gopt);
 			return this;
 		}
 
 		clearSelection(): this {
-			if (!this.mounted || !this.state) return this;
-			this.$r.dxDataGrid('instance').clearSelection();
+			if (!this.$i || !this.state) return this;
+			this.$i.clearSelection();
 			return this;
 		}
 
 		deselectAll(): this {
-			if (!this.mounted) return this;
-			this.$r.dxDataGrid('instance').deselectAll();
+			if (this.$i) this.$i.deselectAll();
 			return this;
 		}
 
 		select(idxs: number[]): this {
-			if (!this.mounted) return this;
-			this.$r.dxDataGrid('instance').selectRowsByIndexes(idxs);
+			if (this.$i) this.$i.selectRowsByIndexes(idxs);
 			return this;
 		}
 
 		selectRows(keys: any[], preserve: boolean): this {
-			if (!this.mounted) return this;
-			this.$r.dxDataGrid('instance').selectRows(keys, preserve);
+			if (this.$i) this.$i.selectRows(keys, preserve);
 			return this;
 		}
 
 		deselectRows(keys: any[]): this {
-			if (!this.mounted) return this;
-			this.$r.dxDataGrid('instance').deselectRows(keys);
+			if (this.$i) this.$i.deselectRows(keys);
 			return this;
 		}
 
 		selectAll(toggle?: boolean): this {
-			if (!this.mounted) return this;
+			if (!this.$i) return this;
 			if (toggle) {
 				let rsize = WUtil.size(this.getSelectedRows());
 				let ssize = WUtil.size(this.state);
 				if (rsize && rsize == ssize) {
-					this.$r.dxDataGrid('instance').clearSelection();
+					this.$i.clearSelection();
 				}
 				else {
-					this.$r.dxDataGrid('instance').selectAll();
+					this.$i.selectAll();
 				}
 			}
 			else {
-				this.$r.dxDataGrid('instance').selectAll();
+				this.$i.selectAll();
 			}
 			return this;
 		}
 
 		setSelectionMode(s: 'single' | 'multiple' | 'none'): this {
 			this.selectionMode = s;
-			if (!this.mounted) return this;
 			let gopt: DevExpress.ui.dxDataGridOptions = {};
 			if (this.selectionFilter && this.selectionFilter.length) {
 				gopt.selection = { mode: this.selectionMode, deferred: true };
@@ -517,26 +461,28 @@ namespace WUX {
 			else {
 				gopt.selection = { mode: this.selectionMode };
 			}
-			this.$r.dxDataGrid(gopt);
+			this.getInstance(gopt);
 			return this;
 		}
 
 		setColVisible(col: string, vis: boolean): this {
+			if (!this.$r) return this;
 			this.$r.dxDataGrid('columnOption', col, 'visible', vis);
+			this.$i = this.$r.dxDataGrid('instance');
 			return this;
 		}
 
 		edit(row: number, col: any, t: number = 200): this {
-			if (!this.mounted) return this;
+			if (!this.$i) return this;
 			setTimeout(() => {
-				this.$r.dxDataGrid('instance').editCell(row, col);
+				this.$i.editCell(row, col);
 			}, t);
 			return this;
 		}
 
 		getFilter(key: string): string {
-			if (!this.mounted) return '';
-			let c = this.$r.dxDataGrid('instance').getCombinedFilter(true);
+			if (!this.$i) return '';
+			let c = this.$i.getCombinedFilter(true);
 			let s = WUtil.size(c);
 			for (let i = 0; i < s; i++) {
 				let f = c[i];
@@ -556,24 +502,24 @@ namespace WUX {
 		}
 
 		getInstance(gopt?: DevExpress.ui.dxDataGridOptions): DevExpress.ui.dxDataGrid {
-			if (!this.mounted) return null;
+			if (!this.$r) return null;
 			if(gopt) this.$r.dxDataGrid(gopt);
-			return this.$r.dxDataGrid('instance');
+			this.$i = this.$r.dxDataGrid('instance');
+			return this.$i;
 		}
 
 		getSelectedKeys(): any[] {
-			if (!this.mounted) return [];
-			return this.$r.dxDataGrid('instance').getSelectedRowKeys();
+			if (!this.$i) return [];
+			return this.$i.getSelectedRowKeys();
 		}
 
 		getSelectedRows(): number[] {
-			if (!this.mounted) return [];
-			let i = this.$r.dxDataGrid('instance');
-			let keys = i.getSelectedRowKeys();
+			if (!this.$i) return [];
+			let keys = this.$i.getSelectedRowKeys();
 			if (!keys || !keys.length) return [];
 			let rows: number[] = [];
 			for (let key of keys) {
-				let idx = i.getRowIndexByKey(key);
+				let idx = this.$i.getRowIndexByKey(key);
 				if (idx < 0) continue;
 				rows.push(idx);
 			}
@@ -581,19 +527,18 @@ namespace WUX {
 		}
 
 		isSelected(data: any): boolean {
-			if (!this.mounted) return false;
-			return this.$r.dxDataGrid('instance').isRowSelected(data);
+			if (!this.$i) return false;
+			return this.$i.isRowSelected(data);
 		}
 
 		getSelectedRowsData(): any[] {
-			if (!this.mounted) return [];
-			return this.$r.dxDataGrid('instance').getSelectedRowsData();
+			if (!this.$i) return [];
+			return this.$i.getSelectedRowsData();
 		}
 
 		getFilteredRowsData(): any[] {
-			if (!this.root) return this.state;
-			let i = this.$r.dxDataGrid('instance');
-			let ds = i.getDataSource();
+			if (!this.$i) return this.state;
+			let ds = this.$i.getDataSource();
 			if (!ds) return this.state;
 			let r = ds.items();
 			if (!r || !r.length) return this.state;
@@ -603,19 +548,18 @@ namespace WUX {
 		cellValue(rowIndex: number, dataField: string): any;
 		cellValue(rowIndex: number, dataField: string, value?: any) : any;
 		cellValue(rowIndex: number, dataField: string, value?: any) {
-			if (!this.root) return null;
-			let i = this.$r.dxDataGrid('instance');
-			if (value === undefined) return i.cellValue(rowIndex, dataField);
-			i.cellValue(rowIndex, dataField, value);
+			if (!this.$i) return null;
+			if (value === undefined) return this.$i.cellValue(rowIndex, dataField);
+			this.$i.cellValue(rowIndex, dataField, value);
 		}
 
 		saveEditData(r?: number): this {
-			let i = this.$r.dxDataGrid('instance');
+			if (!this.$i) return this;
 			if (r != null) {
-				i.saveEditData().done([() => { setTimeout(() => { i.repaintRows([r]); }, 0); }]);
+				this.$i.saveEditData().done([() => { setTimeout(() => { this.$i.repaintRows([r]); }, 0); }]);
 			}
 			else {
-				i.saveEditData();
+				this.$i.saveEditData();
 			}
 			return this;
 		}
@@ -914,7 +858,6 @@ namespace WUX {
 			if (this.exportFile) {
 				gopt.export = { enabled: true, fileName: this.exportFile };
 			}
-
 			// Event handlers
 			if (this.handlers['_selectionchanged'] && this.handlers['_selectionchanged'].length) {
 				gopt.onSelectionChanged = this.handlers['_selectionchanged'][0];
@@ -953,9 +896,10 @@ namespace WUX {
 			this.beforeInit(gopt);
 
 			this.$r.dxDataGrid(gopt);
+			this.$i = this.$r.dxDataGrid('instance');
 
 			if (this.handlers['_scroll'] && this.handlers['_scroll'].length) {
-				this.$r.dxDataGrid('instance').getScrollable().on('scroll', this.handlers['_scroll'][0]);
+				this.$i.getScrollable().on('scroll', this.handlers['_scroll'][0]);
 			}
 		}
 
@@ -976,23 +920,24 @@ namespace WUX {
 			gopt.paging = { enabled: this.paging, pageSize: this.pageSize };
 			if (this.paging) gopt.pager = { showPageSizeSelector: false, allowedPageSizes: [this.pageSize], showInfo: true };
 			if (!this.keepSorting) {
-				this.$r.dxDataGrid('instance').clearSorting();
+				this.$i.clearSorting();
 			}
 			if (!this.selectionFilter || !this.selectionFilter.length) {
-				this.$r.dxDataGrid('instance').clearSelection();
+				this.$i.clearSelection();
 			}
 			this.$r.dxDataGrid(gopt);
-			this.$r.dxDataGrid('instance').refresh().done(() => {
+			this.$i = this.$r.dxDataGrid('instance');
+			this.$i.refresh().done(() => {
 				if (this.handlers['_donerefresh']) {
 					for (let h of this.handlers['_donerefresh']) h(this.createEvent('_donerefresh'));
 				}
 				if (this.handlers['_selectall'] && this.selectionMode == 'multiple') {
 					let $cb = $('.dx-header-row .dx-checkbox').first();
 					if($cb && $cb.length) {
-						if(!this.$cbSelAll || !this.$cbSelAll.is($cb)) {
-							this.$cbSelAll = $cb;
-							let val = this.$cbSelAll.dxCheckBox('instance').option('value');
-							this.$cbSelAll.on('click', (e: JQueryEventObject) => {
+						if(!this.$csa || !this.$csa.is($cb)) {
+							this.$csa = $cb;
+							let val = this.$csa.dxCheckBox('instance').option('value');
+							this.$csa.on('click', (e: JQueryEventObject) => {
 								e.data = val;
 								for(let h of this.handlers['_selectall']) h(e);
 							});
