@@ -5086,7 +5086,10 @@ var WUX;
                 var row = this.rows[i];
                 for (var j = 0; j < row.length; j++) {
                     var f = row[j];
-                    r[this.ripId(f.id)] = f.component ? f.component.getState() : f.value;
+                    var k = this.ripId(f.id);
+                    if (!k)
+                        continue;
+                    r[k] = f.component ? f.component.getState() : f.value;
                 }
             }
             return r;

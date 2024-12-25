@@ -2240,7 +2240,9 @@ namespace WUX {
 				let row = this.rows[i];
 				for (let j = 0; j < row.length; j++) {
 					let f = row[j];
-					r[this.ripId(f.id)] = f.component ? f.component.getState() : f.value;
+					let k = this.ripId(f.id);
+					if (!k) continue;
+					r[k] = f.component ? f.component.getState() : f.value;
 				}
 			}
 			return r;
