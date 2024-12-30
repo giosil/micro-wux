@@ -715,6 +715,8 @@ namespace WUX {
 		}
 
 		protected updateState(nextState: string) {
+			// At runtime nextState can be of any type 
+			nextState = WUtil.toString(nextState);
 			if (!nextState) nextState = '';
 			super.updateState(nextState);
 			if (this.root) this.root['value'] = nextState;

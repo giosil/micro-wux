@@ -3519,6 +3519,8 @@ var WUX;
             configurable: true
         });
         WInput.prototype.updateState = function (nextState) {
+            // At runtime nextState can be of any type 
+            nextState = WUX.WUtil.toString(nextState);
             if (!nextState)
                 nextState = '';
             _super.prototype.updateState.call(this, nextState);
