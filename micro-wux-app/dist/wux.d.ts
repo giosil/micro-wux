@@ -424,6 +424,27 @@ declare namespace WUX {
         static diffMinutes(ah: any, al: any): number;
         static diffHours(ah: any, al: any): number;
         static diffDays(ah: any, al: any): number;
+        /**
+         * Replace scalar value field with object value. Es.
+         *
+         * o = { "person": 1 }
+         * a = [ {"id": 1, "name": "John"}, {"id": 2, "name": "Jack"} ]
+         *
+         * rplObj(o, 'person', 'id', a)
+         *
+         * o = { "person": {"id": 1, "name": "John"} }
+         */
+        static rplObj(o: any, f: string, k: string, a: any): any;
+        /**
+         * Replace object field with scalar value. Es.
+         *
+         * o = { "person": {"id": 1, name: "John"} }
+         *
+         * rplVal(o, 'person', 'id')
+         *
+         * o = { "person": 1 }
+         */
+        static rplVal(o: any, f: string, k: string): any;
     }
 }
 declare namespace WUX {
@@ -747,7 +768,10 @@ declare namespace WUX {
         addRow(classStyle?: string, style?: string | WStyle, id?: string, attributes?: string | object, type?: string): this;
         protected _add(id: string, label: string, co: WComponent, type: string, opts?: WField): this;
         addTextField(fieldId: string, label: string, opts?: WField): this;
+        addNumberField(fieldId: string, label: string, min: number, max: number, opts?: WField): this;
+        addPasswordField(fieldId: string, label: string, opts?: WField): this;
         addDateField(fieldId: string, label: string, opts?: WField): this;
+        addMonthField(fieldId: string, label: string, opts?: WField): this;
         addTimeField(fieldId: string, label: string, opts?: WField): this;
         addEmailField(fieldId: string, label: string, opts?: WField): this;
         addNoteField(fieldId: string, label: string, rows: number, opts?: WField): this;
@@ -757,6 +781,7 @@ declare namespace WUX {
         addToggleField(fieldId: string, label: string, labelCheck?: string, opts?: WField): this;
         addBlankField(label?: string, classStyle?: string, style?: string | WStyle, opts?: WField): this;
         addCaption(text: string, icon?: string, classStyle?: string, style?: string | WStyle, opts?: WField): this;
+        addHiddenField(fieldId: string, value?: any): this;
         addInternalField(fieldId: string, value?: any): this;
         addComponent(fieldId: string, label: string, component: WComponent, opts?: WField): this;
         addToFooter(c: WElement): this;

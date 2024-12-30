@@ -1700,20 +1700,21 @@ namespace WUX {
 					return WUtil.getLast(a, d);
 				}
 				else if (WUtil.isNumeric(k)) {
-					return WUtil.getItem(a, WUtil.toInt(k), d);
+					return WUtil.getItem(a, parseInt(k), d);
 				}
 				else {
 					return WUtil.getValue(a[0], k, d);
 				}
 			}
 			if (typeof a == 'object') {
-				let sep = k.indexOf('.');
-				if (a[k] == null && sep > 0) {
-					let sub = k.substring(0, sep);
-					if (a[sub] == null) return d;
-					return WUtil.getValue(a[sub], k.substring(sep + 1), d);
+				if (a[k] != null) return a[k];
+				let s = k.indexOf('.');
+				if (s > 0) {
+					let sub = k.substring(0, s);
+					if (a[sub] != null) {
+						return WUtil.getValue(a[sub], k.substring(s + 1), d);
+					}
 				}
-				return a[k] == null ? d : a[k];
 			}
 			return d;
 		}
@@ -2015,6 +2016,47 @@ namespace WUX {
 				r++;
 			}
 			return r;
+		}
+
+		/** 
+		 * Replace scalar value field with object value. Es.
+		 * 
+		 * o = { "person": 1 }
+		 * a = [ {"id": 1, "name": "John"}, {"id": 2, "name": "Jack"} ]
+		 *
+		 * rplObj(o, 'person', 'id', a)
+		 * 
+		 * o = { "person": {"id": 1, "name": "John"} }
+		 */
+		static rplObj(o: any, f: string, k: string, a: any): any {
+			if (!o || !f || !k) return null;
+			let v = o[f];
+			if (!v) return null;
+			let r = WUtil.find(a, k, v);
+			if (r) {
+				o[f] = r;
+			}
+			else {
+				o[f] = { k: v };
+			}
+			return o[f];
+		}
+
+		/** 
+		 * Replace object field with scalar value. Es.
+		 * 
+		 * o = { "person": {"id": 1, name: "John"} }
+		 *
+		 * rplVal(o, 'person', 'id')
+		 * 
+		 * o = { "person": 1 }
+		 */
+		static rplVal(o: any, f: string, k: string): any {
+			if (!o || !f || !k) return null;
+			let v = o[f];
+			if (!v) return null;
+			o[f] = v[k];
+			return o[f];
 		}
 	}
 }

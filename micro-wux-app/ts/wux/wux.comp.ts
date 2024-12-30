@@ -1972,10 +1972,32 @@ namespace WUX {
 			return this._add(id, label, co, 'text', opts);
 		}
 
+		addNumberField(fieldId: string, label: string, min: number, max: number, opts?: WField): this {
+			let id = this.subId(fieldId);
+			let co = new WInput(id, 'number', 0, CSS.FORM_CTRL);
+			let at = 'min="' + min + '" max="' + max + '"';
+			if (!opts) opts = {};
+			if (opts.attributes) opts.attributes += ' ' + at;
+			else opts.attributes = at;
+			return this._add(id, label, co, 'number', opts);
+		}
+
+		addPasswordField(fieldId: string, label: string, opts?: WField): this {
+			let id = this.subId(fieldId);
+			let co = new WInput(id, 'password', 0, CSS.FORM_CTRL);
+			return this._add(id, label, co, 'password', opts);
+		}
+
 		addDateField(fieldId: string, label: string, opts?: WField): this {
 			let id = this.subId(fieldId);
 			let co = new WInput(id, 'date', 0, CSS.FORM_CTRL);
 			return this._add(id, label, co, 'date', opts);
+		}
+
+		addMonthField(fieldId: string, label: string, opts?: WField): this {
+			let id = this.subId(fieldId);
+			let co = new WInput(id, 'month', 0, CSS.FORM_CTRL);
+			return this._add(id, label, co, 'month', opts);
 		}
 
 		addTimeField(fieldId: string, label: string, opts?: WField): this {
@@ -2044,6 +2066,15 @@ namespace WUX {
 			return this._add('', '', co, 'caption', opts);
 		}
 
+		addHiddenField(fieldId: string, value?: any): this {
+			let id = this.subId(fieldId);
+			let vs = WUtil.toString(value);
+			let co = new WInput(id, 'hidden');
+			co.setState(vs)
+			this.currRow.push({ id: id, component: co, value: vs, type: 'hidden' });
+			return this;
+		}
+
 		addInternalField(fieldId: string, value?: any): this {
 			if (value === undefined) value = null;
 			this.currRow.push({ id: this.subId(fieldId), value: value, type: 'internal' });
@@ -2051,7 +2082,6 @@ namespace WUX {
 		}
 
 		addComponent(fieldId: string, label: string, component: WComponent, opts?: WField): this {
-			let f0 = opts ? opts : {};
 			if (!component) return this;
 			if (fieldId) {
 				let id = this.subId(fieldId);
@@ -2089,20 +2119,25 @@ namespace WUX {
 				let cols = 0;
 				for (let j = 0; j < row.length; j++) {
 					let f = row[j];
-					if(!f.component) continue;
+					if (!f.component || f.type == 'hidden') continue;
 					cols += f.span && f.span > 0 ? f.span : 1;
 				}
 				let g = !!CSS.FORM_GROUP;
 				for (let j = 0; j < row.length; j++) {
 					let f = row[j];
-					if(!f.component) continue;
+
+					if (!f.component) continue;
+					if (f.type == 'hidden') {
+						f.component.mount(this.fieldset);
+						continue;
+					}
 					
 					let cs = Math.floor(12 / cols);
 					if (cs < 1) cs = 1;
 					if ((cs == 1 && cols < 11) && (j == 0 || j == cols - 1)) cs = 2;
 					if (f.span && f.span > 0) cs = cs * f.span;
 					if (f.colClass) {
-						if(WUtil.starts(f.colClass, 'col-')) {
+						if (WUtil.starts(f.colClass, 'col-')) {
 							this.main.addCol(f.colClass, f.colStyle);
 						}
 						else {
@@ -2113,28 +2148,28 @@ namespace WUX {
 						this.main.addCol('' + cs, f.colStyle);
 					}
 					
-					if(f.type != 'caption') f.component.setState(f.value);
-					if(f.label && !f.labelComp) {
+					if (f.type != 'caption') f.component.setState(f.value);
+					if (f.label && !f.labelComp) {
 						let r = f.required ? ' *' : '';
 						let lc = CSS.LBL_CLASS;
 						let ls = '';
-						if(f.labelCss) {
-							if(f.labelCss.indexOf(':')) {
+						if (f.labelCss) {
+							if (f.labelCss.indexOf(':')) {
 								ls = f.labelCss;
 							}
 							else {
 								lc = f.labelCss;
 							}
 						}
-						else if(f.classStyle) {
+						else if (f.classStyle) {
 							lc = f.classStyle;
 						}
 						let l = new WLabel(f.id + '-l', f.label + r, '', lc, ls);
 						f.labelComp = l.for(f.id);
 					}
 					
-					if(g) {
-						if(f.type == 'select') {
+					if (g) {
+						if (f.type == 'select') {
 							this.main.addGroup({classStyle: CSS.SEL_WRAPPER}, f.labelComp, f.component);
 						}
 						else {
@@ -2147,18 +2182,25 @@ namespace WUX {
 					}
 				}
 			}
+			this.main.mount(this.fieldset);
 			if (this.footer && this.footer.length) {
 				this.foot = new WContainer(this.subId('__foot'), this.footerClass, this.footerStyle);
 				for(let f of this.footer) {
 					this.foot.addRow().addCol('12').add(f);
 				}
-				this.main.addRow().addCol('12').add(this.foot);
+				this.foot.mount(this.root);
 			}
-			this.main.mount(this.fieldset);
 		}
 
 		componentWillUnmount(): void {
-			if(!this.main) this.main.unmount();
+			if (this.main) this.main.unmount();
+			if (this.foot) this.foot.unmount();
+			for (let r of this.rows) {
+				for (let f of r) {
+					let c = f.component;
+					if (c && f.type == 'hidden') c.unmount();
+				}
+			}
 		}
 
 		clear(): this {
@@ -2166,8 +2208,8 @@ namespace WUX {
 				let row = this.rows[i];
 				for (let j = 0; j < row.length; j++) {
 					let f = row[j];
-					if(f.type == 'caption') continue;
-					if(f.component) f.component.setState(null);
+					if (f.type == 'caption') continue;
+					if (f.component) f.component.setState(null);
 					f.value = null;
 				}
 			}
@@ -2176,10 +2218,10 @@ namespace WUX {
 
 		setValue(fid: string, v: any, updState: boolean = true): this {
 			let f = this.getField(fid);
-			if(!f) return this;
-			if(f.type == 'date') v = isoDate(v);
-			if(f.type == 'time') v = formatTime(v, false);
-			if(f.component) f.component.setState(v);
+			if (!f) return this;
+			if (f.type == 'date') v = isoDate(v);
+			if (f.type == 'time') v = formatTime(v, false);
+			if (f.component) f.component.setState(v);
 			f.value = v;
 			if (updState) {
 				if (!this.state) this.state = {};
@@ -2190,19 +2232,19 @@ namespace WUX {
 
 		getValue(fid: string | WField): any {
 			let f = typeof fid == 'string' ? this.getField(fid) : fid;
-			if(!f) return null;
-			if(f.component) return f.component.getState();
+			if (!f) return null;
+			if (f.component) return f.component.getState();
 			return f.value;
 		}
 
 		setOptions(fid: string, options: Array<string | WEntity>, prevVal?: boolean): this {
 			let f = this.getField(fid);
-			if(!f) return this;
+			if (!f) return this;
 			let c = f.component;
-			if(c instanceof WUX.WSelect) {
+			if (c instanceof WUX.WSelect) {
 				c.setOptions(options, prevVal);
 			}
-			else if(c instanceof WUX.WRadio) {
+			else if (c instanceof WUX.WRadio) {
 				c.setOptions(options, prevVal);
 			}
 			return this;
@@ -2235,17 +2277,15 @@ namespace WUX {
 		}
 
 		getValues(): any {
-			let r = {};
-			for (let i = 0; i < this.rows.length; i++) {
-				let row = this.rows[i];
-				for (let j = 0; j < row.length; j++) {
-					let f = row[j];
+			let v = {};
+			for (let r of this.rows) {
+				for (let f of r) {
 					let k = this.ripId(f.id);
 					if (!k) continue;
-					r[k] = f.component ? f.component.getState() : f.value;
+					v[k] = f.component ? f.component.getState() : f.value;
 				}
 			}
-			return r;
+			return v;
 		}
 
 		getState() {

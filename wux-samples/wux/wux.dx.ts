@@ -37,6 +37,110 @@ namespace WUX {
 		}
 		return null;
 	}
+
+	export class WDX extends WComponent<DxComponentType, any> {
+		opts: any;
+		$i: DevExpress.ui.Widget;
+
+		constructor(props: DxComponentType, id?: string, classStyle?: string, style?: string | WStyle, attributes?: string | object) {
+			super(id, 'WDX', props, classStyle, style, attributes);
+		}
+
+		get options(): any {
+			return this.opts;
+		}
+		set options(o: any) {
+			this.opts = o;
+			this.getInstance(o);
+		}
+
+		override componentDidMount(): void {
+			if (!this.$r || !this.$r[this.props]) return null;
+			if (this.opts) {
+				this.$r[this.props](this.opts);
+			}
+			else {
+				this.$r[this.props]();
+			}
+			this.$i = this.$r[this.props]('instance') as DevExpress.ui.Widget;
+		}
+
+		override updateState(nextState: any): void {
+			this.state = nextState;
+			this.option('value', this.state);
+		}
+		
+		override getState(): any {
+			let s = this.option('value');
+			if (s != null) this.state = s;
+			return this.state;
+		}
+
+		getInstance(c?: (i: any) => void): any;
+		getInstance(o?: any, c?: (i: any) => void): any {
+			if (!this.$r || !this.$r[this.props]) return null;
+			if (o && typeof o != 'function') this.$r[this.props](o);
+			this.$i = this.$r[this.props]('instance') as DevExpress.ui.Widget;
+			if (this.$i) {
+				if (c) c(this.$i);
+				if (typeof o == 'function') o(this.$i);
+			}
+			return this.$i;
+		}
+
+		override focus(): this {
+			if (!this.$i) return this;
+			this.$i.focus();
+			return this
+		}
+
+		dispose(): this {
+			if (!this.$i) return this;
+			this.$i.dispose();
+			return this
+		}
+
+		repaint(t: number = -1, c?: (i: any) => void): this {
+			if (!this.$i) return this;
+			if (t >= 0) {
+				setTimeout(() => { 
+					this.$i.repaint(); 
+					if (c) c(this.$i); 
+				}, t);
+			}
+			else {
+				this.$i.repaint();
+				if (c) c(this.$i);
+			}
+			return this;
+		}
+
+		option(n: string, v?: any): any {
+			if (!this.$i) return this;
+			if (v != undefined) {
+				this.$i.option(n, v);
+				return v;
+			}
+			return this.$i.option(n);
+		}
+
+		_on(n: string, f: Function): this {
+			if (!this.$i) return this;
+			this.$i.on(n, f);
+			return this;
+		}
+
+		_off(n: string, f?: Function): this {
+			if (!this.$i) return this;
+			this.$i.off(n, f);
+			return this;
+		}
+
+		_(m: string, ...a: any[]): any {
+			if (!this.$i || !m || !this.$i[m]) return null;
+			return this.$i[m](...a);
+		}
+	}
 	
 	/**
 	 * Wrapper DxDataGrid. Required DevExpress.ui.dxDataGrid https://js.devexpress.com/

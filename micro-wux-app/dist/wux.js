@@ -1826,21 +1826,22 @@ var WUX;
                     return WUtil.getLast(a, d);
                 }
                 else if (WUtil.isNumeric(k)) {
-                    return WUtil.getItem(a, WUtil.toInt(k), d);
+                    return WUtil.getItem(a, parseInt(k), d);
                 }
                 else {
                     return WUtil.getValue(a[0], k, d);
                 }
             }
             if (typeof a == 'object') {
-                var sep = k.indexOf('.');
-                if (a[k] == null && sep > 0) {
-                    var sub = k.substring(0, sep);
-                    if (a[sub] == null)
-                        return d;
-                    return WUtil.getValue(a[sub], k.substring(sep + 1), d);
+                if (a[k] != null)
+                    return a[k];
+                var s = k.indexOf('.');
+                if (s > 0) {
+                    var sub = k.substring(0, s);
+                    if (a[sub] != null) {
+                        return WUtil.getValue(a[sub], k.substring(s + 1), d);
+                    }
                 }
-                return a[k] == null ? d : a[k];
             }
             return d;
         };
@@ -2176,6 +2177,49 @@ var WUX;
                 r++;
             }
             return r;
+        };
+        /**
+         * Replace scalar value field with object value. Es.
+         *
+         * o = { "person": 1 }
+         * a = [ {"id": 1, "name": "John"}, {"id": 2, "name": "Jack"} ]
+         *
+         * rplObj(o, 'person', 'id', a)
+         *
+         * o = { "person": {"id": 1, "name": "John"} }
+         */
+        WUtil.rplObj = function (o, f, k, a) {
+            if (!o || !f || !k)
+                return null;
+            var v = o[f];
+            if (!v)
+                return null;
+            var r = WUtil.find(a, k, v);
+            if (r) {
+                o[f] = r;
+            }
+            else {
+                o[f] = { k: v };
+            }
+            return o[f];
+        };
+        /**
+         * Replace object field with scalar value. Es.
+         *
+         * o = { "person": {"id": 1, name: "John"} }
+         *
+         * rplVal(o, 'person', 'id')
+         *
+         * o = { "person": 1 }
+         */
+        WUtil.rplVal = function (o, f, k) {
+            if (!o || !f || !k)
+                return null;
+            var v = o[f];
+            if (!v)
+                return null;
+            o[f] = v[k];
+            return o[f];
         };
         return WUtil;
     }());
@@ -4817,10 +4861,32 @@ var WUX;
             var co = new WInput(id, 'text', 0, WUX.CSS.FORM_CTRL);
             return this._add(id, label, co, 'text', opts);
         };
+        WForm.prototype.addNumberField = function (fieldId, label, min, max, opts) {
+            var id = this.subId(fieldId);
+            var co = new WInput(id, 'number', 0, WUX.CSS.FORM_CTRL);
+            var at = 'min="' + min + '" max="' + max + '"';
+            if (!opts)
+                opts = {};
+            if (opts.attributes)
+                opts.attributes += ' ' + at;
+            else
+                opts.attributes = at;
+            return this._add(id, label, co, 'number', opts);
+        };
+        WForm.prototype.addPasswordField = function (fieldId, label, opts) {
+            var id = this.subId(fieldId);
+            var co = new WInput(id, 'password', 0, WUX.CSS.FORM_CTRL);
+            return this._add(id, label, co, 'password', opts);
+        };
         WForm.prototype.addDateField = function (fieldId, label, opts) {
             var id = this.subId(fieldId);
             var co = new WInput(id, 'date', 0, WUX.CSS.FORM_CTRL);
             return this._add(id, label, co, 'date', opts);
+        };
+        WForm.prototype.addMonthField = function (fieldId, label, opts) {
+            var id = this.subId(fieldId);
+            var co = new WInput(id, 'month', 0, WUX.CSS.FORM_CTRL);
+            return this._add(id, label, co, 'month', opts);
         };
         WForm.prototype.addTimeField = function (fieldId, label, opts) {
             var id = this.subId(fieldId);
@@ -4882,6 +4948,14 @@ var WUX;
             var co = new WLabel('', text, icon, classStyle, style);
             return this._add('', '', co, 'caption', opts);
         };
+        WForm.prototype.addHiddenField = function (fieldId, value) {
+            var id = this.subId(fieldId);
+            var vs = WUX.WUtil.toString(value);
+            var co = new WInput(id, 'hidden');
+            co.setState(vs);
+            this.currRow.push({ id: id, component: co, value: vs, type: 'hidden' });
+            return this;
+        };
         WForm.prototype.addInternalField = function (fieldId, value) {
             if (value === undefined)
                 value = null;
@@ -4889,7 +4963,6 @@ var WUX;
             return this;
         };
         WForm.prototype.addComponent = function (fieldId, label, component, opts) {
-            var f0 = opts ? opts : {};
             if (!component)
                 return this;
             if (fieldId) {
@@ -4924,7 +4997,7 @@ var WUX;
                 var cols = 0;
                 for (var j = 0; j < row.length; j++) {
                     var f = row[j];
-                    if (!f.component)
+                    if (!f.component || f.type == 'hidden')
                         continue;
                     cols += f.span && f.span > 0 ? f.span : 1;
                 }
@@ -4933,6 +5006,10 @@ var WUX;
                     var f = row[j];
                     if (!f.component)
                         continue;
+                    if (f.type == 'hidden') {
+                        f.component.mount(this.fieldset);
+                        continue;
+                    }
                     var cs = Math.floor(12 / cols);
                     if (cs < 1)
                         cs = 1;
@@ -4985,19 +5062,30 @@ var WUX;
                     }
                 }
             }
+            this.main.mount(this.fieldset);
             if (this.footer && this.footer.length) {
                 this.foot = new WContainer(this.subId('__foot'), this.footerClass, this.footerStyle);
                 for (var _i = 0, _a = this.footer; _i < _a.length; _i++) {
                     var f = _a[_i];
                     this.foot.addRow().addCol('12').add(f);
                 }
-                this.main.addRow().addCol('12').add(this.foot);
+                this.foot.mount(this.root);
             }
-            this.main.mount(this.fieldset);
         };
         WForm.prototype.componentWillUnmount = function () {
-            if (!this.main)
+            if (this.main)
                 this.main.unmount();
+            if (this.foot)
+                this.foot.unmount();
+            for (var _i = 0, _a = this.rows; _i < _a.length; _i++) {
+                var r = _a[_i];
+                for (var _b = 0, r_2 = r; _b < r_2.length; _b++) {
+                    var f = r_2[_b];
+                    var c = f.component;
+                    if (c && f.type == 'hidden')
+                        c.unmount();
+                }
+            }
         };
         WForm.prototype.clear = function () {
             for (var i = 0; i < this.rows.length; i++) {
@@ -5081,18 +5169,18 @@ var WUX;
             return this;
         };
         WForm.prototype.getValues = function () {
-            var r = {};
-            for (var i = 0; i < this.rows.length; i++) {
-                var row = this.rows[i];
-                for (var j = 0; j < row.length; j++) {
-                    var f = row[j];
+            var v = {};
+            for (var _i = 0, _a = this.rows; _i < _a.length; _i++) {
+                var r = _a[_i];
+                for (var _b = 0, r_3 = r; _b < r_3.length; _b++) {
+                    var f = r_3[_b];
                     var k = this.ripId(f.id);
                     if (!k)
                         continue;
-                    r[k] = f.component ? f.component.getState() : f.value;
+                    v[k] = f.component ? f.component.getState() : f.value;
                 }
             }
-            return r;
+            return v;
         };
         WForm.prototype.getState = function () {
             this.state = this.getValues();
