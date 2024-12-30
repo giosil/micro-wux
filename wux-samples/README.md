@@ -1,6 +1,6 @@
 # micro-WUX - Wrapped User Experience 
 
-Here are a few scattered examples.
+Here are a few examples.
 
 ## License
 
