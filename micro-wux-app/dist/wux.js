@@ -4208,15 +4208,27 @@ var WUX;
             var r = '';
             if (!this.options)
                 this.options = [];
+            var g = '';
             for (var _i = 0, _a = this.options; _i < _a.length; _i++) {
                 var opt = _a[_i];
                 if (typeof opt == 'string') {
                     r += '<option>' + opt + '</option>';
                 }
                 else {
+                    if (opt.group) {
+                        if (g != opt.group) {
+                            if (g)
+                                r += '</optgroup>';
+                            g = opt.group;
+                            r += '<optgroup label="' + g + '">';
+                        }
+                        g = opt.group;
+                    }
                     r += '<option value="' + opt.id + '">' + opt.text + '</option>';
                 }
             }
+            if (g)
+                r += '</optgroup>';
             return r;
         };
         return WSelect;

@@ -1350,14 +1350,24 @@ namespace WUX {
 		protected buildOptions(): string {
 			let r = '';
 			if (!this.options) this.options = [];
+			let g = '';
 			for (let opt of this.options) {
 				if (typeof opt == 'string') {
 					r += '<option>' + opt + '</option>';
 				}
 				else {
+					if (opt.group) {
+						if (g != opt.group) {
+							if (g) r += '</optgroup>';
+							g = opt.group;
+							r += '<optgroup label="' + g + '">';
+						}
+						g = opt.group
+					}
 					r += '<option value="' + opt.id + '">' + opt.text + '</option>';
 				}
 			}
+			if (g) r += '</optgroup>';
 			return r;
 		}
 	}
