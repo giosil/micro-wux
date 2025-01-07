@@ -476,6 +476,7 @@ declare namespace WUX {
         static OK: string;
         static CLOSE: string;
         static CANCEL: string;
+        static REQ_MARK: string;
     }
     function formatDate(a: any, withDay?: boolean, e?: boolean): string;
     function isoDate(a: any): string;
@@ -753,6 +754,8 @@ declare namespace WUX {
         footerClass: string;
         footerStyle: string | WStyle;
         captions: WComponent[];
+        mainClass: string;
+        mainStyle: string | WStyle;
         constructor(id?: string, title?: string, action?: string);
         get enabled(): boolean;
         set enabled(b: boolean);

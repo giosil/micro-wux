@@ -2311,6 +2311,7 @@ var WUX;
         RES.OK = 'OK';
         RES.CLOSE = 'Chiudi';
         RES.CANCEL = 'Annulla';
+        RES.REQ_MARK = ' *';
         return RES;
     }());
     WUX.RES = RES;
@@ -4153,11 +4154,11 @@ var WUX;
             this.options = options;
             if (!this.mounted)
                 return this;
-            var pv = this.root["value"];
+            var p = this.root["value"];
             var o = this.buildOptions();
             this.root.innerHTML = o;
             if (prevVal) {
-                this.root["value"] = pv;
+                this.root["value"] = p;
             }
             else if (options && options.length) {
                 if (typeof options[0] == 'string') {
@@ -5002,7 +5003,7 @@ var WUX;
                 this.fieldset.setAttribute('disabled', '');
             }
             this.root.appendChild(this.fieldset);
-            this.main = new WContainer(this.id + '__c');
+            this.main = new WContainer(this.id + '__c', this.mainClass, this.mainStyle);
             for (var i = 0; i < this.rows.length; i++) {
                 var w = this.roww[i];
                 this.main.addRow(WUX.cls(w.type, w.classStyle, w.style), WUX.style(w.style));
@@ -5045,7 +5046,7 @@ var WUX;
                     if (f.type != 'caption')
                         f.component.setState(f.value);
                     if (f.label && !f.labelComp) {
-                        var r = f.required ? ' *' : '';
+                        var r = f.required ? WUX.RES.REQ_MARK : '';
                         var lc = WUX.CSS.LBL_CLASS;
                         var ls = '';
                         if (f.labelCss) {

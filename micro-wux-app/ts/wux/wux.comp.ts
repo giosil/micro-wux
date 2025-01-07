@@ -1297,11 +1297,11 @@ namespace WUX {
 		setOptions(options: Array<string | WEntity>, prevVal?: boolean): this {
 			this.options = options;
 			if (!this.mounted) return this;
-			let pv = this.root["value"]
+			let p = this.root["value"];
 			let o = this.buildOptions();
 			this.root.innerHTML = o;
 			if (prevVal) {
-				this.root["value"] = pv;
+				this.root["value"] = p;
 			}
 			else if (options && options.length) {
 				if (typeof options[0] == 'string') {
@@ -1803,6 +1803,8 @@ namespace WUX {
 		footerClass: string;
 		footerStyle: string | WStyle;
 		captions: WComponent[];
+		mainClass: string;
+		mainStyle: string | WStyle;
 
 		constructor(id?: string, title?: string, action?: string) {
 			// WComponent init
@@ -2120,7 +2122,7 @@ namespace WUX {
 			}
 			this.root.appendChild(this.fieldset);
 
-			this.main = new WContainer(this.id + '__c');
+			this.main = new WContainer(this.id + '__c', this.mainClass, this.mainStyle);
 			for (let i = 0; i < this.rows.length; i++) {
 				let w = this.roww[i];
 				this.main.addRow(WUX.cls(w.type, w.classStyle, w.style), WUX.style(w.style));
@@ -2162,7 +2164,7 @@ namespace WUX {
 					
 					if (f.type != 'caption') f.component.setState(f.value);
 					if (f.label && !f.labelComp) {
-						let r = f.required ? ' *' : '';
+						let r = f.required ? RES.REQ_MARK : '';
 						let lc = CSS.LBL_CLASS;
 						let ls = '';
 						if (f.labelCss) {

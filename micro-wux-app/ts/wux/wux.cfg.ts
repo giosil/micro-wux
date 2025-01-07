@@ -78,6 +78,7 @@
 		static OK = 'OK';
 		static CLOSE = 'Chiudi';
 		static CANCEL = 'Annulla';
+		static REQ_MARK = ' *';
 	}
 	
 	// Data format utilities

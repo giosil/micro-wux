@@ -137,7 +137,17 @@ namespace WUX {
 		}
 
 		_(m: string, ...a: any[]): any {
-			if (!this.$i || !m || !this.$i[m]) return null;
+			if (!this.$i || !m) return null;
+			let s = m.indexOf('.');
+			if (s > 0) {
+				let m0 = m.substring(0, s);
+				let m1 = m.substring(s + 1);
+				if (!this.$i[m0]) return null;
+				let r0 = this.$i[m0]();
+				if (!r0 || !r0[m1]) return null;
+				return r0[m1](...a);
+			}
+			if (!this.$i[m]) return null;
 			return this.$i[m](...a);
 		}
 	}
