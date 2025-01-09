@@ -104,7 +104,12 @@ namespace APP {
 		}
 		
 		_get(method: string, entity: string, params: { [key: string]: any }, success: (result: any) => void, failure?: (error: any) => void) {
-			if(!method) method = 'GET';
+			if (!method) method = 'GET';
+			if (params) {
+				for(let k in params) {
+					if(params[k] == null) params[k] = '';
+				}
+			}
 			let search = params ? new URLSearchParams(params).toString() : "";
 			let requrl = search ? this.url + "/" + entity + "?" + search : this.url + "/" + entity;
 			this.before();
@@ -125,16 +130,16 @@ namespace APP {
 				}));
 			})
 			.then(data => {
-				if(!data) return;
+				if (!data) return;
 				let s = data.status;
 				let b = data.body;
 				if(s >= 200 && s < 300) {
 					if(success) success(b);
 				}
 				else {
-					if(!b) b = {};
+					if (!b) b = {};
 					let m = b.message;
-					if(!m) {
+					if (!m) {
 						m = 'Errore HTTP ' + s;
 						b["message"] = m;
 					}
@@ -149,7 +154,7 @@ namespace APP {
 			.catch(error => {
 				console.error('[HttpClient] ' + method + ' ' + entity + ':', error);
 				this.after();
-				if(failure) {
+				if (failure) {
 					failure(error);
 				}
 				else {
@@ -159,7 +164,7 @@ namespace APP {
 		}
 		
 		_send(method: string, entity: string, data: object, success: (result: any) => void, failure?: (error: any) => void) {
-			if(!method) method = 'POST';
+			if (!method) method = 'POST';
 			let requrl = this.url + "/" + entity;
 			this.before();
 			fetch(requrl, {
