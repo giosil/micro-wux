@@ -1719,6 +1719,18 @@ namespace WUX {
 			return d;
 		}
 
+		static isObject(o: any, k: string): boolean {
+			if (!o || !k) return false;
+			if (typeof o == 'object') {
+				let v = o[k];
+				if (!v) return false;
+				if (typeof v == 'object') {
+					return true;
+				}
+			}
+			return false;
+		}
+
 		static getItem(a: any, i: number, d?: any): any {
 			if (i < 0) return d;
 			if (Array.isArray(a)) {

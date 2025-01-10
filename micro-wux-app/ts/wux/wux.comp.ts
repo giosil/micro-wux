@@ -2244,6 +2244,29 @@ namespace WUX {
 			return this;
 		}
 
+		setValueOf(fid: string, v: any, k: string, updState: boolean = true): this {
+			let f = this.getField(fid);
+			if (!f) return this;
+			let w = v;
+			let x = k ? k.indexOf('.') : -1;
+			if (w != null && x > 0) {
+				w = w[k.substring(0, x)];
+				k = k.substring(x + 1);
+			}
+			if (w != null && typeof w == 'object') {
+				if (k != null) w = w[k];
+			}
+			if (f.type == 'date') w = isoDate(w);
+			if (f.type == 'time') w = formatTime(w, false);
+			if (f.component) f.component.setState(w);
+			f.value = w;
+			if (updState) {
+				if (!this.state) this.state = {};
+				this.state[fid] = w;
+			}
+			return this;
+		}
+
 		getValue(fid: string | WField): any {
 			let f = typeof fid == 'string' ? this.getField(fid) : fid;
 			if (!f) return null;

@@ -1845,6 +1845,19 @@ var WUX;
             }
             return d;
         };
+        WUtil.isObject = function (o, k) {
+            if (!o || !k)
+                return false;
+            if (typeof o == 'object') {
+                var v = o[k];
+                if (!v)
+                    return false;
+                if (typeof v == 'object') {
+                    return true;
+                }
+            }
+            return false;
+        };
         WUtil.getItem = function (a, i, d) {
             if (i < 0)
                 return d;
@@ -5132,6 +5145,35 @@ var WUX;
                 if (!this.state)
                     this.state = {};
                 this.state[fid] = v;
+            }
+            return this;
+        };
+        WForm.prototype.setValueOf = function (fid, v, k, updState) {
+            if (updState === void 0) { updState = true; }
+            var f = this.getField(fid);
+            if (!f)
+                return this;
+            var w = v;
+            var x = k ? k.indexOf('.') : -1;
+            if (w != null && x > 0) {
+                w = w[k.substring(0, x)];
+                k = k.substring(x + 1);
+            }
+            if (w != null && typeof w == 'object') {
+                if (k != null)
+                    w = w[k];
+            }
+            if (f.type == 'date')
+                w = WUX.isoDate(w);
+            if (f.type == 'time')
+                w = WUX.formatTime(w, false);
+            if (f.component)
+                f.component.setState(w);
+            f.value = w;
+            if (updState) {
+                if (!this.state)
+                    this.state = {};
+                this.state[fid] = w;
             }
             return this;
         };

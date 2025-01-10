@@ -391,6 +391,7 @@ declare namespace WUX {
         static size(a: any): number;
         static setValue(a: any, k: string, v: any): any;
         static getValue(a: any, k: string, d?: any): any;
+        static isObject(o: any, k: string): boolean;
         static getItem(a: any, i: number, d?: any): any;
         static getFirst(a: any, d?: any): any;
         static getLast(a: any, d?: any): any;
@@ -792,6 +793,7 @@ declare namespace WUX {
         componentWillUnmount(): void;
         clear(): this;
         setValue(fid: string, v: any, updState?: boolean): this;
+        setValueOf(fid: string, v: any, k: string, updState?: boolean): this;
         getValue(fid: string | WField): any;
         setOptions(fid: string, options: Array<string | WEntity>, prevVal?: boolean): this;
         setSpan(fieldId: string, span: number): this;
