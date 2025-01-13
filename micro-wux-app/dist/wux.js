@@ -1813,6 +1813,46 @@ var WUX;
             }
             return 0;
         };
+        WUtil.get = function (o, k) {
+            if (!o || !k)
+                return null;
+            if (typeof o == 'object') {
+                var s = k.indexOf('.');
+                if (s > 0)
+                    return WUtil.get(o[k.substring(0, s)], k.substring(s + 1));
+                return o[k];
+            }
+            return null;
+        };
+        WUtil.is = function (t, o, k) {
+            var v = k ? WUtil.get(o, k) : o;
+            if (t == 'null')
+                return v == null;
+            if (t == 'notnull')
+                return v != null;
+            if (t == 'array')
+                return Array.isArray(v);
+            if (t == 'array0')
+                return Array.isArray(v) && v.length == 0;
+            if (t == 'arraynot0')
+                return Array.isArray(v) && v.length > 0;
+            if (t == 'empty')
+                return WUtil.isEmpty(v);
+            if (t == 'nan')
+                return isNaN(v);
+            if (t == 'notnan')
+                return !isNaN(v);
+            if (t == 'zero')
+                return v == 0;
+            if (t == 'notzero')
+                return typeof v == 'number' && v != 0;
+            if (t == 'notobject') {
+                if (v == null)
+                    return false;
+                return typeof v != 'object' && typeof v != 'function';
+            }
+            return typeof v == t;
+        };
         WUtil.setValue = function (a, k, v) {
             if (typeof a == 'object')
                 a[k] = v;
@@ -1844,19 +1884,6 @@ var WUX;
                 }
             }
             return d;
-        };
-        WUtil.isObject = function (o, k) {
-            if (!o || !k)
-                return false;
-            if (typeof o == 'object') {
-                var v = o[k];
-                if (!v)
-                    return false;
-                if (typeof v == 'object') {
-                    return true;
-                }
-            }
-            return false;
         };
         WUtil.getItem = function (a, i, d) {
             if (i < 0)

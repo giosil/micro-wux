@@ -389,9 +389,10 @@ declare namespace WUX {
         static getWeek(a?: any): number;
         static getParam(name: string, url?: string): string;
         static size(a: any): number;
+        static get(o: any, k: string): any;
+        static is(t: string, o: any, k?: string): boolean;
         static setValue(a: any, k: string, v: any): any;
         static getValue(a: any, k: string, d?: any): any;
-        static isObject(o: any, k: string): boolean;
         static getItem(a: any, i: number, d?: any): any;
         static getFirst(a: any, d?: any): any;
         static getLast(a: any, d?: any): any;
