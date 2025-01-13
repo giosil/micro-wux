@@ -2087,5 +2087,26 @@ namespace WUX {
 			o[f] = v[k];
 			return o[f];
 		}
+
+		static map(src: any, dst: any, ks: string[], kd: string[]): any {
+			if (!src) src = {};
+			if (!dst) return src;
+			for (let i = 0; i < ks.length; i++) {
+				let k0 = ks[i];
+				let k1 = kd[i];
+				if (!k0 || !k1) continue;
+				let s = k1.indexOf('.');
+				if (s > 0) {
+					let d = dst[k1.substring(0, s)];
+					if (!d) d = {};
+					d[k1.substring(s + 1)] = WUtil.get(src, k0);
+					dst[k1.substring(0, s)] = d;
+				}
+				else {
+					dst[k1] = WUtil.get(src, k0);
+				}
+			}
+			return dst;
+		}
 	}
 }

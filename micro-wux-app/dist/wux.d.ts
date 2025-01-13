@@ -447,6 +447,7 @@ declare namespace WUX {
          * o = { "person": 1 }
          */
         static rplVal(o: any, f: string, k: string): any;
+        static map(src: any, dst: any, ks: string[], kd: string[]): any;
     }
 }
 declare namespace WUX {

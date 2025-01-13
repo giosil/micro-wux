@@ -2261,6 +2261,30 @@ var WUX;
             o[f] = v[k];
             return o[f];
         };
+        WUtil.map = function (src, dst, ks, kd) {
+            if (!src)
+                src = {};
+            if (!dst)
+                return src;
+            for (var i = 0; i < ks.length; i++) {
+                var k0 = ks[i];
+                var k1 = kd[i];
+                if (!k0 || !k1)
+                    continue;
+                var s = k1.indexOf('.');
+                if (s > 0) {
+                    var d = dst[k1.substring(0, s)];
+                    if (!d)
+                        d = {};
+                    d[k1.substring(s + 1)] = WUtil.get(src, k0);
+                    dst[k1.substring(0, s)] = d;
+                }
+                else {
+                    dst[k1] = WUtil.get(src, k0);
+                }
+            }
+            return dst;
+        };
         return WUtil;
     }());
     WUX.WUtil = WUtil;
