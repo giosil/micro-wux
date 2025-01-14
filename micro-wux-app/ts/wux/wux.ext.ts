@@ -219,20 +219,39 @@ namespace WUX {
 			return new WUX.WButton(this.subId('bfc'), RES.CANCEL, '', 'btn btn-secondary button-sm', '', '');
 		}
 
+		fireOk(): void {
+			if (this.onClickOk()) {
+				this.ok = true;
+				this.cancel = false;
+				if(this.wp) {
+					this.wp.back();
+					this._h();
+					return;
+				}
+				if(this.$r) this.$r.modal('hide');
+			}
+		}
+
+		fireCancel(): void {
+			if (this.onClickCancel()) {
+				this.ok = false;
+				this.cancel = true;
+				if(this.wp) {
+					this.wp.back();
+					this._h();
+					return;
+				}
+				if(this.$r) this.$r.modal('hide');
+			}
+		}
+
 		buttonOk(): WUX.WButton {
 			if (this.btnOK) return this.btnOK;
 			this.btnOK = this.buildBtnOK();
 			this.btnOK.on('click', (e: JQueryEventObject) => {
-				if (this.onClickOk()) {
-					this.ok = true;
-					this.cancel = false;
-					if(this.wp) {
-						this.wp.back();
-						this._h();
-						return;
-					}
-					if(this.$r) this.$r.modal('hide');
-				}
+				
+				this.fireOk();
+
 			});
 			this.buttons.push(this.btnOK);
 		}
@@ -241,16 +260,9 @@ namespace WUX {
 			if (this.btnCancel) return this.btnCancel;
 			this.btnCancel = this.buildBtnCancel();
 			this.btnCancel.on('click', (e: JQueryEventObject) => {
-				if (this.onClickCancel()) {
-					this.ok = false;
-					this.cancel = true;
-					if(this.wp) {
-						this.wp.back();
-						this._h();
-						return;
-					}
-					if(this.$r) this.$r.modal('hide');
-				}
+
+				this.fireCancel();
+
 			});
 			this.buttons.push(this.btnCancel);
 		}

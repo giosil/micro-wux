@@ -1814,8 +1814,8 @@ var WUX;
             return 0;
         };
         WUtil.get = function (o, k) {
-            if (!o || !k)
-                return null;
+            if (o == null || k == null)
+                return o;
             if (typeof o == 'object') {
                 var s = k.indexOf('.');
                 if (s > 0)
@@ -1825,36 +1825,38 @@ var WUX;
             return null;
         };
         WUtil.is = function (t, o, k) {
-            var v = k ? WUtil.get(o, k) : o;
+            var v = WUtil.get(o, k);
+            if (t == 'undefined')
+                return v == undefined;
             if (t == 'null')
                 return v == null;
+            if (v == null)
+                return t == 'empty';
             if (t == 'notnull')
-                return v != null;
-            if (t == 'array')
-                return Array.isArray(v);
-            if (t == 'array0')
-                return Array.isArray(v) && v.length == 0;
-            if (t == 'arraynot0')
-                return Array.isArray(v) && v.length > 0;
-            if (t == 'empty')
-                return WUtil.isEmpty(v);
-            if (t == 'nan')
-                return isNaN(v);
-            if (t == 'notnan')
-                return !isNaN(v);
-            if (t == 'zero')
-                return v == 0;
-            if (t == 'notzero')
-                return typeof v == 'number' && v != 0;
-            if (t == 'notobject') {
-                if (v == null)
-                    return false;
-                return typeof v != 'object' && typeof v != 'function';
+                return true;
+            switch (t) {
+                case 'array':
+                    return Array.isArray(v);
+                case 'array0':
+                    return Array.isArray(v) && v.length == 0;
+                case 'arraynot0':
+                    return Array.isArray(v) && v.length > 0;
+                case 'date':
+                    return v instanceof Date;
+                case 'empty':
+                    return WUtil.isEmpty(v);
+                case 'nan':
+                    return isNaN(v);
+                case 'value':
+                    if (v instanceof Date)
+                        return true;
+                    return typeof v != 'object' && typeof v != 'function';
+                default:
+                    return typeof v == t;
             }
-            return typeof v == t;
         };
         WUtil.setValue = function (a, k, v) {
-            if (typeof a == 'object')
+            if (a != null && typeof a == 'object')
                 a[k] = v;
             return a;
         };
@@ -5594,23 +5596,39 @@ var WUX;
             }
             return new WUX.WButton(this.subId('bfc'), WUX.RES.CANCEL, '', 'btn btn-secondary button-sm', '', '');
         };
+        WDialog.prototype.fireOk = function () {
+            if (this.onClickOk()) {
+                this.ok = true;
+                this.cancel = false;
+                if (this.wp) {
+                    this.wp.back();
+                    this._h();
+                    return;
+                }
+                if (this.$r)
+                    this.$r.modal('hide');
+            }
+        };
+        WDialog.prototype.fireCancel = function () {
+            if (this.onClickCancel()) {
+                this.ok = false;
+                this.cancel = true;
+                if (this.wp) {
+                    this.wp.back();
+                    this._h();
+                    return;
+                }
+                if (this.$r)
+                    this.$r.modal('hide');
+            }
+        };
         WDialog.prototype.buttonOk = function () {
             var _this = this;
             if (this.btnOK)
                 return this.btnOK;
             this.btnOK = this.buildBtnOK();
             this.btnOK.on('click', function (e) {
-                if (_this.onClickOk()) {
-                    _this.ok = true;
-                    _this.cancel = false;
-                    if (_this.wp) {
-                        _this.wp.back();
-                        _this._h();
-                        return;
-                    }
-                    if (_this.$r)
-                        _this.$r.modal('hide');
-                }
+                _this.fireOk();
             });
             this.buttons.push(this.btnOK);
         };
@@ -5620,17 +5638,7 @@ var WUX;
                 return this.btnCancel;
             this.btnCancel = this.buildBtnCancel();
             this.btnCancel.on('click', function (e) {
-                if (_this.onClickCancel()) {
-                    _this.ok = false;
-                    _this.cancel = true;
-                    if (_this.wp) {
-                        _this.wp.back();
-                        _this._h();
-                        return;
-                    }
-                    if (_this.$r)
-                        _this.$r.modal('hide');
-                }
+                _this.fireCancel();
             });
             this.buttons.push(this.btnCancel);
         };

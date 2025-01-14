@@ -1688,8 +1688,8 @@ namespace WUX {
 			return 0;
 		}
 
-		static get(o: any, k: string): any {
-			if (!o || !k) return null;
+		static get(o: any, k?: string): any {
+			if (o == null || k == null) return o;
 			if (typeof o == 'object') {
 				let s = k.indexOf('.');
 				if (s > 0) return WUtil.get(o[k.substring(0, s)], k.substring(s + 1));
@@ -1698,27 +1698,35 @@ namespace WUX {
 			return null;
 		}
 
-		static is(t: string, o: any, k?: string): boolean {
-			let v = k ? WUtil.get(o, k) : o;
+		static is(t: "array" | "array0" | "arraynot0" | "bigint" | "boolean" | "date" | "empty" | "function" | "nan" | "notnull" | "null" | "number" | "object" | "string" | "symbol" | "undefined" | "value", o: any, k?: string): boolean {
+			let v = WUtil.get(o, k);
+			if (t == 'undefined') return v == undefined;
 			if (t == 'null') return v == null;
-			if (t == 'notnull') return v != null;
-			if (t == 'array') return Array.isArray(v);
-			if (t == 'array0') return Array.isArray(v) && v.length == 0;
-			if (t == 'arraynot0') return Array.isArray(v) && v.length > 0;
-			if (t == 'empty') return WUtil.isEmpty(v);
-			if (t == 'nan') return isNaN(v);
-			if (t == 'notnan') return !isNaN(v);
-			if (t == 'zero') return v == 0;
-			if (t == 'notzero') return typeof v == 'number' && v != 0;
-			if (t == 'notobject') {
-				if (v == null) return false;
-				return typeof v != 'object' && typeof v != 'function';	
+			if (v == null) return t == 'empty';
+			if (t == 'notnull') return true;
+			switch (t) {
+				case 'array':
+					return Array.isArray(v);
+				case 'array0':
+					return Array.isArray(v) && v.length == 0;
+				case 'arraynot0':
+					return Array.isArray(v) && v.length > 0;
+				case 'date':
+					return v instanceof Date;
+				case 'empty':
+					return WUtil.isEmpty(v);
+				case 'nan':
+					return isNaN(v);
+				case 'value':
+					if (v instanceof Date) return true;
+					return typeof v != 'object' && typeof v != 'function';
+				default:
+					return typeof v == t;
 			}
-			return typeof v == t;
 		}
 
 		static setValue(a: any, k: string, v: any): any {
-			if (typeof a == 'object') a[k] = v;
+			if (a != null && typeof a == 'object') a[k] = v;
 			return a;
 		}
 

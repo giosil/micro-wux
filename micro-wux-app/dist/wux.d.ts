@@ -389,8 +389,8 @@ declare namespace WUX {
         static getWeek(a?: any): number;
         static getParam(name: string, url?: string): string;
         static size(a: any): number;
-        static get(o: any, k: string): any;
-        static is(t: string, o: any, k?: string): boolean;
+        static get(o: any, k?: string): any;
+        static is(t: "array" | "array0" | "arraynot0" | "bigint" | "boolean" | "date" | "empty" | "function" | "nan" | "notnull" | "null" | "number" | "object" | "string" | "symbol" | "undefined" | "value", o: any, k?: string): boolean;
         static setValue(a: any, k: string, v: any): any;
         static getValue(a: any, k: string, d?: any): any;
         static getItem(a: any, i: number, d?: any): any;
@@ -862,6 +862,8 @@ declare namespace WUX {
         protected onClickCancel(): boolean;
         protected buildBtnOK(): WUX.WButton;
         protected buildBtnCancel(): WUX.WButton;
+        fireOk(): void;
+        fireCancel(): void;
         buttonOk(): WUX.WButton;
         buttonCancel(): WUX.WButton;
         updButtons(ok?: string, canc?: string): this;
