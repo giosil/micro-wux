@@ -2278,7 +2278,7 @@ var WUX;
                 if (!k || !j)
                     continue;
                 var v = WUtil.get(src, k);
-                if (d && d.length > i && v == null) {
+                if (v == null && d && d.length > i) {
                     v = d[i];
                 }
                 if (t && t.length > i) {

@@ -2106,7 +2106,7 @@ namespace WUX {
 				let j = kd[i];
 				if (!k || !j) continue;
 				let v = WUtil.get(src, k);
-				if (d && d.length > i && v == null) {
+				if (v == null && d && d.length > i) {
 					v = d[i];
 				}	
 				if (t && t.length > i) {
