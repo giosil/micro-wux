@@ -2096,22 +2096,38 @@ namespace WUX {
 			return o[f];
 		}
 
-		static map(src: any, dst: any, ks: string[], kd: string[]): any {
-			if (!src) src = {};
-			if (!dst) return src;
+		static map(src: any, dst: any, ks: string[], kd: string[], t?: string[], d?: any[]): any {
+			if (!dst) dst = {};
+			if (!src) return dst; 
+			if (!ks || !ks.length) return dst;
+			if (!kd || !kd.length) kd = ks;
 			for (let i = 0; i < ks.length; i++) {
-				let k0 = ks[i];
-				let k1 = kd[i];
-				if (!k0 || !k1) continue;
-				let s = k1.indexOf('.');
+				let k = ks[i];
+				let j = kd[i];
+				if (!k || !j) continue;
+				let v = WUtil.get(src, k);
+				if (d && d.length > i && v == null) {
+					v = d[i];
+				}	
+				if (t && t.length > i) {
+					switch (t[i]) {
+						case 's': v = WUtil.toString(v); break;
+						case 'n': v = WUtil.toNumber(v); break;
+						case 'b': v = WUtil.toBoolean(v); break;
+						case '!': v = !WUtil.toBoolean(v); break;
+						case 'd': v = WUtil.toDate(v); break;
+						case 'a': v = WUtil.toArray(v); break;
+					}
+				}
+				let s = j.indexOf('.');
 				if (s > 0) {
-					let d = dst[k1.substring(0, s)];
-					if (!d) d = {};
-					d[k1.substring(s + 1)] = WUtil.get(src, k0);
-					dst[k1.substring(0, s)] = d;
+					let o = dst[j.substring(0, s)];
+					if (!o) o = {};
+					o[j.substring(s + 1)] = v;
+					dst[j.substring(0, s)] = o;
 				}
 				else {
-					dst[k1] = WUtil.get(src, k0);
+					dst[j] = v;
 				}
 			}
 			return dst;
