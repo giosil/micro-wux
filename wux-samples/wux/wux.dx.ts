@@ -622,6 +622,12 @@ namespace WUX {
 			return this.$i;
 		}
 
+		pageIndex(p: number): this {
+			if (!this.$i) return this;
+			this.$i.pageIndex(p);
+			return this;
+		}
+
 		getSelectedKeys(): any[] {
 			if (!this.$i) return [];
 			return this.$i.getSelectedRowKeys();
