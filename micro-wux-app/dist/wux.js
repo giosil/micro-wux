@@ -5856,6 +5856,30 @@ var WUX;
             this.tabs.push(tab);
             return tab;
         };
+        WTab.prototype.setEnabled = function (i, e) {
+            var p = document.getElementById(this.id + '-p' + i);
+            if (!p)
+                return this;
+            var c = p.getAttribute('class');
+            if (e) {
+                if (!c)
+                    return this;
+                c = c.replace('disabled', '');
+            }
+            else {
+                if (!c) {
+                    c = 'disabled';
+                }
+                else if (c.indexOf('disabled') >= 0) {
+                    return this;
+                }
+                else {
+                    c += ' disabled';
+                }
+            }
+            p.setAttribute('class', c);
+            return this;
+        };
         WTab.prototype.render = function () {
             if (!this.state)
                 this.state = 0;
@@ -5876,10 +5900,10 @@ var WUX;
             for (var i = 0; i < this.tabs.length; i++) {
                 var tab = this.tabs[i];
                 if (i == this.state) {
-                    r += '<li class="nav-item" role="presentation"><' + this._t + ' class="nav-link active" ' + this._a + '="tab" ' + this._r + '="#' + this.id + '-' + i + '" role="tab"> ' + tab.name + '</' + this._t + '></li>';
+                    r += '<li class="nav-item" role="presentation"><' + this._t + ' class="nav-link active" ' + this._a + '="tab" ' + this._r + '="#' + this.id + '-' + i + '" role="tab" id="' + this.id + '-p' + i + '"> ' + tab.name + '</' + this._t + '></li>';
                 }
                 else {
-                    r += '<li class="nav-item" role="presentation"><' + this._t + ' class="nav-link" ' + this._a + '="tab" ' + this._r + '="#' + this.id + '-' + i + '" role="tab"> ' + tab.name + '</' + this._t + '></li>';
+                    r += '<li class="nav-item" role="presentation"><' + this._t + ' class="nav-link" ' + this._a + '="tab" ' + this._r + '="#' + this.id + '-' + i + '" role="tab" id="' + this.id + '-p' + i + '">' + tab.name + '</' + this._t + '></li>';
                 }
             }
             r += '</ul>';

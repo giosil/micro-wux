@@ -888,6 +888,7 @@ declare namespace WUX {
         _r: string;
         constructor(id?: string, classStyle?: string, style?: string | WStyle, attributes?: string | object, props?: any);
         addTab(title: string, icon?: string, style?: string | WStyle, attributes?: string | object): WContainer;
+        setEnabled(i: number, e: boolean): this;
         protected render(): string;
         protected componentDidUpdate(prevProps: any, prevState: any): void;
         protected componentDidMount(): void;
