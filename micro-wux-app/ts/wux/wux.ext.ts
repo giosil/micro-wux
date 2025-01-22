@@ -409,6 +409,9 @@ namespace WUX {
 	export class WTab extends WComponent<any, number> {
 		tabs: WContainer[];
 		contStyle: string | WStyle;
+		ulClass: string;
+		tpClass: string;
+		
 		_t: string;
 		_a: string;
 		_r: string;
@@ -438,24 +441,36 @@ namespace WUX {
 			return tab;
 		}
 
+		get count(): number {
+			return this.tabs ? this.tabs.length : 0;
+		}
+
+		isEnabled(i: number): boolean {
+			if (i < 0) i = this.tabs.length + i;
+			let p = document.getElementById(this.id + '-p' + i);
+			if (!p) return false;
+			let c = p.getAttribute('class');
+			if (!c) return true;
+			return c.indexOf('disabled') < 0;
+		}
+
 		setEnabled(i: number, e: boolean): this {
+			if (i < 0) i = this.tabs.length + i;
 			let p = document.getElementById(this.id + '-p' + i);
 			if (!p) return this;
 			let c = p.getAttribute('class');
+			if (!c) return this;
 			if (e) {
-				if (!c) return this;
-				c = c.replace('disabled', '');
+				if (c.indexOf('disabled') < 0) return this;
+				c = c.replace('disabled', '').trim();
+				p.removeAttribute('tabindex');
+				p.removeAttribute('aria-disabled');
 			}
 			else {
-				if (!c) {
-					c = 'disabled';
-				}
-				else if (c.indexOf('disabled') >= 0) {
-					return this;
-				}
-				else {
-					c += ' disabled';
-				}
+				if (c.indexOf('disabled') >= 0) return this;
+				c += ' disabled';
+				p.setAttribute('tabindex', '-1');
+				p.setAttribute('aria-disabled', 'true');
 			}
 			p.setAttribute('class', c);
 			return this;
@@ -474,7 +489,8 @@ namespace WUX {
 			if (this._style) r += ' style="' + this._style + '"';
 			if (this._attributes) r += ' ' + this._attributes;
 			r += '>';
-			r += '<ul class="nav nav-tabs auto" role="tablist">';
+			if (!this.ulClass) this.ulClass = 'nav nav-tabs';
+			r += '<ul class="' + this.ulClass + '" role="tablist">';
 			for (let i = 0; i < this.tabs.length; i++) {
 				let tab = this.tabs[i];
 				if (i == this.state) {
@@ -488,12 +504,13 @@ namespace WUX {
 			let cs = css(this.contStyle);
 			if(cs) cs = ' style="' + cs + '"';
 			r += '<div class="tab-content"' + cs + '>';
+			if (!this.tpClass) this.tpClass = 'tab-pane';
 			for (let i = 0; i < this.tabs.length; i++) {
 				if (i == this.state) {
-					r += '<div id="' + this.id + '-' + i + '" class="tab-pane show active" role="tabpanel"></div>';
+					r += '<div id="' + this.id + '-' + i + '" class="' + this.tpClass + ' show active" role="tabpanel"></div>';
 				}
 				else {
-					r += '<div id="' + this.id + '-' + i + '" class="tab-pane" role="tabpanel"></div>';
+					r += '<div id="' + this.id + '-' + i + '" class="' + this.tpClass + '" role="tabpanel"></div>';
 				}
 			}
 			r += '</div></div>';

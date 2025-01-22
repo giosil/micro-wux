@@ -5856,26 +5856,46 @@ var WUX;
             this.tabs.push(tab);
             return tab;
         };
+        Object.defineProperty(WTab.prototype, "count", {
+            get: function () {
+                return this.tabs ? this.tabs.length : 0;
+            },
+            enumerable: false,
+            configurable: true
+        });
+        WTab.prototype.isEnabled = function (i) {
+            if (i < 0)
+                i = this.tabs.length + i;
+            var p = document.getElementById(this.id + '-p' + i);
+            if (!p)
+                return false;
+            var c = p.getAttribute('class');
+            if (!c)
+                return true;
+            return c.indexOf('disabled') < 0;
+        };
         WTab.prototype.setEnabled = function (i, e) {
+            if (i < 0)
+                i = this.tabs.length + i;
             var p = document.getElementById(this.id + '-p' + i);
             if (!p)
                 return this;
             var c = p.getAttribute('class');
+            if (!c)
+                return this;
             if (e) {
-                if (!c)
+                if (c.indexOf('disabled') < 0)
                     return this;
-                c = c.replace('disabled', '');
+                c = c.replace('disabled', '').trim();
+                p.removeAttribute('tabindex');
+                p.removeAttribute('aria-disabled');
             }
             else {
-                if (!c) {
-                    c = 'disabled';
-                }
-                else if (c.indexOf('disabled') >= 0) {
+                if (c.indexOf('disabled') >= 0)
                     return this;
-                }
-                else {
-                    c += ' disabled';
-                }
+                c += ' disabled';
+                p.setAttribute('tabindex', '-1');
+                p.setAttribute('aria-disabled', 'true');
             }
             p.setAttribute('class', c);
             return this;
@@ -5896,7 +5916,9 @@ var WUX;
             if (this._attributes)
                 r += ' ' + this._attributes;
             r += '>';
-            r += '<ul class="nav nav-tabs auto" role="tablist">';
+            if (!this.ulClass)
+                this.ulClass = 'nav nav-tabs';
+            r += '<ul class="' + this.ulClass + '" role="tablist">';
             for (var i = 0; i < this.tabs.length; i++) {
                 var tab = this.tabs[i];
                 if (i == this.state) {
@@ -5911,12 +5933,14 @@ var WUX;
             if (cs)
                 cs = ' style="' + cs + '"';
             r += '<div class="tab-content"' + cs + '>';
+            if (!this.tpClass)
+                this.tpClass = 'tab-pane';
             for (var i = 0; i < this.tabs.length; i++) {
                 if (i == this.state) {
-                    r += '<div id="' + this.id + '-' + i + '" class="tab-pane show active" role="tabpanel"></div>';
+                    r += '<div id="' + this.id + '-' + i + '" class="' + this.tpClass + ' show active" role="tabpanel"></div>';
                 }
                 else {
-                    r += '<div id="' + this.id + '-' + i + '" class="tab-pane" role="tabpanel"></div>';
+                    r += '<div id="' + this.id + '-' + i + '" class="' + this.tpClass + '" role="tabpanel"></div>';
                 }
             }
             r += '</div></div>';

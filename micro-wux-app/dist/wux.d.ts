@@ -883,11 +883,15 @@ declare namespace WUX {
     class WTab extends WComponent<any, number> {
         tabs: WContainer[];
         contStyle: string | WStyle;
+        ulClass: string;
+        tpClass: string;
         _t: string;
         _a: string;
         _r: string;
         constructor(id?: string, classStyle?: string, style?: string | WStyle, attributes?: string | object, props?: any);
         addTab(title: string, icon?: string, style?: string | WStyle, attributes?: string | object): WContainer;
+        get count(): number;
+        isEnabled(i: number): boolean;
         setEnabled(i: number, e: boolean): this;
         protected render(): string;
         protected componentDidUpdate(prevProps: any, prevState: any): void;
