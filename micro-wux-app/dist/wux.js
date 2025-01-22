@@ -2241,7 +2241,9 @@ var WUX;
                 o[f] = r;
             }
             else {
-                o[f] = { k: v };
+                var w = {};
+                w[k] = v;
+                o[f] = w;
             }
             return o[f];
         };

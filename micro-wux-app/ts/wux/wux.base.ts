@@ -2074,7 +2074,9 @@ namespace WUX {
 				o[f] = r;
 			}
 			else {
-				o[f] = { k: v };
+				let w = {};
+				w[k] = v;
+				o[f] = w;
 			}
 			return o[f];
 		}
