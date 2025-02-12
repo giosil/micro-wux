@@ -5018,6 +5018,11 @@ var WUX;
             var co = new WTextArea(id, rows, WUX.CSS.FORM_CTRL);
             return this._add(id, label, co, 'note', opts);
         };
+        WForm.prototype.addFileField = function (fieldId, label, opts) {
+            var id = this.subId(fieldId);
+            var co = new WInput(id, 'file', 0, WUX.CSS.FORM_CTRL);
+            return this._add(id, label, co, 'file', opts);
+        };
         WForm.prototype.addOptionsField = function (fieldId, label, options, opts) {
             var id = this.subId(fieldId);
             var co = new WSelect(id, options, false, WUX.CSS.FORM_CTRL);
@@ -5269,6 +5274,38 @@ var WUX;
             if (f.component)
                 return f.component.getState();
             return f.value;
+        };
+        WForm.prototype.getFile = function (fid, x, onload) {
+            if (x === void 0) { x = 0; }
+            var f = this.getField(fid);
+            if (!f || !f.id)
+                return null;
+            var i = document.getElementById(f.id);
+            if (!i || !i.files)
+                return null;
+            if (x < 0)
+                x = i.files.length + x;
+            if (x < 0 || x >= i.files.length)
+                return null;
+            var l = i.files[x];
+            if (!l)
+                return null;
+            if (onload) {
+                var r = new FileReader();
+                r.onload = function (e) {
+                    if (!e || !e.target)
+                        return;
+                    var s = e.target.result;
+                    if (!s)
+                        return;
+                    var a = s.split(',');
+                    if (!a || a.length < 2)
+                        return;
+                    onload(l, a[1]);
+                };
+                r.readAsDataURL(l);
+            }
+            return l;
         };
         WForm.prototype.setOptions = function (fid, options, prevVal) {
             var f = this.getField(fid);

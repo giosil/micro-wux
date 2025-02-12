@@ -2033,6 +2033,12 @@ namespace WUX {
 			return this._add(id, label, co, 'note', opts);
 		}
 
+		addFileField(fieldId: string, label: string, opts?: WField): this {
+			let id = this.subId(fieldId);
+			let co = new WInput(id, 'file', 0, CSS.FORM_CTRL);
+			return this._add(id, label, co, 'file', opts);
+		}
+
 		addOptionsField(fieldId: string, label: string, options?: (string | WEntity)[], opts?: WField): this {
 			let id = this.subId(fieldId);
 			let co = new WSelect(id, options, false, CSS.FORM_CTRL);
@@ -2272,6 +2278,30 @@ namespace WUX {
 			if (!f) return null;
 			if (f.component) return f.component.getState();
 			return f.value;
+		}
+
+		getFile(fid: string, x: number = 0, onload: (f: File, b64: string) => any): File {
+			let f = this.getField(fid);
+			if (!f || !f.id) return null;
+			let i = document.getElementById(f.id) as HTMLInputElement;
+			if (!i || !i.files) return null;
+			if (x < 0) x = i.files.length + x;
+			if (x < 0 || x >= i.files.length) return null;
+			let l = i.files[x];
+			if (!l) return null;
+			if (onload) {
+				let r  = new FileReader();
+				r.onload = (e: any) => {
+					if (!e || !e.target) return;
+					let s =  e.target.result as string;
+					if (!s) return;
+					let a = s.split(',');
+					if (!a || a.length < 2) return;
+					onload(l, a[1]);
+				};
+				r.readAsDataURL(l);
+			}
+			return l;
 		}
 
 		setOptions(fid: string, options: Array<string | WEntity>, prevVal?: boolean): this {

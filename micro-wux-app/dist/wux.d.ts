@@ -781,6 +781,7 @@ declare namespace WUX {
         addTimeField(fieldId: string, label: string, opts?: WField): this;
         addEmailField(fieldId: string, label: string, opts?: WField): this;
         addNoteField(fieldId: string, label: string, rows: number, opts?: WField): this;
+        addFileField(fieldId: string, label: string, opts?: WField): this;
         addOptionsField(fieldId: string, label: string, options?: (string | WEntity)[], opts?: WField): this;
         addRadioField(fieldId: string, label: string, options?: (string | WEntity)[], opts?: WField): this;
         addBooleanField(fieldId: string, label: string, labelCheck?: string, opts?: WField): this;
@@ -797,6 +798,7 @@ declare namespace WUX {
         setValue(fid: string, v: any, updState?: boolean): this;
         setValueOf(fid: string, v: any, k: string, updState?: boolean): this;
         getValue(fid: string | WField): any;
+        getFile(fid: string, x: number, onload: (f: File, b64: string) => any): File;
         setOptions(fid: string, options: Array<string | WEntity>, prevVal?: boolean): this;
         setSpan(fieldId: string, span: number): this;
         setEnabled(fieldId: string, v: boolean): this;
