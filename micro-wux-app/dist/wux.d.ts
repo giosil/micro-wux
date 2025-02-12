@@ -798,6 +798,7 @@ declare namespace WUX {
         setValue(fid: string, v: any, updState?: boolean): this;
         setValueOf(fid: string, v: any, k: string, updState?: boolean): this;
         getValue(fid: string | WField): any;
+        getFile(fid: string, onload: (f: File, b64: string) => any): File;
         getFile(fid: string, x: number, onload: (f: File, b64: string) => any): File;
         setOptions(fid: string, options: Array<string | WEntity>, prevVal?: boolean): this;
         setSpan(fieldId: string, span: number): this;
@@ -866,6 +867,8 @@ declare namespace WUX {
         protected buildBtnCancel(): WUX.WButton;
         fireOk(): void;
         fireCancel(): void;
+        doOk(): void;
+        doCancel(): void;
         buttonOk(): WUX.WButton;
         buttonCancel(): WUX.WButton;
         updButtons(ok?: string, canc?: string): this;

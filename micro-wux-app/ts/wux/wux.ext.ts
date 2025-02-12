@@ -220,29 +220,33 @@ namespace WUX {
 		}
 
 		fireOk(): void {
-			if (this.onClickOk()) {
-				this.ok = true;
-				this.cancel = false;
-				if(this.wp) {
-					this.wp.back();
-					this._h();
-					return;
-				}
-				if(this.$r) this.$r.modal('hide');
-			}
+			if (this.onClickOk()) this.doOk();
 		}
 
 		fireCancel(): void {
-			if (this.onClickCancel()) {
-				this.ok = false;
-				this.cancel = true;
-				if(this.wp) {
-					this.wp.back();
-					this._h();
-					return;
-				}
-				if(this.$r) this.$r.modal('hide');
+			if (this.onClickCancel()) this.doCancel();
+		}
+
+		doOk(): void {
+			this.ok = true;
+			this.cancel = false;
+			if(this.wp) {
+				this.wp.back();
+				this._h();
+				return;
 			}
+			if(this.$r) this.$r.modal('hide');
+		}
+
+		doCancel(): void {
+			this.ok = false;
+			this.cancel = true;
+			if(this.wp) {
+				this.wp.back();
+				this._h();
+				return;
+			}
+			if(this.$r) this.$r.modal('hide');
 		}
 
 		buttonOk(): WUX.WButton {

@@ -2280,11 +2280,17 @@ namespace WUX {
 			return f.value;
 		}
 
-		getFile(fid: string, x: number = 0, onload: (f: File, b64: string) => any): File {
+		getFile(fid: string, onload: (f: File, b64: string) => any): File;
+		getFile(fid: string, x: number, onload: (f: File, b64: string) => any): File;
+		getFile(fid: string, x: number | ((f: File, b64: string) => any), onload?: (f: File, b64: string) => any): File {
 			let f = this.getField(fid);
 			if (!f || !f.id) return null;
 			let i = document.getElementById(f.id) as HTMLInputElement;
 			if (!i || !i.files) return null;
+			if (typeof x == 'function') {
+				onload = x;
+				x = 0;
+			}
 			if (x < 0) x = i.files.length + x;
 			if (x < 0 || x >= i.files.length) return null;
 			let l = i.files[x];

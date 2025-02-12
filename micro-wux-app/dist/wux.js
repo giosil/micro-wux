@@ -5276,13 +5276,16 @@ var WUX;
             return f.value;
         };
         WForm.prototype.getFile = function (fid, x, onload) {
-            if (x === void 0) { x = 0; }
             var f = this.getField(fid);
             if (!f || !f.id)
                 return null;
             var i = document.getElementById(f.id);
             if (!i || !i.files)
                 return null;
+            if (typeof x == 'function') {
+                onload = x;
+                x = 0;
+            }
             if (x < 0)
                 x = i.files.length + x;
             if (x < 0 || x >= i.files.length)
@@ -5666,30 +5669,34 @@ var WUX;
             return new WUX.WButton(this.subId('bfc'), WUX.RES.CANCEL, '', 'btn btn-secondary button-sm', '', '');
         };
         WDialog.prototype.fireOk = function () {
-            if (this.onClickOk()) {
-                this.ok = true;
-                this.cancel = false;
-                if (this.wp) {
-                    this.wp.back();
-                    this._h();
-                    return;
-                }
-                if (this.$r)
-                    this.$r.modal('hide');
-            }
+            if (this.onClickOk())
+                this.doOk();
         };
         WDialog.prototype.fireCancel = function () {
-            if (this.onClickCancel()) {
-                this.ok = false;
-                this.cancel = true;
-                if (this.wp) {
-                    this.wp.back();
-                    this._h();
-                    return;
-                }
-                if (this.$r)
-                    this.$r.modal('hide');
+            if (this.onClickCancel())
+                this.doCancel();
+        };
+        WDialog.prototype.doOk = function () {
+            this.ok = true;
+            this.cancel = false;
+            if (this.wp) {
+                this.wp.back();
+                this._h();
+                return;
             }
+            if (this.$r)
+                this.$r.modal('hide');
+        };
+        WDialog.prototype.doCancel = function () {
+            this.ok = false;
+            this.cancel = true;
+            if (this.wp) {
+                this.wp.back();
+                this._h();
+                return;
+            }
+            if (this.$r)
+                this.$r.modal('hide');
         };
         WDialog.prototype.buttonOk = function () {
             var _this = this;
