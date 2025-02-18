@@ -2,6 +2,8 @@ namespace WUX {
 
 	export type DxComponentType = 'dxAccordion' | 'dxActionSheet' | 'dxAutocomplete' | 'dxBox' | 'dxButton' | 'dxButtonGroup' | 'dxCalendar' | 'dxCheckBox' | 'dxColorBox' | 'dxContextMenu' | 'dxDataGrid' | 'dxDateBox' | 'dxDeferRendering' | 'dxDiagram' | 'dxDraggable' | 'dxDrawer' | 'dxDropDownBox' | 'dxDropDownButton' | 'dxFileManager' | 'dxFileUploader' | 'dxFilterBuilder' | 'dxForm' | 'dxGallery' | 'dxGantt' | 'dxHtmlEditor' | 'dxList' | 'dxLoadIndicator' | 'dxLoadPanel' | 'dxLookup' | 'dxMap' | 'dxMenu' | 'dxMultiView' | 'dxNavBar' | 'dxNumberBox' | 'dxPivotGrid' | 'dxPivotGridFieldChooser' | 'dxPopover' | 'dxPopup' | 'dxProgressBar' | 'dxRadioGroup' | 'dxRangeSlider' | 'dxRecurrenceEditor' | 'dxResizable' | 'dxResponsiveBox' | 'dxScheduler' | 'dxScrollView' | 'dxSelectBox' | 'dxSlideOut' | 'dxSlideOutView' | 'dxSlider' | 'dxSortable' | 'dxSpeedDialAction' | 'dxSwitch' | 'dxTabPanel' | 'dxTabs' | 'dxTagBox' | 'dxTextArea' | 'dxTextBox' | 'dxTileView' | 'dxToast' | 'dxToolbar' | 'dxTooltip' | 'dxTreeList' | 'dxTreeView' | 'dxValidationGroup' | 'dxValidationSummary' | 'dxValidator' | 'dxBarGauge' | 'dxBullet' | 'dxChart' | 'dxCircularGauge' | 'dxFunnel' | 'dxLinearGauge' | 'dxPieChart' | 'dxPolarChart' | 'dxRangeSelector' | 'dxSankey' | 'dxSparkline' | 'dxTreeMap' | 'dxVectorMap';
 	
+	export let dxTableDidMount: (c: WDXTable) => any;
+
 	export function initDX(callback: () => any) {
 		if (debug) console.log('[WUX] initDX...');
 		let u = '/cldr/cldr-data-' + global.locale + '.json';
@@ -1021,6 +1023,8 @@ namespace WUX {
 			if (this.handlers['_scroll'] && this.handlers['_scroll'].length) {
 				this.$i.getScrollable().on('scroll', this.handlers['_scroll'][0]);
 			}
+
+			if(dxTableDidMount) dxTableDidMount(this);
 		}
 
 		protected componentWillUpdate(nextProps: any, nextState: any): void {
