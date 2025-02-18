@@ -714,6 +714,12 @@ namespace WUX {
 			}
 		}
 
+		onEnter(h: (e: KeyboardEvent) => any): this {
+			if (!h) return this;
+			this.handlers['_enter'] = [h];
+			return this;
+		}
+
 		protected updateState(nextState: string) {
 			// At runtime nextState can be of any type 
 			nextState = WUtil.toString(nextState);
@@ -756,6 +762,19 @@ namespace WUX {
 				if (this._af) addAttributes += ' autofocus';
 				return l + this.build(this.rootTag, '', addAttributes);
 			}
+		}
+
+		protected componentDidMount(): void {
+			let i = document.getElementById(this.id);
+			if (!i) return;
+			i.addEventListener("keydown", (e: KeyboardEvent) => {
+				if (e.key === "Enter") {
+					e.preventDefault();
+					if (this.handlers['_enter']) {
+						for (let h of this.handlers['_enter']) h(e);
+					}
+				}
+			});
 		}
 	}
 
@@ -1856,6 +1875,12 @@ namespace WUX {
 			return this;
 		}
 
+		onEnter(h: (e: KeyboardEvent) => any): this {
+			if (!h) return this;
+			this.handlers['_enter'] = [h];
+			return this;
+		}
+
 		focus(): this {
 			if (!this.mounted) return this;
 			let f = this.first(true);
@@ -1962,7 +1987,16 @@ namespace WUX {
 
 		protected _add(id: string, label: string, co: WComponent, type: string, opts?: WField): this {
 			let f = opts ? opts : {};
-			if(co instanceof WInput || co instanceof WTextArea) {
+			if(co instanceof WInput) {
+				co.readonly = !!f.readonly;
+				co.autofocus = !!f.autofocus;
+				co.onEnter((e: KeyboardEvent) => {
+					if (this.handlers['_enter']) {
+						for (let h of this.handlers['_enter']) h(e);
+					}
+				});
+			}
+			else if(co instanceof WTextArea) {
 				co.readonly = !!f.readonly;
 				co.autofocus = !!f.autofocus;
 			}

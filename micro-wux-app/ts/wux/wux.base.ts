@@ -1265,6 +1265,17 @@ namespace WUX {
 		return s;
 	}
 
+	export function toggleAttr(e: Element, a: string, b: boolean): Element {
+		if (!e || !a) return e;
+		if (b) {
+			e.setAttribute(a, '');
+		}
+		else {
+			e.removeAttribute(a);
+		}
+		return e;
+	}
+
 	export function addStyle(s: string, k: string, v: string, n?: boolean): string {
 		if (!k || !v) return css(s);
 		if (!s) return k + ':' + v + ';';

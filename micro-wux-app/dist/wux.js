@@ -1264,6 +1264,18 @@ var WUX;
         return s;
     }
     WUX.style = style;
+    function toggleAttr(e, a, b) {
+        if (!e || !a)
+            return e;
+        if (b) {
+            e.setAttribute(a, '');
+        }
+        else {
+            e.removeAttribute(a);
+        }
+        return e;
+    }
+    WUX.toggleAttr = toggleAttr;
     function addStyle(s, k, v, n) {
         if (!k || !v)
             return css(s);
@@ -3617,6 +3629,12 @@ var WUX;
             enumerable: false,
             configurable: true
         });
+        WInput.prototype.onEnter = function (h) {
+            if (!h)
+                return this;
+            this.handlers['_enter'] = [h];
+            return this;
+        };
         WInput.prototype.updateState = function (nextState) {
             // At runtime nextState can be of any type 
             nextState = WUX.WUtil.toString(nextState);
@@ -3664,6 +3682,23 @@ var WUX;
                     addAttributes += ' autofocus';
                 return l + this.build(this.rootTag, '', addAttributes);
             }
+        };
+        WInput.prototype.componentDidMount = function () {
+            var _this = this;
+            var i = document.getElementById(this.id);
+            if (!i)
+                return;
+            i.addEventListener("keydown", function (e) {
+                if (e.key === "Enter") {
+                    e.preventDefault();
+                    if (_this.handlers['_enter']) {
+                        for (var _i = 0, _a = _this.handlers['_enter']; _i < _a.length; _i++) {
+                            var h = _a[_i];
+                            h(e);
+                        }
+                    }
+                }
+            });
         };
         return WInput;
     }(WUX.WComponent));
@@ -4842,6 +4877,12 @@ var WUX;
             this.addRow();
             return this;
         };
+        WForm.prototype.onEnter = function (h) {
+            if (!h)
+                return this;
+            this.handlers['_enter'] = [h];
+            return this;
+        };
         WForm.prototype.focus = function () {
             if (!this.mounted)
                 return this;
@@ -4948,8 +4989,21 @@ var WUX;
             return this;
         };
         WForm.prototype._add = function (id, label, co, type, opts) {
+            var _this = this;
             var f = opts ? opts : {};
-            if (co instanceof WInput || co instanceof WTextArea) {
+            if (co instanceof WInput) {
+                co.readonly = !!f.readonly;
+                co.autofocus = !!f.autofocus;
+                co.onEnter(function (e) {
+                    if (_this.handlers['_enter']) {
+                        for (var _i = 0, _a = _this.handlers['_enter']; _i < _a.length; _i++) {
+                            var h = _a[_i];
+                            h(e);
+                        }
+                    }
+                });
+            }
+            else if (co instanceof WTextArea) {
                 co.readonly = !!f.readonly;
                 co.autofocus = !!f.autofocus;
             }

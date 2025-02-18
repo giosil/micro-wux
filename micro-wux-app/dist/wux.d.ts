@@ -351,6 +351,7 @@ declare namespace WUX {
         n?: string;
     }
     function style(ws: string | WStyle): string;
+    function toggleAttr(e: Element, a: string, b: boolean): Element;
     function addStyle(s: string, k: string, v: string, n?: boolean): string;
     function css(...a: (string | WStyle)[]): string;
     function cls(...a: (string | WStyle)[]): string;
@@ -610,9 +611,11 @@ declare namespace WUX {
         set readonly(v: boolean);
         get autofocus(): boolean;
         set autofocus(v: boolean);
+        onEnter(h: (e: KeyboardEvent) => any): this;
         protected updateState(nextState: string): void;
         getState(): string;
         protected render(): string;
+        protected componentDidMount(): void;
     }
     class WTextArea extends WComponent<number, string> {
         _ro: boolean;
@@ -763,6 +766,7 @@ declare namespace WUX {
         get enabled(): boolean;
         set enabled(b: boolean);
         init(): this;
+        onEnter(h: (e: KeyboardEvent) => any): this;
         focus(): this;
         first(enabled?: boolean): WField;
         focusOn(fieldId: string): this;
