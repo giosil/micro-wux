@@ -512,14 +512,17 @@ namespace WUX {
 		on(events: string, handler: (e: any) => any): this;
 		on(events: string, handler: (e: any) => any): this {
 			if (!events) return this;
-			let arrayEvents = events.split(' ');
-			for (let event of arrayEvents) {
+			let a = events.split(' ');
+			let i = '';
+			for (let event of a) {
 				if (!this.handlers[event]) this.handlers[event] = [];
 				this.handlers[event].push(handler);
 				if (event.charAt(0) == '_' || event == 'mount' || event == 'unmount' || event == 'statechange' || event == 'propschange') continue;
+				i += ' ' + event;
 				if (this.root) this.root.addEventListener(event, handler);
 			}
-			if (this.internal) this.internal.on(events, handler);
+			if (!i) return this;
+			if (this.internal) this.internal.on(i.substring(1), handler);
 			return this;
 		}
 
@@ -527,12 +530,15 @@ namespace WUX {
 		off(events?: 'click' | 'dblclick' | 'mouseenter' | 'mouseleave' | 'keypress' | 'keydown' | 'keyup' | 'submit' | 'change' | 'focus' | 'blur' | 'resize'): this;
 		off(events?: string): this;
 		off(events?: string): this {
+			let i = '';
 			if (!events) {
 				this.handlers = {};
 			}
 			else {
-				let arrayEvents = events.split(' ');
-				for (let event of arrayEvents) {
+				let a = events.split(' ');
+				for (let event of a) {
+					if (event.charAt(0) == '_' || event == 'mount' || event == 'unmount' || event == 'statechange' || event == 'propschange') continue;
+					i += ' ' + event;
 					if (this.root) {
 						let hs = this.handlers[event];
 						for (let h of hs) {
@@ -542,45 +548,46 @@ namespace WUX {
 					delete this.handlers[event];
 				}
 			}
-			if (this.internal) this.internal.off(events);
+			if (!i) return this;
+			if (this.internal) this.internal.off(i.substring(1));
 			return this;
 		}
 
-		trigger(eventType: 'mount' | 'unmount', data?: any): this;
-		trigger(eventType: 'statechange', nextState?: S): this;
-		trigger(eventType: 'propschange', nextProps?: P): this;
-		trigger(eventType: 'click' | 'dblclick' | 'mouseenter' | 'mouseleave' | 'keypress' | 'keydown' | 'keyup' | 'blur' | 'submit' | 'change' | 'focus' | 'resize', ...extraParameters: any[]): this;
-		trigger(eventType: string, ...extParams: any[]): this;
-		trigger(eventType: string, ...extParams: any[]): this {
-			if (this.debug) console.log('[' + str(this) + '] trigger', eventType, extParams);
-			if (!eventType) return;
+		trigger(event: 'mount' | 'unmount', data?: any): this;
+		trigger(event: 'statechange', nextState?: S): this;
+		trigger(event: 'propschange', nextProps?: P): this;
+		trigger(event: 'click' | 'dblclick' | 'mouseenter' | 'mouseleave' | 'keypress' | 'keydown' | 'keyup' | 'blur' | 'submit' | 'change' | 'focus' | 'resize', ...extraParameters: any[]): this;
+		trigger(event: string, ...extParams: any[]): this;
+		trigger(event: string, ...extParams: any[]): this {
+			if (this.debug) console.log('[' + str(this) + '] trigger', event, extParams);
+			if (!event) return this;
 			let ep0 = extParams && extParams.length > 0 ? extParams[0] : undefined;
-			if (eventType.charAt(0) == '_' || eventType == 'mount' || eventType == 'unmount' || eventType == 'statechange' || eventType == 'propschange') {
+			if (event.charAt(0) == '_' || event == 'mount' || event == 'unmount' || event == 'statechange' || event == 'propschange') {
 				if (ep0 !== undefined) {
-					if (eventType == 'statechange') {
+					if (event == 'statechange') {
 						if (this.state != extParams[0]) {
 							this.state = extParams[0];
 							if (this.debug) console.log('[' + str(this) + '] trigger set state', this.state);
 						}
 					}
-					else if (eventType == 'propschange') {
+					else if (event == 'propschange') {
 						if (this.props != extParams[0]) {
 							this.props = extParams[0];
 							if (this.debug) console.log('[' + str(this) + '] trigger set props', this.props);
 						}
 					}
 				}
-				if (!this.handlers || !this.handlers[eventType]) return this;
-				let event = this.createEvent(eventType, ep0);
-				for (let handler of this.handlers[eventType]) handler(event);
+				if (!this.handlers || !this.handlers[event]) return this;
+				let e = this.createEvent(event, ep0);
+				for (let handler of this.handlers[event]) handler(e);
 			}
 			else if (this.root) {
-				if (this.debug) console.log('[' + str(this) + '] trigger ' + eventType + ' on root=' + str(this.root));
-				this.root.dispatchEvent(new Event(eventType, ep0));
+				if (this.debug) console.log('[' + str(this) + '] trigger ' + event + ' on root=' + str(this.root));
+				this.root.dispatchEvent(new Event(event, ep0));
 			}
 			if (this.internal) {
-				if (this.debug) console.log('[' + str(this) + '] trigger ' + eventType + ' on internal=' + str(this.internal));
-				this.internal.trigger(eventType, ...extParams);
+				if (this.debug) console.log('[' + str(this) + '] trigger ' + event + ' on internal=' + str(this.internal));
+				this.internal.trigger(event, ...extParams);
 			}
 			return this;
 		}
@@ -1265,10 +1272,11 @@ namespace WUX {
 		return s;
 	}
 
-	export function toggleAttr(e: Element, a: string, b: boolean): Element {
+	export function toggleAttr(e: Element, a: string, b: boolean, v?: string): Element {
 		if (!e || !a) return e;
+		if (!v) v = '';
 		if (b) {
-			e.setAttribute(a, '');
+			e.setAttribute(a, v);
 		}
 		else {
 			e.removeAttribute(a);

@@ -477,29 +477,37 @@ var WUX;
         WComponent.prototype.on = function (events, handler) {
             if (!events)
                 return this;
-            var arrayEvents = events.split(' ');
-            for (var _i = 0, arrayEvents_1 = arrayEvents; _i < arrayEvents_1.length; _i++) {
-                var event_1 = arrayEvents_1[_i];
+            var a = events.split(' ');
+            var i = '';
+            for (var _i = 0, a_1 = a; _i < a_1.length; _i++) {
+                var event_1 = a_1[_i];
                 if (!this.handlers[event_1])
                     this.handlers[event_1] = [];
                 this.handlers[event_1].push(handler);
                 if (event_1.charAt(0) == '_' || event_1 == 'mount' || event_1 == 'unmount' || event_1 == 'statechange' || event_1 == 'propschange')
                     continue;
+                i += ' ' + event_1;
                 if (this.root)
                     this.root.addEventListener(event_1, handler);
             }
+            if (!i)
+                return this;
             if (this.internal)
-                this.internal.on(events, handler);
+                this.internal.on(i.substring(1), handler);
             return this;
         };
         WComponent.prototype.off = function (events) {
+            var i = '';
             if (!events) {
                 this.handlers = {};
             }
             else {
-                var arrayEvents = events.split(' ');
-                for (var _i = 0, arrayEvents_2 = arrayEvents; _i < arrayEvents_2.length; _i++) {
-                    var event_2 = arrayEvents_2[_i];
+                var a = events.split(' ');
+                for (var _i = 0, a_2 = a; _i < a_2.length; _i++) {
+                    var event_2 = a_2[_i];
+                    if (event_2.charAt(0) == '_' || event_2 == 'mount' || event_2 == 'unmount' || event_2 == 'statechange' || event_2 == 'propschange')
+                        continue;
+                    i += ' ' + event_2;
                     if (this.root) {
                         var hs = this.handlers[event_2];
                         for (var _a = 0, hs_1 = hs; _a < hs_1.length; _a++) {
@@ -510,31 +518,33 @@ var WUX;
                     delete this.handlers[event_2];
                 }
             }
+            if (!i)
+                return this;
             if (this.internal)
-                this.internal.off(events);
+                this.internal.off(i.substring(1));
             return this;
         };
-        WComponent.prototype.trigger = function (eventType) {
+        WComponent.prototype.trigger = function (event) {
             var _a;
             var extParams = [];
             for (var _i = 1; _i < arguments.length; _i++) {
                 extParams[_i - 1] = arguments[_i];
             }
             if (this.debug)
-                console.log('[' + str(this) + '] trigger', eventType, extParams);
-            if (!eventType)
-                return;
+                console.log('[' + str(this) + '] trigger', event, extParams);
+            if (!event)
+                return this;
             var ep0 = extParams && extParams.length > 0 ? extParams[0] : undefined;
-            if (eventType.charAt(0) == '_' || eventType == 'mount' || eventType == 'unmount' || eventType == 'statechange' || eventType == 'propschange') {
+            if (event.charAt(0) == '_' || event == 'mount' || event == 'unmount' || event == 'statechange' || event == 'propschange') {
                 if (ep0 !== undefined) {
-                    if (eventType == 'statechange') {
+                    if (event == 'statechange') {
                         if (this.state != extParams[0]) {
                             this.state = extParams[0];
                             if (this.debug)
                                 console.log('[' + str(this) + '] trigger set state', this.state);
                         }
                     }
-                    else if (eventType == 'propschange') {
+                    else if (event == 'propschange') {
                         if (this.props != extParams[0]) {
                             this.props = extParams[0];
                             if (this.debug)
@@ -542,23 +552,23 @@ var WUX;
                         }
                     }
                 }
-                if (!this.handlers || !this.handlers[eventType])
+                if (!this.handlers || !this.handlers[event])
                     return this;
-                var event_3 = this.createEvent(eventType, ep0);
-                for (var _b = 0, _c = this.handlers[eventType]; _b < _c.length; _b++) {
+                var e = this.createEvent(event, ep0);
+                for (var _b = 0, _c = this.handlers[event]; _b < _c.length; _b++) {
                     var handler = _c[_b];
-                    handler(event_3);
+                    handler(e);
                 }
             }
             else if (this.root) {
                 if (this.debug)
-                    console.log('[' + str(this) + '] trigger ' + eventType + ' on root=' + str(this.root));
-                this.root.dispatchEvent(new Event(eventType, ep0));
+                    console.log('[' + str(this) + '] trigger ' + event + ' on root=' + str(this.root));
+                this.root.dispatchEvent(new Event(event, ep0));
             }
             if (this.internal) {
                 if (this.debug)
-                    console.log('[' + str(this) + '] trigger ' + eventType + ' on internal=' + str(this.internal));
-                (_a = this.internal).trigger.apply(_a, __spreadArray([eventType], extParams, false));
+                    console.log('[' + str(this) + '] trigger ' + event + ' on internal=' + str(this.internal));
+                (_a = this.internal).trigger.apply(_a, __spreadArray([event], extParams, false));
             }
             return this;
         };
@@ -684,14 +694,14 @@ var WUX;
                     this.$r = jq(this.root);
                 this.componentDidMount();
                 if (this.root) {
-                    for (var event_4 in this.handlers) {
-                        if (!event_4 || event_4.charAt(0) == '_')
+                    for (var event_3 in this.handlers) {
+                        if (!event_3 || event_3.charAt(0) == '_')
                             continue;
-                        if (event_4 == 'mount' || event_4 == 'unmount' || event_4 == 'statechange' || event_4 == 'propschange')
+                        if (event_3 == 'mount' || event_3 == 'unmount' || event_3 == 'statechange' || event_3 == 'propschange')
                             continue;
-                        for (var _i = 0, _a = this.handlers[event_4]; _i < _a.length; _i++) {
+                        for (var _i = 0, _a = this.handlers[event_3]; _i < _a.length; _i++) {
                             var handler = _a[_i];
-                            this.root.addEventListener(event_4, handler);
+                            this.root.addEventListener(event_3, handler);
                         }
                     }
                 }
@@ -1264,11 +1274,13 @@ var WUX;
         return s;
     }
     WUX.style = style;
-    function toggleAttr(e, a, b) {
+    function toggleAttr(e, a, b, v) {
         if (!e || !a)
             return e;
+        if (!v)
+            v = '';
         if (b) {
-            e.setAttribute(a, '');
+            e.setAttribute(a, v);
         }
         else {
             e.removeAttribute(a);
@@ -1556,8 +1568,8 @@ var WUX;
                 return [];
             var r = [];
             if (Array.isArray(a)) {
-                for (var _i = 0, a_1 = a; _i < a_1.length; _i++) {
-                    var e = a_1[_i];
+                for (var _i = 0, a_3 = a; _i < a_3.length; _i++) {
+                    var e = a_3[_i];
                     var n = WUtil.toNumber(e);
                     if (nz && !n)
                         continue;
@@ -1579,8 +1591,8 @@ var WUX;
                 return [];
             var r = [];
             if (Array.isArray(a)) {
-                for (var _i = 0, a_2 = a; _i < a_2.length; _i++) {
-                    var e = a_2[_i];
+                for (var _i = 0, a_4 = a; _i < a_4.length; _i++) {
+                    var e = a_4[_i];
                     var s = WUtil.toString(e);
                     if (ne && !s)
                         continue;

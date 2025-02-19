@@ -1,3 +1,12 @@
+WUX.dxTableDidMount = () => {
+	let i = document.querySelector('.dx-datagrid .dx-icon.dx-icon-export-excel-button');
+	if (i) {
+		let b = i.parentElement;
+		b.setAttribute('style', 'padding:4px');
+		b.innerHTML = '<i class="fa fa-file-excel text-primary" style="font-size:1.4rem;"></i>';
+	}
+};
+
 namespace APP {
 
 	import WUtil = WUX.WUtil;

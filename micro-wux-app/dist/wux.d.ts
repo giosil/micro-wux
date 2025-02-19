@@ -182,11 +182,11 @@ declare namespace WUX {
         off(events?: 'mount' | 'unmount' | 'statechange' | 'propschange'): this;
         off(events?: 'click' | 'dblclick' | 'mouseenter' | 'mouseleave' | 'keypress' | 'keydown' | 'keyup' | 'submit' | 'change' | 'focus' | 'blur' | 'resize'): this;
         off(events?: string): this;
-        trigger(eventType: 'mount' | 'unmount', data?: any): this;
-        trigger(eventType: 'statechange', nextState?: S): this;
-        trigger(eventType: 'propschange', nextProps?: P): this;
-        trigger(eventType: 'click' | 'dblclick' | 'mouseenter' | 'mouseleave' | 'keypress' | 'keydown' | 'keyup' | 'blur' | 'submit' | 'change' | 'focus' | 'resize', ...extraParameters: any[]): this;
-        trigger(eventType: string, ...extParams: any[]): this;
+        trigger(event: 'mount' | 'unmount', data?: any): this;
+        trigger(event: 'statechange', nextState?: S): this;
+        trigger(event: 'propschange', nextProps?: P): this;
+        trigger(event: 'click' | 'dblclick' | 'mouseenter' | 'mouseleave' | 'keypress' | 'keydown' | 'keyup' | 'blur' | 'submit' | 'change' | 'focus' | 'resize', ...extraParameters: any[]): this;
+        trigger(event: string, ...extParams: any[]): this;
         unmount(): this;
         mount(context?: Element): this;
         componentWillUnmount(): void;
@@ -351,7 +351,7 @@ declare namespace WUX {
         n?: string;
     }
     function style(ws: string | WStyle): string;
-    function toggleAttr(e: Element, a: string, b: boolean): Element;
+    function toggleAttr(e: Element, a: string, b: boolean, v?: string): Element;
     function addStyle(s: string, k: string, v: string, n?: boolean): string;
     function css(...a: (string | WStyle)[]): string;
     function cls(...a: (string | WStyle)[]): string;
