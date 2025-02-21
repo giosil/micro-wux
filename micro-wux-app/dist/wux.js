@@ -4229,6 +4229,25 @@ var WUX;
             }
             return this.props;
         };
+        WSelect.prototype.findOption = function (text, d) {
+            if (d === void 0) { d = null; }
+            if (!this.options)
+                return d;
+            if (!text)
+                text = '';
+            for (var _i = 0, _a = this.options; _i < _a.length; _i++) {
+                var o = _a[_i];
+                if (typeof o == 'string') {
+                    if (o == text)
+                        return o;
+                }
+                else {
+                    if (o.text == text)
+                        return o.id;
+                }
+            }
+            return d;
+        };
         WSelect.prototype.select = function (i) {
             if (!this.root || !this.options)
                 return this;
@@ -4973,8 +4992,25 @@ var WUX;
         WForm.prototype.onField = function (fid, events, handler) {
             var c = this.getComponent(fid);
             if (!c)
-                return;
+                return this;
             c.on(events, handler);
+            return this;
+        };
+        WForm.prototype.findOption = function (fid, text, d) {
+            if (d === void 0) { d = null; }
+            if (!text)
+                text = '';
+            var c = this.getComponent(fid);
+            if (!c)
+                return d;
+            if (c instanceof WSelect) {
+                return c.findOption(text, d);
+            }
+            return d;
+        };
+        WForm.prototype.setOptionValue = function (fid, text, d) {
+            if (d === void 0) { d = null; }
+            this.setValue(fid, this.findOption(fid, text, d));
             return this;
         };
         WForm.prototype.addRow = function (classStyle, style, id, attributes, type) {

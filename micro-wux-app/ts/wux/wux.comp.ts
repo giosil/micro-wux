@@ -1252,6 +1252,20 @@ namespace WUX {
 			return this.props;
 		}
 
+		findOption(text: string, d: any = null): any {
+			if (!this.options) return d;
+			if (!text) text = '';
+			for(let o of this.options) {
+				if(typeof o == 'string') {
+					if(o == text) return o;
+				}
+				else {
+					if(o.text == text) return o.id;
+				}
+			}
+			return d;
+		}
+
 		select(i: number): this {
 			if (!this.root || !this.options) return this;
 			this.setState(this.options.length > i ? this.options[i] : null);
@@ -1957,8 +1971,23 @@ namespace WUX {
 		onField(fid: string, events: string, handler: (e: any) => any): this;
 		onField(fid: string, events: string, handler: (e: any) => any): this {
 			let c = this.getComponent(fid);
-			if(!c) return;
+			if(!c) return this;
 			c.on(events, handler);
+			return this;
+		}
+
+		findOption(fid: string, text: string, d: any = null): any {
+			if (!text) text = '';
+			let c = this.getComponent(fid);
+			if(!c) return d;
+			if(c instanceof WSelect) {
+				return c.findOption(text, d);
+			}
+			return d;
+		}
+
+		setOptionValue(fid: string, text: string, d: any = null): this {
+			this.setValue(fid, this.findOption(fid, text, d));
 			return this;
 		}
 

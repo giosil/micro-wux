@@ -681,6 +681,7 @@ declare namespace WUX {
         multiple: boolean;
         constructor(id?: string, options?: Array<string | WEntity>, multiple?: boolean, classStyle?: string, style?: string | WStyle, attributes?: string | object);
         getProps(): any;
+        findOption(text: string, d?: any): any;
         select(i: number): this;
         addOption(e: string | WEntity, sel?: boolean): this;
         remOption(e: string | WEntity): this;
@@ -775,6 +776,8 @@ declare namespace WUX {
         onField(fid: string, events: 'mount' | 'unmount' | 'statechange' | 'propschange', handler: (e: WEvent) => any): this;
         onField(fid: string, events: 'click' | 'dblclick' | 'mouseenter' | 'mouseleave' | 'keypress' | 'keydown' | 'keyup' | 'submit' | 'change' | 'focus' | 'blur' | 'resize', handler: (e: Event) => any): this;
         onField(fid: string, events: string, handler: (e: any) => any): this;
+        findOption(fid: string, text: string, d?: any): any;
+        setOptionValue(fid: string, text: string, d?: any): this;
         addRow(classStyle?: string, style?: string | WStyle, id?: string, attributes?: string | object, type?: string): this;
         protected _add(id: string, label: string, co: WComponent, type: string, opts?: WField): this;
         addTextField(fieldId: string, label: string, opts?: WField): this;
