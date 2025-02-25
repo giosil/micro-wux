@@ -359,7 +359,7 @@ namespace APP {
 				return { matricola: t };
 			}
 			if (t.length > 6) {
-				let c6 = t.substring(6, 1);
+				let c6 = t.substring(6, 7);
 				if (c6 >= '0' && c6 <= '9') {
 					if (t.length > 16) t = t.substring(0, 16);
 					return { codiceFiscale: t };
