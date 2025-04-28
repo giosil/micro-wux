@@ -1,10 +1,10 @@
-# micro-WUX - Wrapped User Experience 
+# micro-WUX - Wrapped User Experience &middot; [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0) ![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&logoColor=white)
 
-A compact version of [WUX](https://github.com/giosil/wux) Javascript library to build component based user interface in a simple way.
+[WUX](https://github.com/giosil/wux) is a simple Javascript library to build component based user interface.
 
-Here is also an example of Javascript microfrontend using [single-spa](https://single-spa.js.org/) framework and micro-wux library:
+Here we examine how to integrate the WUX library in [single-spa](https://single-spa.js.org/) apps for front-end microservices development through some examples:
 
-- `micro-wux-app`   - typescript application with micro-wux library
+- `micro-wux-app`   - typescript application with WUX library
 - `single-spa-app`  - single-spa application
 - `single-spa-root` - single-spa root config 
 
