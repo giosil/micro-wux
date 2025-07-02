@@ -3606,6 +3606,9 @@ var WUX;
             this.handlers['_enter'] = [h];
             return this;
         };
+        WInput.prototype.shouldComponentUpdate = function (nextProps, nextState) {
+            return this.props != nextProps || this.state != WUX.WUtil.toString(nextState);
+        };
         WInput.prototype.updateState = function (nextState) {
             // At runtime nextState can be of any type 
             nextState = WUX.WUtil.toString(nextState);
@@ -3645,7 +3648,8 @@ var WUX;
                 addAttributes += this.props ? ' type="' + this.props + '"' : ' type="text"';
                 if (this.size)
                     addAttributes += ' size="' + this.size + '"';
-                if (this.state)
+                // this.state can be zero.
+                if (this.state != null)
                     addAttributes += ' value="' + this.state + '"';
                 if (this.placeHolder)
                     addAttributes += ' placeholder="' + this.placeHolder + '"';

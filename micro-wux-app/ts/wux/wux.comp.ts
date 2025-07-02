@@ -714,6 +714,10 @@ namespace WUX {
 			return this;
 		}
 
+		protected shouldComponentUpdate(nextProps: string, nextState: string): boolean {
+			return this.props != nextProps || this.state != WUtil.toString(nextState);
+		}
+
 		protected updateState(nextState: string) {
 			// At runtime nextState can be of any type 
 			nextState = WUtil.toString(nextState);
@@ -751,7 +755,8 @@ namespace WUX {
 				let addAttributes = 'name="' + this.id + '"';
 				addAttributes += this.props ? ' type="' + this.props + '"' : ' type="text"';
 				if (this.size) addAttributes += ' size="' + this.size + '"';
-				if (this.state) addAttributes += ' value="' + this.state + '"';
+				// this.state can be zero.
+				if (this.state != null) addAttributes += ' value="' + this.state + '"';
 				if (this.placeHolder) addAttributes += ' placeholder="' + this.placeHolder + '"';
 				if (this._ro) addAttributes += ' readonly';
 				if (this._af) addAttributes += ' autofocus';
